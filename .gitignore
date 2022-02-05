@@ -1,7 +1,7 @@
-/Data/*
-/.Rproj.user/*
-/Literature/*
-/Results/*
+/Shared/Data/*
+.Rproj.user/*
+/Shared/Literature/*
+/Shared/Results/*
 /Writing/*cache
 /GitControlled/Presentation/*_cache/*
 /GitControlled/Writing/*_cache/*

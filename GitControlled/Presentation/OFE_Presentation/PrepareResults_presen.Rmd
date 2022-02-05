@@ -1,0 +1,289 @@
+---
+title: "Machine Learning Methods for Site-specific Input Management"
+author: Shunkei Kakimto
+output: word_document
+---
+
+```{r}
+library(knitr)
+library(here)
+knitr::opts_chunk$set(
+	cache = FALSE,
+	warning = FALSE,
+	message = FALSE
+	)
+
+opts_knit$set(root.dir=here())
+```
+
+
+```{r, cache = FALSE}
+# === packages ===#
+library(sf)
+library(data.table)
+library(RColorBrewer)
+library(patchwork)
+library(grf)
+library(magrittr)
+library(ggplot2)
+library(ggthemes)
+library(viridis)
+library(tidyverse)
+library(ggpubr)
+library(flextable)
+library(officer)
+library(modelsummary)
+library(here)
+library(gridExtra)
+library(DiagrammeR)
+library(causalTree)
+library(rpart)
+library(rattle)
+library(webshot2) # remotes::install_github("rstudio/webshot2")
+# library(sparkline)
+# library(htmltools)
+# library(htmlwidgets)
+# library(equatags)
+# library(equatiomatic)
+
+```
+
+# Load the data 
+
+```{r source, results = "hide", fig.show='hide', cache = FALSE }
+# source(here("Codes", "functions.R"))
+source(here("GitControlled","Codes", "0_0_functions.R"))
+# source(here("GitControlled","Codes", "functions_stepwise_vs_base.R"))
+```
+
+# Results
+
+## Source Results and Preparation
+
+```{r source-results, message=FALSE, warning=FALSE}
+
+# ===================================
+# Forest resutls 
+# ===================================
+
+res_forest_all_honesty <- readRDS(here("Shared", "Results", "CNN", "SimRes_sp_400.rds"))%>%
+    setnames("model", "Method")%>%
+    .[, var_case:=factor(var_case, levels = c("aby", "abytt", "aabbyy", "aabbyytt"))]%>%
+    .[, Method:=factor(Method, levels = c("RF", "BRF", "CF_stepwise", "CF_base"))]%>%
+    .[, Honesty := TRUE]
+
+
+res_forest_all_nohonesty <- readRDS(here("Shared", "Results", "CNN", "SimRes_sp_400_nohonesty.rds"))%>%
+    setnames("model", "Method")%>%
+    .[, var_case:=factor(var_case, levels = c("aby", "abytt", "aabbyy", "aabbyytt"))]%>%
+    .[, Method:=factor(Method, levels = c("RF", "BRF", "CF_stepwise", "CF_base"))]%>%
+    .[, Honesty := FALSE]
+
+
+CNN_y_eval_v1 <- readRDS(here("Shared", "Results", "CNN", "CNN_y_eval_v1.rds"))%>%
+    .[,r2_y_cell:=NA]%>%
+    .[,Honesty:=NA]%>%
+    .[,.(Method, var_case, r2_y_cell, r2_y_agg, Honesty)]
+    # .[,r2_y_agg:=round(r2_y_agg,digits=3)]
+
+
+res_CNN_optN <- readRDS(here("Shared", "Results", "CNN", "res_CNN_r2_optN.rds"))%>%
+    .[,Method:="CNN"]%>%
+    setnames("r2_N", "r2_agg")%>%
+    .[,.(Method, var_case, r2_agg)]
+
+# /*-------------------------------------------------------*/
+#' ## Organize the data
+# /*-------------------------------------------------------*/
+res_forest_all <- rbind(res_forest_all_honesty, res_forest_all_nohonesty)
+    # .[,`:=`(
+    #     r2_cell=round(r2_cell,digits=3),
+    #     r2_agg=round(r2_agg,digits=3),
+    #     r2_y_cell=round(r2_y_cell,digits=3),
+    #     r2_y_agg=round(r2_y_agg,digits=3)
+    #     )]    
+
+res_forest_yield <- res_forest_all[Method%in%c("RF","BRF"), .(Method, var_case, r2_y_cell, r2_y_agg, Honesty)]
+
+res_forest_optN <- res_forest_all[, .(Method, var_case, r2_cell, r2_agg, Honesty)]
+
+res_yield_all <- rbind(res_forest_yield, CNN_y_eval_v1)
+
+```
+
+
+## opt_N Estimation (subplot-level)
+
+```{r, dependson = "source-results"}
+
+res_optN_subplot <- copy(res_forest_optN)%>%
+    .[Honesty==TRUE,.(Method, var_case, r2_agg)]%>%
+    rbind(.,res_CNN_optN)%>%
+    .[, Method:=factor(Method, levels = c("RF", "BRF", "CNN", "CF_stepwise", "CF_base"))]
+
+
+##== Summary Table  ==##
+table_optN_subplot_long <- copy(res_optN_subplot)%>%
+    .[, .(r2_agg = mean(r2_agg), r2_Stdv = sd(r2_agg)), by=.(Method, var_case)]%>%
+    setnames(names(.), c("Method", "Model", "R-squared", "Stdv."))%>%
+    flextable()%>% 
+    autofit()
+
+
+table_optN_subplot_wide_prep <- copy(res_optN_subplot)%>%
+    .[, .(r2_agg = mean(r2_agg)), by=.(Method, var_case)]%>%
+    .[, r2_agg:= format(round(r2_agg, digits=3), nsmall = 3)]%>%
+    .[,var_case:= case_when(
+      var_case == "aby" ~ "Model 1",
+      var_case == "abytt" ~ "Model 2",
+      var_case == "aabbyy" ~ "Model 3",
+      var_case == "aabbyytt" ~ "Model 4"
+    )]
+
+avg_optN <- copy(res_optN_subplot)%>%
+    .[, .(Avg= mean(r2_agg)), by=Method]%>%
+    .[, Avg:= format(round(Avg, 3), nsmall = 3)]%>%
+    dcast(...~Method, value.var = "Avg")
+
+
+table_optN_subplot_wide <- copy(table_optN_subplot_wide_prep)%>%
+    dcast(var_case~Method, value.var = "r2_agg")%>%
+    setnames("var_case", "Model")%>%
+    mutate(
+    across(
+      everything(),
+      as.character
+        )
+    ) %>% 
+    add_row(Model = NA, RF = NA, BRF = NA, CF_stepwise = NA, CF_base = NA, .after = 4)%>%
+    flextable(.)%>%
+    add_body(
+        Model="Avg.",
+        RF = avg_optN[,RF],
+        BRF = avg_optN[,BRF],
+        CNN = avg_optN[,CNN],
+        CF_stepwise = avg_optN[,CF_stepwise],
+        CF_base = avg_optN[,CF_base], 
+        top = FALSE
+        )%>%
+    theme_booktabs()%>%
+    set_header_labels(values = list(
+        Model = "Model",
+        RF = "RF",
+        BRF = "BRF",
+        CNN = "CNN",
+        CF_stepwise = "CF-stepwise",
+        CF_base = "CF-base"
+    ))%>%
+    align(align = "center", part = "all")%>%
+    align(j=1,  align = "left", part = "all")%>%
+    # width(width = 2)%>%
+    autofit()%>%
+    set_caption("Table 1: Mean R-squared of EONR Estimates by ML Methods and Modeling Scenarios")%>%
+    font(fontname="Helvetica", part = "all",
+    # cs.family = fontname,
+    # hansi.family = fontname,
+    # eastasia.family = fontname
+    )
+
+# save_as_image(table_optN_subplot_wide, path = here("GitControlled", "Writing", "Presentation", "OFE_Presentation","table_optN.png"),
+#     # zoom = 8,
+#     webshot = "webshot2")
+
+```
+
+
+# 
+
+```{r, dependson = "source-results"}
+####==== CNN vs RF vs BRF ====####
+res_CNN_y <- readRDS(here("Shared", "Results", "CNN", "CNN_y_eval_v1.rds"))%>%
+    .[,.(sim, Method, var_case, r2_y_agg)]%>%
+    setnames("r2_y_agg", "r2_y")
+    # .[,r2_y_agg:=round(r2_y_agg,digits=3)]
+
+res_CNN_optN <- readRDS(here("Shared", "Results", "CNN", "res_CNN_r2_optN.rds"))%>%
+    setnames("r2_N", "r2")
+
+res_CNN <- res_CNN_y[res_CNN_optN, on=c("sim", "var_case")]%>%
+    dcast(sim + var_case ~ Method, value.var = c("r2", "r2_y"))
+
+
+res_CNN_RF_BRF <- readRDS(here("Shared", "Results", "CNN", "SimRes_sp_400.rds"))%>%
+    .[,!c("r2_cell", "r2_y_cell")]%>%
+    .[model%in%c("RF","BRF"),] %>%
+    .[, var_case:=factor(var_case, levels = c("aby", "abytt", "aabbyy", "aabbyytt"))]%>%
+    setnames("model", "Method")%>%
+    setnames(c("r2_agg", "r2_y_agg"), c("r2", "r2_y"))%>%
+    dcast(sim + var_case ~ Method, value.var = c("r2", "r2_y"))%>%
+    .[res_CNN, on=c("sim", "var_case")]%>%
+    setnames("var_case", "Model")%>%
+    .[,.(sim, Model, r2_RF, r2_BRF, r2_CNN, r2_y_RF, r2_y_BRF, r2_y_CNN)]%>%
+    .[,which_optN := 
+        ifelse(r2_BRF>r2_RF & r2_BRF>r2_CNN, "BRF",
+            ifelse(r2_RF>r2_BRF & r2_RF>r2_CNN, "RF",
+                ifelse(r2_CNN>r2_BRF & r2_CNN>r2_RF, "CNN", NA)
+                )
+            )
+        ]%>%
+    .[,which_y := 
+        ifelse(r2_y_BRF>r2_y_RF & r2_y_BRF>r2_y_CNN, "BRF",
+            ifelse(r2_y_RF>r2_y_BRF & r2_y_RF>r2_y_CNN, "RF",
+                ifelse(r2_y_CNN>r2_y_BRF & r2_y_CNN>r2_y_RF, "CNN", NA)
+                )
+            )
+        ]%>%
+    .[,index_consist := ifelse(which_optN==which_y, 1, 0)]%>%
+    .[,cons_y_optN := ifelse(index_consist==1, which_optN, NA)]%>%
+    # RF vs BRF
+    .[,r2_y_ratio_RF_BRF := r2_y_RF/r2_y_BRF]%>%
+    .[,r2_optN_ratio_RF_BRF := r2_RF/r2_BRF]%>%
+    # CNN vs RF
+    .[,r2_y_ratio_CNN_RF := r2_y_CNN/r2_y_RF]%>%
+    .[,r2_optN_ratio_CNN_RF := r2_CNN/r2_RF]%>%
+    # CNN vs BRF 
+    .[,r2_y_ratio_CNN_BRF := r2_y_CNN/r2_y_BRF]%>%
+    .[,r2_optN_ratio_CNN_BRF := r2_CNN/r2_BRF]
+
+
+
+# Summary Table 
+sumry_res_CNN_RF_BRF <- res_CNN_RF_BRF%>%
+    .[,.(
+        count_BRF = nrow(.SD[cons_y_optN=="BRF"]),
+        count_RF = nrow(.SD[cons_y_optN=="RF"]),
+        count_CNN = nrow(.SD[cons_y_optN=="CNN"]),
+        count_y_BRF = nrow(.SD[which_y=="BRF"]),
+        count_y_RF = nrow(.SD[which_y=="RF"]),
+        count_y_CNN = nrow(.SD[which_y=="CNN"]),
+        Total= sum(index_consist)
+        ), by=Model]%>%
+    .[,BRF := paste0(count_BRF, " (",count_y_BRF,")")]%>%
+    .[,RF := paste0(count_RF, " (",count_y_RF,")")]%>%
+    .[,CNN := paste0(count_CNN, " (",count_y_CNN,")")]%>%
+    .[,Model:= case_when(
+      Model == "aby" ~ "Model 1",
+      Model == "abytt" ~ "Model 2",
+      Model == "aabbyy" ~ "Model 3",
+      Model == "aabbyytt" ~ "Model 4"
+    )]%>%
+    .[,.(Model, RF, BRF, CNN, Total)]%>%
+    flextable()%>%
+    align(align = "center", part = "all")%>%
+    align(j=1,  align = "left", part = "all")%>%
+    set_caption("Table 2: Count table about the number of simulation rounds where an identical ML method showed the highest R-squared in both EONR estimation and yield prediction in that round")%>%
+    add_footer_row(
+    values = "The number in ( ) indicates the number of rounds with the highest R-squared in yield prediction.",
+    colwidths = 5
+    )%>%
+    font(fontname="Helvetica", part = "all",
+    # cs.family = fontname,
+    # hansi.family = fontname,
+    # eastasia.family = fontname
+    )%>%
+    autofit()
+
+# save_as_image(sumry_res_CNN_RF_BRF, path = here("GitControlled", "Writing", "Presentation", "OFE_Presentation","table_y.png"),
+#     # zoom = 8, 
+#     webshot = "webshot2")
+```

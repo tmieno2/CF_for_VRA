@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Causal Forest Approach for Site-specific Input Management via On-farm Precision Experimentation</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Taro Mieno, University of Nebraska Lincoln" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <link href="libs/animate.css/animate.xaringan.css" rel="stylesheet" />
+    <link href="libs/tachyons/tachyons.min.css" rel="stylesheet" />
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"Copy Code","success":"Copied!","error":"Press Ctrl+C to Copy"})</script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Causal Forest Approach for Site-specific Input Management via On-farm Precision Experimentation
+### Taro Mieno, University of Nebraska Lincoln
+
+---
+
+class: middle
+
+
+
+
+
+
+
+
+
+
+&lt;style type="text/css"&gt;
+
+.remark-slide-content.hljs-github h1 {
+  margin-top: 5px;  
+  margin-bottom: 25px;  
+}
+
+.remark-slide-content.hljs-github {
+  padding-top: 10px;  
+  padding-left: 30px;  
+  padding-right: 30px;  
+}
+
+.panel-tabs {
+  &lt;!-- color: #062A00; --&gt;
+  color: #841F27;
+  margin-top: 0px;  
+  margin-bottom: 0px;  
+  margin-left: 0px;  
+  padding-bottom: 0px;  
+}
+
+.panel-tab {
+  margin-top: 0px;  
+  margin-bottom: 0px;  
+  margin-left: 3px;  
+  margin-right: 3px;  
+  padding-top: 0px;  
+  padding-bottom: 0px;  
+}
+
+.panelset .panel-tabs .panel-tab {
+  min-height: 40px;
+}
+
+.remark-slide th {
+  border-bottom: 1px solid #ddd;
+}
+
+.remark-slide thead {
+  border-bottom: 0px;
+}
+
+.gt_footnote {
+  padding: 2px;  
+}
+
+.remark-slide table {
+  border-collapse: collapse;
+}
+
+.remark-slide tbody {
+  border-bottom: 2px solid #666;
+}
+
+
+.important {
+  background-color: lightpink;
+  border: 2px solid blue;
+  font-weight: bold;
+} 
+
+.remark-code {
+  display: block;
+  overflow-x: auto;
+  padding: .5em;
+  background: #ffe7e7;
+} 
+
+.hljs-github .hljs {
+  background: #f2f2fd;
+}
+
+.remark-inline-code {
+  padding-top: 0px;
+  padding-bottom: 0px;
+  background-color: #e6e6e6;
+}
+
+.r.hljs.remark-code.remark-inline-code{
+  font-size: 0.9em
+}
+
+.left-full {
+  width: 80%;
+  float: left;
+}
+
+.left-code {
+  width: 38%;
+  height: 92%;
+  float: left;
+}
+
+.right-plot {
+  width: 60%;
+  float: right;
+  padding-left: 1%;
+}
+
+.left6 {
+  width: 60%;
+  height: 92%;
+  float: left;
+}
+
+.left5 {
+  width: 49%;
+  &lt;!-- height: 92%; --&gt;
+  float: left;
+}
+
+.right5 {
+  width: 49%;
+  float: right;
+  padding-left: 1%;
+}
+
+.right4 {
+  width: 39%;
+  float: right;
+  padding-left: 1%;
+}
+
+.left3 {
+  width: 29%;
+  height: 92%;
+  float: left;
+}
+
+.right7 {
+  width: 69%;
+  float: right;
+  padding-left: 1%;
+}
+
+.left4 {
+  width: 38%;
+  float: left;
+}
+
+.right6 {
+  width: 60%;
+  float: right;
+  padding-left: 1%;
+}
+
+ul li{
+  margin: 7px;
+}
+
+ul, li{
+  margin-left: 15px; 
+  padding-left: 0px; 
+}
+
+ol li{
+  margin: 7px;
+}
+
+ol, li{
+  margin-left: 15px; 
+  padding-left: 0px; 
+}
+
+&lt;/style&gt;
+
+&lt;style type="text/css"&gt;
+.content-box { 
+    box-sizing: border-box;
+    background-color: #e2e2e2;
+}
+.content-box-blue,
+.content-box-gray,
+.content-box-grey,
+.content-box-army,
+.content-box-green,
+.content-box-purple,
+.content-box-red,
+.content-box-yellow {
+  box-sizing: border-box;
+  border-radius: 5px;
+  margin: 0 0 10px;
+  overflow: hidden;
+  padding: 0px 5px 0px 5px;
+  width: 100%;
+}
+.content-box-blue { background-color: #F0F8FF; }
+.content-box-gray { background-color: #e2e2e2; }
+.content-box-grey { background-color: #F5F5F5; }
+.content-box-army { background-color: #737a36; }
+.content-box-green { background-color: #d9edc2; }
+.content-box-purple { background-color: #e2e2f9; }
+.content-box-red { background-color: #ffcccc; }
+.content-box-yellow { background-color: #fef5c4; }
+.content-box-blue .remark-inline-code,
+.content-box-blue .remark-inline-code,
+.content-box-gray .remark-inline-code,
+.content-box-grey .remark-inline-code,
+.content-box-army .remark-inline-code,
+.content-box-green .remark-inline-code,
+.content-box-purple .remark-inline-code,
+.content-box-red .remark-inline-code,
+.content-box-yellow .remark-inline-code { 
+  background: none;
+}
+
+.full-width {
+    display: flex;
+    width: 100%;
+    flex: 1 1 auto;
+}
+&lt;/style&gt;
+
+
+&lt;style type="text/css"&gt;
+blockquote, .blockquote {
+  display: block;
+  margin-top: 0.1em;
+  margin-bottom: 0.2em;
+  margin-left: 5px;
+  margin-right: 5px;
+  border-left: solid 10px #0148A4;
+  border-top: solid 2px #0148A4;
+  border-bottom: solid 2px #0148A4;
+  border-right: solid 2px #0148A4;
+  box-shadow: 0 0 6px rgba(0,0,0,0.5);
+  /* background-color: #e64626; */
+  color: #e64626;
+  padding: 0.5em;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+}
+
+.blockquote p {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+.blockquote &gt; h1:first-of-type {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+.blockquote &gt; h2:first-of-type {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+.blockquote &gt; h3:first-of-type {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+.blockquote &gt; h4:first-of-type {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+
+.text-shadow {
+  text-shadow: 0 0 4px #424242;
+}
+&lt;/style&gt;
+
+&lt;style type="text/css"&gt;
+/******************
+ * Slide scrolling
+ * (non-functional)
+ * not sure if it is a good idea anyway
+slides &gt; slide {
+  overflow: scroll;
+ padding: 5px 40px;
+}
+.scrollable-slide .remark-slide {
+  height: 400px;
+  overflow: scroll !important;
+}
+ ******************/
+
+.scroll-box-8 {
+  height:8em;
+  overflow-y: scroll;
+}
+.scroll-box-10 {
+  height:10em;
+  overflow-y: scroll;
+}
+.scroll-box-12 {
+  height:12em;
+  overflow-y: scroll;
+}
+.scroll-box-14 {
+  height:14em;
+  overflow-y: scroll;
+}
+.scroll-box-16 {
+  height:16em;
+  overflow-y: scroll;
+}
+.scroll-box-18 {
+  height:18em;
+  overflow-y: scroll;
+}
+.scroll-box-20 {
+  height:20em;
+  overflow-y: scroll;
+}
+.scroll-box-24 {
+  height:24em;
+  overflow-y: scroll;
+}
+.scroll-box-30 {
+  height:30em;
+  overflow-y: scroll;
+}
+.scroll-output {
+  height: 90%;
+  overflow-y: scroll;
+}
+
+ 
+&lt;/style&gt;
+
+
+
+
+
+
+
+
+
+
+
+# Causal Forest Approach for Site-specific Input Management via On-farm Precision Experimentation
+
++ Shunkei Kakimoto, University of Nebraska Lincoln
++ Taro Mieno, University of Nebraska Lincoln 
++ Takashi Tanaka, Gifu University, Japan
++ David S. Bullock, University of Illinois
+
+---
+class: middle
+
+# Site-specific Economically Optimal Input Rates
+
++ On-farm Precision Experimentation (OFPE)
+  - more spatially granular data of yield, inputs of interest (e.g., fertilizer, seed)
+  - other field/soil characteristics
++ Steps:
+  1. Run input experiments
+  2. Collect data
+  3. &lt;span style = "color: red;"&gt; Estimate yield response function based on the data &lt;/span&gt;  
+  4. Estimate the economically optimal site-specific input rates 
+
+---
+class: middle
+
+# Yield Response and EOIR Estimation
+
++ Application of various machine learning methods
+  - Random Forest ([Krause, et al., 2020](#bib-krause2020random); [Marques Ramos, et al., 2020](https://www.sciencedirect.com/science/article/pii/S0168169920319591))
+  - Convolutional Neural Network ([Barbosa, et al., 2020a](#bib-barbosa2020modeling))
++ Many studies
+  + stop at predicting yields without identifying EOIR
+  + use information that is not available to farmers at the time of their management decision making
+
+---
+class: middle
+
+# Yield and EOIR prediction
+
+Consider this stylized conceptual model:
+
+`$$Yield = f(I, c, x) + g(c, x)$$`
+
++ &lt;span style = "color: red;"&gt; `\(f(I, c, x)\)` &lt;/span&gt;: `\(0.4\)` at maximum
++ `\(g(c, x)\)`: `\(0.6\)` at maximum
+
+
+&lt;template id="69c41aa1-a1a2-479a-a42d-4ff2ef67265c"&gt;&lt;style&gt;
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  margin-top: 1.275em;
+  margin-bottom: 1.275em;
+  border-color: transparent;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+&lt;/style&gt;&lt;div class="tabwid"&gt;&lt;style&gt;.cl-96854ea6{}.cl-96793a44{font-family:'Helvetica';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-96793a6c{font-family:'Helvetica';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 255, 1.00);background-color:transparent;}.cl-96793a76{font-family:'Helvetica';font-size:11pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(255, 0, 0, 1.00);background-color:transparent;}.cl-96794e3a{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-96794e4e{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-96794e62{margin:0;text-align:center;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-96799f84{width:67.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-96799fa2{width:75pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-96799fac{width:71.9pt;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-96799fc0{width:59.7pt;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-96799fca{width:59.7pt;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-96799fd4{width:67.6pt;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-96799fe8{width:75pt;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-96799ffc{width:71.9pt;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9679a006{width:71.9pt;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9679a010{width:59.7pt;background-color:transparent;vertical-align: middle;border-bottom: 1pt solid rgba(102, 102, 102, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9679a01a{width:67.6pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9679a02e{width:75pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 1pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9679a042{width:75pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9679a04c{width:71.9pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9679a056{width:59.7pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9679a06a{width:67.6pt;background-color:transparent;vertical-align: middle;border-bottom: 2pt solid rgba(102, 102, 102, 1.00);border-top: 2pt solid rgba(102, 102, 102, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}&lt;/style&gt;&lt;table class='cl-96854ea6'&gt;&lt;thead&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-9679a056"&gt;&lt;p class="cl-96794e3a"&gt;&lt;span class="cl-96793a44"&gt;model&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9679a042"&gt;&lt;p class="cl-96794e3a"&gt;&lt;span class="cl-96793a44"&gt;component&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9679a06a"&gt;&lt;p class="cl-96794e4e"&gt;&lt;span class="cl-96793a44"&gt;explained&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9679a04c"&gt;&lt;p class="cl-96794e4e"&gt;&lt;span class="cl-96793a44"&gt;R-squared&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  rowspan="2"class="cl-96799fc0"&gt;&lt;p class="cl-96794e3a"&gt;&lt;span class="cl-96793a44"&gt;model 1&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-96799fa2"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;f&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-96799f84"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;0.3&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td  rowspan="2"class="cl-96799fac"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;0.8&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-96799fe8"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;g&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-96799fd4"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;0.5&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  rowspan="2"class="cl-9679a010"&gt;&lt;p class="cl-96794e3a"&gt;&lt;span class="cl-96793a6c"&gt;model 2&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9679a02e"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;f&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9679a01a"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;0.3&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td  rowspan="2"class="cl-9679a006"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;0.9&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-96799fe8"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;g&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-96799fd4"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;0.6&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td  rowspan="2"class="cl-9679a010"&gt;&lt;p class="cl-96794e3a"&gt;&lt;span class="cl-96793a76"&gt;model 3&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9679a02e"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;f&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-9679a01a"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;0.4&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td  rowspan="2"class="cl-9679a006"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;0.8&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr style="overflow-wrap:break-word;"&gt;&lt;td class="cl-96799fe8"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;g&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;td class="cl-96799fd4"&gt;&lt;p class="cl-96794e62"&gt;&lt;span class="cl-96793a44"&gt;0.4&lt;/span&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/div&gt;&lt;/template&gt;
+&lt;div class="flextable-shadow-host" id="d9c08e58-625a-4375-8db7-9d329c1b4be6"&gt;&lt;/div&gt;
+&lt;script&gt;
+var dest = document.getElementById("d9c08e58-625a-4375-8db7-9d329c1b4be6");
+var template = document.getElementById("69c41aa1-a1a2-479a-a42d-4ff2ef67265c");
+var caption = template.content.querySelector("caption");
+if(caption) {
+  caption.style.cssText = "display:block;text-align:center;";
+  var newcapt = document.createElement("p");
+  newcapt.appendChild(caption)
+  dest.parentNode.insertBefore(newcapt, dest.previousSibling);
+}
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+&lt;/script&gt;
+
+---
+class: middle
+
+.content-box-red[**Key**]: You want to estimate accurately the part that matters for EOIR suggestion, not overall.
+
+---
+class: middle
+
+# Predicting Yield &lt;span style = "color: red;"&gt; Level &lt;/span&gt; is Sufficient, but not Necessary
+
++ Consider a very simple profit maximization problem
+
+`$$\max_{I} \quad pf(I, \mathbf{c}) - wI$$`
+
++ `\(p\)`: crop price
++ `\(f(\cdot)\)`: yield function
++ `\(I\)`: input
++ `\(c\)`: collection of other variables
++ `\(w\)`: input price
+
+--
+
+.content-box-red[**First order condition**]:
+
+`$$\frac{\partial f(I^{*}(p,w,\mathbf{c}), \mathbf{c})}{\partial I} \equiv \frac{w}{p}$$`
+
+What you need is the impact of input on yield (difference in yield moving from one rate to another)
+
+---
+class: middle
+
+# Causal Forest and other traditional ML methods
+
++ Traditional ML methods (e.g., Random Forest, Boosted Regression Forest, CNN) 
+  - is designed to estimate the &lt;span style = "color: red;"&gt; level &lt;/span&gt; of the dependent variable (yield) well
+  - once the yield model is trained, you can estimate the impact of a treatment (just plug in two different rates and see the difference in their predicted yield values) 
+
++ Causal Forest (a causal machine learning method)
+  - is designed to estimate heterogeneous treatment effects directly without predicting yield levels 
+
+---
+class: middle
+
+# Causal Forest: Illustration (Corn, Seed Rate Experiment)
+
+.left4[
+&lt;br&gt;
++ A causal forest is an ensemble of causal trees
++ Treatment effect is calculated at each leaf
+
+&lt;br&gt;
+
+.content-box-blue[Experiment:]
+
++ **Control**: `\(27,000\)` seeds/acre
++ **Treated**: `\(31,000\)` seeds/acre 
+
+
+.content-box-blue[Characteristics:]
++ Slope (`slope`)
++ Electrical Conductivity (`ecs`) 
+]
+
+.right6[
+&lt;img src="/Users/tmieno2/Dropbox/ResearchProjects/PrecisionAgriculture/ML_VRA/GitControlled/Presentation/ctree.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+
+
+---
+class: middle
+
+# Research Question
+
++ Does Causal Forest (CF) outperform traditional ML approaches in estimating site-specific EOIR and result in higher economic profits?
+
++ Can you trust yield prediction accuracy as the criteria to select a model when your ultimate goal is to find the model that produces the highest economic profit?
+
+---
+class: middle
+
+# Method
+
++ Monte Carlo simulation
+  - hypothetical field, on which OFPEs are run
+  - site-specific yield response functions are known (to researchers)
+  - site-specific economically optimal input rates are known for a given combination of crop and input prices
+
+&lt;span style = "color: red;"&gt; Important Note &lt;/span&gt;: Using real-world data, you are never ever able to test which model performs the best in terms of the economic performance of site-specific input recommendations because you do not observe true yield response functions
+
+---
+class: middle
+
+# Yield Response Functions
+
+Yield response function is assumed to follow Mitscherlich-Baule functional form:
+
+`$$f(N, \mathbf{c}) = ymax(\mathbf{c})(1-exp(\alpha(\mathbf{c}) + \beta(\mathbf{c}) N)) + \varepsilon$$`
+
++ `\(c\)`: a collection of site-specific characteristics
++ `\(\varepsilon\)`: error 
+
+--
+
+Researchers observe and use yield, N, and `\(c\)` to train models.
+
+---
+class: middle
+
+# Data Generation: Nitrogen Rate (Trial Design)
+.left4[
+&lt;br&gt;
+&lt;br&gt;
+Each plot is assigned a single N rate according to the fixed trial design
+]
+
+.right6[
+&lt;img src="presentation_x_files/figure-html/fig-nExp-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+] 
+
+---
+class: middle
+
+# Data Generation: Characteristics and Error
+
+.left4[
+&lt;br&gt;
+&lt;br&gt;
+Characteristics `\((c)\)` and error term are generated so that they are spatially correlated 
+]
+
+.right6[
+&lt;img src="presentation_x_files/figure-html/fig-parameters-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: middle
+
+# Data Generation: Yield
+
+.left4[
+&lt;br&gt;
+&lt;br&gt;
+Yield is generated based on N, `\(c\)`, and error term
+]
+
+.right6[
+&lt;img src="presentation_x_files/figure-html/field-yield-cell-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+class: middle
+
+# Modeling Scenarios
+
+Researchers observe all the variables (characteristics) that govern site-specific yield response functions, but do not know the functional form.
+
+`$$f(N, \mathbf{c}) = ymax(\mathbf{c})(1-exp(\alpha(\mathbf{c}) + \beta(\mathbf{c}) N)) + \varepsilon$$`
+
++ **aby**: `\(\alpha\)`, `\(\beta\)`, ymax 
++ **abytt**: `\(\alpha\)`, `\(\beta\)`, ymax, `\(\theta_1\)`, `\(\theta_2\)` `\((\theta\)`s are irrelevant variables)
++ **aabbyy**: 
+  - `\(\alpha_1\)`, `\(\alpha_2\)` `\((\alpha = \alpha_1 + \alpha_2)\)` 
+  - `\(\beta_1\)`, `\(\beta_2\)` `\((\beta = \beta_1 + \beta_2)\)` 
+  - `\(ymax_1\)`, `\(ymax_2\)` `\((ymax = ymax_1 + ymax_2)\)`
++ **aabbyytt**: `\(\alpha_1\)`, `\(\alpha_2\)`, `\(\beta_1\)`, `\(\beta_2\)`, `\(ymax_1\)`, `\(ymax_2\)`, `\(\theta_1\)`, `\(\theta_2\)`
+
+---
+class: middle
+
+# Estimation Methods
+
++ Random Forest
++ Boosted Regression Forest
++ Convolutional Neural Network (follows the architecture of [Barbosa, et al. (2020a)](#bib-barbosa2020modeling))
++ Causal Forest (CF)
+
+---
+class: middle
+
+# Results: Economic Performance
+
+
+&lt;img src="/Users/tmieno2/Dropbox/ResearchProjects/PrecisionAgriculture/ML_VRA/GitControlled/Presentation/results_table.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+class: middle
+
+# Treatment Effect Estimation Accuracy: subplot-level
+
+&lt;img src="presentation_x_files/figure-html/plot-tre-1.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+class: middle
+
+# Yield Prediction vs Profitability Performance
+
+
+&lt;img src="/Users/tmieno2/Dropbox/ResearchProjects/PrecisionAgriculture/ML_VRA/GitControlled/Presentation/yield_profit.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+class: middle
+
+# Conclusions
+
+## Economic Performance
++ Random Forest should not be used. It is simply worse than BRF and CF and vulnerable to irrelevant variables.
++ CF outperforms RF, BRF, CNN
++ **Caveats**:
+  * CNN used particular architecture suggested by ([Barbosa, et al., 2020a](#bib-barbosa2020modeling)), and other architectures may perform better
+  * If the experimental settings differ (yield response functions, trial design, etx), the results can of course be different (I already found a case where BRF performs better than CF just yesterday)
+
+--
+
+## Yield Prediction vs EONR Prediction
++ Yield prediction accuracy has very little to do with EONR prediction accuracy
++ Picking a model based on yield prediction accuracy does not necessarily lead you to a model that is good at predicting EONR
+
+---
+class: middle
+
+# Extensions
+
++ Collaborate across the teams to see which model works the best under what condition?
++ Can we identify factors that lets us know what approach to use with some confidence? 
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+---
+title: ""
+author: Shunkei Kakimoto
+output:
+  bookdown::word_document2:
+    fig_caption: yes
+    number_sections: no
+    global_numbering: true
+    reference_docx: word_template.docx
+    # reference_docx: word_template_format.docx
+    # pandoc_args: ["-Fpandoc-crossref"]
+---
+
+Date: 
+
+To whom it may concern:
+
+We wish to submit an original research article entitled "Causal Forest Approach for Site-specific Input Management via On-farm Precision Experimentation" for consideration by Computers and Electronics in Agriculture. 
+
+We confirm this work is original and has not been published anywhere else. It is not currently being considered for publication elsewhere. 
+
+This paper covers a new machine learning approach to site-specific input management. Our proposed approach outperforms methods currently in use. This manuscript is appropriate for publication by Computers and Electronics in Agriculture because it innovates estimation of site-specific crop yield responses specifically to changes in input (e.g., seed, fertilizer).
+
+Current machine learning methods focus on output yield prediction. Our approach specifically estimates the heterogeneous causal effects of nitrogen rates on yields which cannot be achieved through current methods. This manuscript contributes to further innovation and development of site-specific input management. 
+
+
+We have no conflicts of interest to disclose. 
+
+Please contact me with any concerns about this manuscript at: skakimoto3@huskers.unl.edu. Contact information for my co-authors is as follows: \
+Taro Mieno: tmieno2@unl.edu \
+Takashi S.T. Tanaka: takashit@gifu-u.ac.jp \
+David S. Bullock: dsbulloc@illinois.edu \
+
+Thank you for considering our manuscript. 
+
+Sincerely,
+
+Shunkei Kakimoto
+

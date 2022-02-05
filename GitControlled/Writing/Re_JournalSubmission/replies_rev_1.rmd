@@ -1,0 +1,128 @@
+---
+title: "Reply to Reviewer #1"
+author: Shunkei Kakimoto
+output:
+  bookdown::word_document2:
+    fig_caption: yes
+    number_sections: no
+    global_numbering: true
+    reference_docx: word_template.docx
+---
+
+# Comments:
+
+**1. The first point of the highlight describes the advantages of the CF model over other machine learning methods. The advantages of the CF model are not suitable for the highlight of this study. Therefore, I suggest that the authors revise the first point of the highlight.**
+<span style="color:blue">  
+
+
+</span>
+
+
+**2. In the second section (lines 76-184), the authors describe the fundamental information necessary to identify EOIR in general and discuss the causal forest approach in detail. The structure of the manuscript is redundant. Some of the descriptions belong to the methods section. Therefore, I suggest that the authors adjust the content of the section. Move some content to the supplement material and others to the methods section.**
+<span style="color:blue">  
+
+
+</span>
+
+**3. The description of materials and methods section is redundant, please move some unimportant details description to supplementary materials.**
+<span style="color:blue">  
+
+
+</span>
+
+
+**4. What is the unit of the topographical slope？ (line 131)**
+<span style="color:blue">  
+
++ I provided the unit in the text. It is degree. 
+
+</span>
+
+
+**5. There are 3 numbers in each small frame of Figure 1, please describe the meaning of each number in detail in the figure caption. (line 137)**
+<span style="color:blue">  
+
++ I added the explanation for those numbers as a footnote in the figure. 
+</span>
+
+
+**6. Some formulas in the manuscript are not numbered (lines 116, 120, 268, 291, 371, 389).**
+<span style="color:blue">  
+
++ I numbered all the formulas. 
+</span>
+
+
+**7. What are the exact number and proportion of test set training sets? (line 192)**
+<span style="color:blue">  
+
++ I modified this sentence "For each simulated field, we generated a training data set and a validation data set." For each simulation round, one of the fields was used as a training data set, and another field that is different from the one used as a training data set in that round was used as a validation data set.
+
+</span>
+
+
+**8. I can’t open the code link (https://github.com/tmieno2/ML_VRA.git, lines 199 and 249) with my browsers (chrome, edge, and Firefox). Please upload the code to the public research data repositories (Zenodo, Mendeley Data, figshare, Harvard Dataverse, etc.), not GitHub. Please generate a separate DOI for your code and cite it.**
+<span style="color:blue">  
++ I uploaded to the simulation codes and the data on Mendeley Data. The link is suggested on section 3: Materials and Methods.
+
+</span>
+
+
+**9. Please convert the length units of the manuscript to international length units. (line 207)**
+<span style="color:blue">  
+
++ I converted to those units to meter (m)
+
+</span>
+
+
+**10. Please add the number of rows and columns to the plots, subplots, and cells schematics in Figure 2. (line 209)**
+<span style="color:blue">  
+
++ I updated Figure 2. The number of rows and columns of plots, subplots, and cells schematics are indicated each map in Figure 2.
+</span>
+
+
+**11. The titles of sections 3.2.1 and 3.2.2 do not provide useful information to the readers, please revise the titles. (lines 342 and 373)**
+<span style="color:blue">  
+
++ I changed the title of section 3.2 to "Training Models and Estimating Site-specific EONRs". Further, I revised the title of sections 3.2.1 and 3.2.2 to "Estimation of site-specific EONRs by RF, BRF, and CNN" and "Estimation of site-specific EONRs by CF", respectively. 
+</span>
+
+
+**12. The titles of 4.1 and 4.2 are confusing, please revise. (lines 410 and 457)**
+<span style="color:blue">  
+
++ I changed the title of section 4.2 to "The relationships between yield prediction performance and EONR prediction performance". 
+</span>
+
+**13. Why there are no CNN results in Figures 8,9, and 10? (lines 439, 441, and 453)**
+<span style="color:blue">  
+
++ As explained in section 4.1, CNN completely failed to predict site-specific EONR because the estimated yield response function were always linear (please see the Table 1). Therefore, I do not think that visualizing the CNN results provide any meaningful implications to understand its performance of EONR estimation performance.
++ I added the explanation for not showing CNN results in Figures 8,9, and 10. ("CNN is not shown as its RMSEs of the EONR estimations and $\hat{\pi}_{def}$ always take $62.8$ kg/ha and \$$58.99$/ha, respectively")
+
+</span>
+
+
+**14. I suggest that the authors add to the supplementary material a table of the training accuracy of the different models.**
+<span style="color:blue">  
+
++ run simulations on training dataset, and report the results.
+</span>
+
+
+**15. Please add a separate section for research gaps or uncertainties. Are there any prerequisite assumptions for using the CF model?**
+<span style="color:blue">  
+
+
+</span>
+
+
+**16. Please revise the conclusion. Most of the content is discussing the uncertainty of the study. Please move the statement about uncertainty to a separate uncertainty section.**
+
+<span style="color:blue">  
+
+
+</span>
+
