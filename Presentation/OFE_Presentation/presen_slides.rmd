@@ -1,0 +1,163 @@
+---
+title: Machine Learning Methods for Site-specific Input Management
+author:
+  - Shunkei Kakimoto$^1$, Taro Mieno$^1$ and Takashi S. T. Tanaka$^2$
+institute: $^1$Agricultural Economics, University of Nebraska Lincoln  $^2$Applied Biological Sciences, Gifu University
+date: "September 1st 2021"
+fontsize: 12pt
+mathspec: true # for metropolis theme
+aspectratio: 169 # 16:9
+#classoption: handout
+output:
+ beamer_presentation:
+   theme: "Madrid" 
+   # https://deic-web.uab.cat/~iblanes/beamer_gallery/index_by_theme.html
+   #theme: "metropolis" # special
+   colortheme: "whale"
+   # https://deic-web.uab.cat/~iblanes/beamer_gallery/index_by_color.html
+   fonttheme: "professionalfonts"
+   # https://deic-web.uab.cat/~iblanes/beamer_gallery/index_by_font.html
+   latex_engine: xelatex # for metropolis theme
+   toc: false
+   number_sections: false
+   slide_level: 1
+   keep_tex: true
+    # includes:
+    #   in_header: preamble.tex
+# compact-title: ture # to remove markdown generated title frame
+header-includes:
+  - \usepackage{fancyvrb}
+  - \usepackage{graphicx}
+  - \usepackage{booktabs}
+  - \usepackage{longtable}
+  - \usepackage{array}
+  - \usepackage{multirow}
+  - \usepackage{wrapfig}
+  - \usepackage{float}
+  - \usepackage{colortbl}
+  - \usepackage{pdflscape}
+  - \usepackage{tabu}
+  - \usepackage{threeparttable}
+  # - \setbeamertemplate{page number in head/foot}[]{}
+  # - \AtBeginSection{}
+bibliography: MSthesis.bib
+---
+
+```{r setup, include=FALSE}
+library(here)
+library(knitr)
+
+# opts_knit$set(root.dir = here())
+
+opts_chunk$set(
+  fig.align = "center", 
+  fig.retina = 5,
+  warning = F, 
+  message = F,
+  cache = FALSE, # <-- T
+  cache.lazy = FALSE,
+  echo = F
+  )
+```
+
+```{r, cache = TRUE}
+# === packages ===#
+library(sf)
+library(data.table)
+library(grf)
+library(RColorBrewer)
+library(patchwork)
+library(plotly)
+library(magrittr)
+library(ggplot2)
+library(viridis)
+library(tmap)
+library(tidyverse)
+library(ggthemes)
+library(mgcv)
+library(ggpubr)
+library(flextable)
+library(officer)
+library(modelsummary)
+library(raster)
+library(bookdown)
+```
+
+# Background
++ The application of Machine Learning(ML) methods for site-specific economically optimal input rates (EOIR) (e.g., seed, fertilizer) have been getting more attention in recent years
+\newline
+  + @barbosa2020modeling applied Convolutional Neural Network
+  + @krause2020random used Random Forest-based approaches
+  + @Gardner21, @Wang2021, @coulibali2020, etc.
+
+---
+
+# Research Gap
+
++ The conventional ML methods focus on predicting yield well rather than causal identification of input on yield
++ The past studies have used predictive ability of yield for validity of their models.
+\newline
+
+## note
++ EOIR estimation should be based on the change in yields associated with the change in input levels *ceteris paribus*
++ Having good yield prediction capability does not necessarily mean it is also capable of estimating EOIR well
+<!-- + Because causal identification between yield and input is necessary for estimation of EONR, and such causal inference and having good prediction is different two distinct object -->
+
+---
+
+# New Trend of Causal Machine Learning Application 
++ Causal Machine Learning (CML) methods:
+  + Unlike the conventional prediction-oriented ML methods, CML focuses on identifying causal impacts of an event (in our context, an increase or decrease in input rate for example)
+  \newline
++ **Causal Forest (CF) ** [@Wager2018a; @athey2016recursive]:
+  + CF estimates heterogeneous causal impacts of a treatment (a change in the input level) based on observed characteristics (e.g., organic matter)
+<!-- + Hence, CF seems particularly suitable for estimating site-specific yield response functions and then EOIR.  -->
+
+---
+
+# Research Questions
+
+##
++ In terms of estimating EOIR, how do CF-based methods (CF-stepwise and CF-base) compare to other prediction-oriented ML methods: Random Forest (RF), Boosted Random Forest (BRF), and Convolutional Neural Network (CNN)?
+\newline
++ Is the predictive ability of yield a good indicator of the performance of EOIR estimation?
+
+---
+
+# Methods
++ Conduct one thousand rounds of Monte Carlo simulations under four different production scenarios
++ Compare the performance in estimating economically optimal nitrogen rates (EONR) of CF-based methods (CF-base and CF-stepwise) to other methods: RF, BRF, and CNN
++ For RF, BRF, and CNN, contrast their EONR performances against their yield prediction performances
+<!-- +  Evaluation metric: R-squared of estimated EONR and R-squared of predicted yield -->
+
+---
+
+# Key Results: EONR estimation
+
+```{r res-N, out.width = "70%"}
+# knit_print(table_optN_subplot_wide)
+knitr::include_graphics("table_optN.png")
+```
+
+---
+
+# Key Results: EONR estimation and Yield Prediction
+
+```{r res-yield, out.width = "70%"}
+# knit_print(table_optN_subplot_wide)
+knitr::include_graphics("table_y.png")
+```
+---
+
+# Key Findings
+## 
++ The proposed CF-base method is capable of estimating site-specific EONR more accurately than other prediction-oriented ML methods 
+\newline
++ The ability of predicting yield does not necessarily translate to good performance in estimating EONR.
+
+---
+
+# References {.allowframebreaks}
+
+
+

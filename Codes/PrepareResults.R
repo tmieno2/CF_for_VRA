@@ -1,0 +1,1221 @@
+## -----------------------------------------------
+library(knitr)
+# library(here)
+
+knitr::opts_chunk$set(
+    cache = FALSE,
+    warning = FALSE,
+    message = FALSE
+    )
+
+# opts_knit$set(root.dir=here())
+opts_knit$set(root.dir = "~/Dropbox/ResearchProject/ML_VRA")
+
+
+## ---- cache = FALSE-----------------------------
+# === packages ===#
+library(sf)
+library(data.table)
+library(RColorBrewer)
+library(patchwork)
+library(grf)
+library(magrittr)
+library(ggplot2)
+library(ggthemes)
+library(viridis)
+library(tidyverse)
+library(ggpubr)
+library(flextable)
+library(officer)
+library(officedown)
+library(modelsummary)
+library(here)
+library(gridExtra)
+library(DiagrammeR)
+library(latex2exp)
+
+here::i_am("GitControlled/Codes/0_0_functions.R")
+
+## ----source, results = "hide", fig.show='hide', cache = FALSE-----------------
+# setwd(here())
+source("./GitControlled/Codes/0_0_functions.R")
+# source("./GitControlled/Codes/functions_stepwise_vs_base.R")
+
+
+## ----setup, warning=FALSE, message=FALSE, cache= TRUE----
+pCorn <- price_table[2, pCorn]
+pN <- price_table[2, pN]
+
+sp_range <- 400
+
+field <- readRDS("./Shared/Data/for_Simulations/field_padding.rds") %>%
+    filter(padding==1)%>%
+    dplyr::select(unique_cell_id)
+
+
+####==== (1) cell-level dataset ====####
+# coef_data <- readRDS("./Shared/Data/for_Simulations/cnn_coefficients_sprange_400.rds")
+
+# x=1
+# coef_data_m <- coef_data[sim == x, ]
+# coef_data_t <- coef_data[sim == ifelse(x + 1 >= max(sim), 1, x + 1), ]
+
+# sample_dt <- prepare_raw_data(1, field=field, coef_data_m=coef_data_m, coef_data_t=coef_data_t, app_error="no")
+
+# sample_training_cell <- sample_dt$reg_raw_data
+
+# saveRDS(sample_training_cell, "./Shared/Data/for_writing/sample_reg_raw_data.rds")
+
+
+field_cell_dt <- readRDS("./Shared/Data/for_writing/sample_reg_raw_data.rds")%>%
+    .[,plot_id := ceiling(subplot_id/4)]%>%
+    .[padding==1,]
+
+field_cell_sf <- left_join(field, field_cell_dt, by="unique_cell_id")%>%
+    na.omit()
+
+# ggplot(field_cell_sf)+
+#     geom_sf(aes(fill=factor(padding)), size=0)
+
+##== area of the field ==##
+# st_area(st_union(field_cell_sf%>%filter(padding==1))) 
+
+# nrow(field_cell_sf)
+
+
+
+####==== (2) plot-level dataset without padding area ====####
+
+field_plot_sf <- field_cell_sf%>%
+    group_by(plot_id, strip_id, rate)%>%
+    summarise()
+
+# nrow(field_plot_sf)
+# ggplot(field_plot_sf)+geom_sf()
+
+
+
+####==== (3) subplot-level field without padding area ====####
+
+# field_subplot_dt <- field_cell_dt[, .(
+#     sim = mean(sim),
+#     yield = mean(yield),
+#     opt_N = mean(opt_N),
+#     rate = mean(rate),
+#     aa_n = mean(aa_n), 
+#     alpha = mean(alpha),
+#     beta = mean(beta),
+#     ymax = mean(ymax),
+#     alpha1 = mean(alpha1),
+#     alpha2 = mean(alpha2),
+#     beta1 = mean(beta1),
+#     beta2 = mean(beta2),
+#     ymax1 = mean(ymax1),
+#     ymax2 = mean(ymax2),
+#     theta_1 = mean(theta_1),
+#     theta_2 = mean(theta_2)
+#   ), by = .(subplot_id, strip_id)]%>%
+#   .[,unique_subplot_id:=paste0(strip_id,"_",subplot_id)]%>%
+#   .[, `:=`(
+#     strip_id = NULL,
+#     subplot_id = NULL
+#   )]
+
+# saveRDS(field_subplot_dt, here("Shared", "Data", "for_writing", "sample_field_subplot_dt.rds"))
+
+field_subplot_dt <- readRDS("Shared/Data/for_writing/sample_field_subplot_dt.rds")
+
+field_subplot_sf <- field_cell_sf%>%
+    group_by(subplot_id, strip_id)%>%
+    summarise()%>%
+    mutate(unique_subplot_id=paste0(strip_id,"_",subplot_id))%>%
+    dplyr::select(unique_subplot_id)%>%
+    left_join(., field_subplot_dt, by="unique_subplot_id")
+
+# nrow(field_subplot_sf)
+# ggplot(field_subplot_sf)+geom_sf()
+
+
+
+## -----------------------------------------------
+
+# library(causalTree)
+# library(here)
+# library(rpart)
+# library(rattle)
+# library(sf)
+
+# # ===================================
+# # Get tree 
+# # ===================================
+
+# data_sf <- st_read(here("Shared/Data/snider_high_res.gpkg")) %>%
+#     na.omit() %>%
+#     dplyr::rename(tgtn=NPlan,tgts=SRPlan)
+
+# data_dt <- data.table(data_sf) %>%
+#     setnames(names(.),tolower(names(.)))
+
+# tgts_ls <- data_dt[,tgts] %>% unique() %>% sort
+
+# ctree_data <- copy(data_dt) %>%
+#   .[tgts %in% tgts_ls[1:2],] %>%
+#   .[,treat:=ifelse(tgts==tgts_ls[2],1,0)] %>%
+#   #--- Corn Yield: 1 bu/acre ->  62.77 kg/ha---#
+#   .[,yield:= yield*62.77]
+
+
+# tree <- causalTree(
+#   yield ~ slope+ecs,
+#   data = ctree_data,
+#   treatment = ctree_data$treat,
+#   split.Rule = "CT",
+#   cv.option = "CT",
+#   split.Honest = T,
+#   cv.Honest = T,
+#   split.Bucket = F,
+#   xval = 5,
+#   cp = 0,
+#   minsize = 20,
+#   propensity = 0.5
+# )
+
+# opcp <- tree$cptable[,1][which.min(tree$cptable[,4])]
+# opfit <- prune(tree, opcp)
+
+
+# png(here("GitControlled/Writing/JournalSubmission/ctree_ex.png"))
+# fancyRpartPlot(opfit,sub='')
+# dev.off()
+
+
+
+## -----------------------------------------------
+variogram_tb <- data.frame(
+    Parameters = c("ymax_ij", "alpha_ij", "beta_ij", "varepsilon_ij"),
+    Range = c(400, 400, 400, 400),
+    Mean = c(12000, -0.5, format(c(0,0))),
+    Nugget = format(c(0, 0, 0, 0)),
+    Sill =c(2000000, 0.02, format(1, nsmall = 1), 0.015)
+    ) %>%
+    flextable() %>%
+    compose(i = 1, j = 1, part = "body", value = as_paragraph(as_i("ymax"), as_sup(as_i("i,j")))) %>%
+    compose(i = 2, j = 1, part = "body", value = as_paragraph(as_i("\U03B1"), as_sup(as_i("i,j")))) %>%
+    compose(i = 3, j = 1, part = "body", value = as_paragraph(as_i("\U03B2"), as_sup(as_i("i,j")))) %>%
+    compose(i = 4, j = 1, part = "body", value = as_paragraph(as_i("\U03B5"), as_sup(as_i("i,j")))) %>%
+    compose(i = 1, j = 3, part = "body", value = as_paragraph("1.2", "\U2A2F", "10", as_sup("4"))) %>%
+    compose(i = 1, j = 5, part = "body", value = as_paragraph("2.0", "\U2A2F", "10", as_sup("6"))) %>%
+    compose(i = 1, j = 3, part = "body", value = as_paragraph("1.2", "\U2A2F", "10", as_sup("4"))) %>%
+    compose(i = 2, j = 5, part = "body", value = as_paragraph("2.0", "\U2A2F", "10", as_sup("-2"))) %>%
+    compose(i = 4, j = 5, part = "body", value = as_paragraph("1.5", "\U2A2F", "10", as_sup("-2"))) %>%
+    align(align = "center", part = "all")%>%
+    align(j=1,  align = "left", part = "all")%>%
+    # --- change headers labels--- #
+    set_header_labels(values = list(
+        Parameters = "Parameters",
+        Range = "Range (m)",
+        Mean = "Mean",
+        Nugget = "Nugget",
+        Sill = "Sill"
+    ))%>%
+    #- change the borders just for consistency with other tables -#
+    hline_bottom(part="all") %>%
+    hline_top(part="header") %>%
+    footnote(
+    value = as_paragraph("NOTE: About ymax, the units of of Mean, Nugget, and Sill are kg."),
+     ref_symbols = NA
+    ) %>%
+    autofit()
+
+
+## ---- dependson = "setup"-----------------------
+# gen_yield_MB <- function(ymax, alpha, beta, N) {
+#   yield <- ymax * (1 - exp(alpha + beta * N))
+#   return(yield)
+# }
+
+N_rates <- field_cell_dt[,rate]%>%unique()%>%sort()
+
+N_seq <- 0:300
+
+        # alpha        beta     ymax
+# 1: -0.6605052 -0.01572583 10886.94
+
+dt_sample_MB_curve <- field_cell_dt[1,.(alpha,beta,ymax)]%>%
+    .[rep(1:nrow(.), each = length(N_seq)), ]%>%
+    .[,N:= N_seq]%>%
+    .[,Yield := gen_yield_MB(ymax, alpha, beta, N)]
+
+sample_MB_curve <- ggplot()+
+    geom_point(data=dt_sample_MB_curve, 
+        aes(x=N, y=Yield))+
+    theme_few()+
+    xlab("N(kg/ha)") + ylab("Yield(kg/ha)")
+
+
+
+## ----field-map-visualization, dependson = "setup"----
+
+##== plot-level field without padding area ==##
+# vis_field_plot <- ggplot(field_plot_sf) +
+#     geom_sf(fill=NA) +
+#     theme_void() +
+#     labs(caption="Bottom Title") + 
+#     theme(plot.title = element_text(hjust = 0.5)) 
+
+
+
+####==== Example map of plot and subplots and cells ====####
+##== Preparation ==##
+# ex_plot <- field_plot_sf[224,]
+# ex_subplots <- field_subplot_sf[ex_plot, , op = st_within]
+
+# ex_one_subplot <- ex_subplots[1,]
+# ex_cells <- field_cell_sf[ex_one_subplot, ,op=st_within]
+
+
+# #-- (1) plot-level field map (base: vis_field_withoutPadding) --#
+# library(latex2exp)
+
+# plot <- 
+#     ggplot()+
+#         geom_sf(data=field_plot_sf)+
+#         geom_sf(data=ex_plot, fill="green", size = 1)+
+#         # coord_sf(expand = F) +
+#         theme_void() +
+#         ggtitle(TeX("$12 \\times 32$ plots")) +
+#         theme(plot.title = element_text(hjust = 0.5))
+
+
+# grob_plot <- ggplotGrob(plot)
+
+# # #-- (2) create a map of subplots in a plot --##
+# subplots_inPlot <- ggplot()+
+#     geom_sf(data=ex_plot, fill="green")+
+#     geom_sf(data = ex_subplots, fill = NA, size = 1)+
+#     theme_void() +
+#     ggtitle(TeX("$4 \\times 1$ subplots")) +
+#     theme(plot.title = element_text(hjust = 0.5))
+
+# grob_subplots_inPlot <- ggplotGrob(subplots_inPlot)
+
+# # #-- (3) create a map of cells in a subplot --#
+# cells_inSubplot <- 
+#     ggplot()+
+#     geom_sf(data=ex_one_subplot, fill="green", size = 1)+
+#     geom_sf(data=ex_cells, fill=NA)+
+#     theme_void() +
+#     ggtitle(TeX("$6 \\times 6$ cells")) +
+#     theme(
+#         plot.title = element_text(hjust = 0.5, margin=margin(0,0,10,0)))
+
+# grob_cells_inSubplot <- ggplotGrob(cells_inSubplot)
+
+# # #-- (4)put them on the same map --#
+# g_inset <- ggplot() +
+#   coord_equal(xlim = c(0, 1), ylim = c(0, 1), expand = FALSE)
+
+# map_all_together <- 
+#     #/*----------------------------------*/
+#     #' ##  base maps 
+#     #/*----------------------------------*/
+#     g_inset +
+#     # --- plot level --- #
+#     annotation_custom(grob_plot, 
+#         xmin = 0, xmax = 0.4, ymin = 0, ymax = 1) +
+#     # --- subplot level --- # 
+#     annotation_custom(grob_subplots_inPlot, 
+#         xmin = 0.57, xmax = 0.67, ymin = 0.3, ymax = 0.8) + #hight is 5
+#     # --- cell level --- # 
+#     annotation_custom(grob_cells_inSubplot, 
+#         xmin = 0.8, xmax = 1, ymin = 0.5, ymax = 0.7) +
+#         # xmin = 0.75, xmax = 1, ymin = 0.45, ymax = 0.7) +
+#     #/*----------------------------------*/
+#     #' ## add line segments
+#     #/*----------------------------------*/
+#     # --- plot-subplot (above) --- #
+#     # geom_segment(aes(x = 0.386,  xend = 0.55, y = 0.547, yend = 0.73), 
+#     geom_segment(aes(x = 0.387, xend = 0.57, y = 0.534, yend = 0.717), 
+#          lineend = "round", color = "grey",
+#         size = 1.5
+#         ) +
+#     # --- plot-subplot (below) --- #
+#     # geom_segment(aes(x = 0.386, xend = 0.55, y = 0.5, yend = 0.37), 
+#     geom_segment(aes(x = 0.387, xend = 0.57, y = 0.485, yend = 0.352), 
+#         # data = arrowA, 
+#          lineend = "round", color = "grey", 
+#         size = 1.5
+#         )+
+#     # --- subplot-cell (above) --- #
+#     # geom_segment(aes(x = 0.65, xend = 0.805, y = 0.64, yend = 0.692), 
+#     geom_segment(aes(x = 0.671, xend = 0.82, y = 0.626, yend = 0.661), 
+#         # data = arrowA, 
+#          lineend = "round", color = "grey",
+#         size = 1.5
+#         ) +
+#     # --- subplot-cell (below) --- #
+#     geom_segment(aes(x = 0.671, xend = 0.82, y = 0.532, yend = 0.506), 
+#         # data = arrowA, 
+#          lineend = "round", color = "grey",
+#         size = 1.5
+#         ) + 
+#     theme_void()
+    
+# #     theme(plot.margin=unit(c(0,0,0,0),"mm"))
+
+# file <- here("GitControlled/Writing/Re_JournalSubmission/field_devision_v2.pdf")
+# ggsave(file)
+# knitr::plot_crop(file)
+# dev.off()
+
+
+## ---- dependson = "setup"-----------------------
+
+field_Ndesign <- ggplot() +
+    # geom_sf(data=field_plot_sf, color='blue', size=0.8, fill=NA) +
+    geom_sf(data=field_plot_sf,
+        aes(fill = factor(rate)), size = 0,
+        inherit.aes = FALSE,
+        # alpha=0.9
+        ) +
+    scale_fill_viridis_d() +
+    labs(fill = "Nitrogen rate\n  (kg/ha)") +
+    theme_void()
+    # theme(legend.position = "bottom",
+    #     legend.title = element_text(size = 0.9))
+
+
+
+## ---- dependson = "setup"-----------------------
+
+# yield_dist <- ggplot(field_cell_dt)+
+#     geom_density(aes(x=yield))
+
+##== cell level ==##
+vis_yield_cell <- ggplot(field_cell_sf) +
+    geom_sf(aes(fill = yield), size = 0) +
+    scale_fill_viridis_c()+
+    labs(fill = "Yield Level\n  (kg/ha)")+
+    theme_void()
+
+
+##== subplot yield level ==##
+vis_yield_subplot <- ggplot(field_subplot_sf) +
+    geom_sf(aes(fill = yield), size = 0) +
+    scale_fill_viridis_c()+
+    labs(fill = "Yield Level\n  (kg/ha)")+
+    theme_void()
+    
+
+
+## ---- dependson = "setup"-----------------------
+opt_N_dist <- ggplot(field_cell_dt)+
+    geom_density(aes(x=opt_N))
+
+##== cell level ==##
+vis_optN_cell <- ggplot(field_cell_sf) +
+    geom_sf(aes(fill = opt_N), size = 0) +
+    scale_fill_viridis_c()+
+    labs(fill = "EONR (kg/ha)")+
+    theme_void()
+
+##== subplot yield level ==##
+vis_optN_subplot <- ggplot(field_subplot_sf) +
+    geom_sf(aes(fill = opt_N), size = 0) +
+    scale_fill_viridis_c()+
+    labs(fill = "Yield Level\n  (kg/ha)")+
+    theme_void()
+
+
+## ---- dependson = "setup"-----------------------
+####==== ymax map ====####
+ymax_dist <- ggplot(field_cell_dt)+
+    geom_density(aes(x=ymax))
+
+field_ymax <- ggplot(field_cell_sf) +
+    geom_sf(aes(fill = ymax), size = 0) +
+    scale_fill_viridis_c()+
+    ggtitle('(1) ymax')+
+    labs(fill = "kg/ha")+
+    theme_void()
+    # theme(legend.title = element_blank())
+
+####==== alpha map ====####
+alpha_dist <- ggplot(field_cell_dt)+
+    geom_density(aes(x=alpha))
+
+field_alpha <- ggplot(field_cell_sf) +
+    geom_sf(aes(fill = alpha), size = 0) +
+    scale_fill_viridis_c() +
+    ggtitle(expression("(2) " ~alpha)) +
+    theme_void() +
+    theme(legend.title = element_blank())
+
+####==== beta map ====####
+beta_dist <- ggplot(field_cell_dt)+
+    geom_density(aes(x=beta))
+
+field_beta <- ggplot(field_cell_sf) +
+    geom_sf(aes(fill = beta), size = 0) +
+    scale_fill_viridis_c()+
+    ggtitle(expression("(3) " ~beta)) +
+    # labs(fill = expression(~beta))+
+    theme_void() +
+    theme(legend.title = element_blank())
+
+
+####==== m_error map ====#### (this should be m_error*det_yield, not just m_error)
+# m_error_sf <-  left_join(field, coef_data_m, by="unique_cell_id")
+
+field_m_error <- ggplot(field_cell_sf) +
+    geom_sf(aes(fill = yield_error), size = 0) +
+    scale_fill_viridis_c()+
+    ggtitle(expression("(d) " ~epsilon)) +
+    labs(fill = "kg/ha")+
+    theme_void()
+    # theme(legend.title = element_blank())
+
+
+# grid.arrange(field_ymax, field_alpha, field_beta, field_m_error, ncol=2, nrow=2)
+
+
+## ----source-results, message=FALSE, warning=FALSE, cache= TRUE----
+
+# ===================================
+# Forest results 
+# ===================================
+
+res_forest_all_honest <- readRDS("./Shared/Results/Summary_SimRes_Honest_full_tune.rds")
+
+# ===================================
+# CNN results 
+# ===================================
+
+res_CNN_all <- readRDS("./Shared/Results/SimRes_CNN_RMSE.rds")
+
+# /*-------------------------------------------------------*/
+#' ## Organize the data
+# /*-------------------------------------------------------*/ 
+#--- for reporting the results of  yield prediction and EONR estimation ---#
+report_res_allML <- rbind(res_forest_all_honest, res_CNN_all)%>%
+    .[, Method := factor(Method, levels = c("RF", "BRF", "CNN", "CF_stepwise", "CF_base"))] %>%
+    .[, Model := factor(Model, levels = c("aby", "abytt", "aabbyy", "aabbyytt"))]
+
+report_res_subsetML <- report_res_allML %>%
+    .[Method != "CF_stepwise", ]
+
+
+
+## ---- dependson = "source-results"--------------------------------------------
+
+rmse_y_all <-  copy(report_res_allML)%>%
+    .[Method %in% c("RF", "BRF", "CNN")]
+
+#==== Distribution of RMSE of predicted yields ====#
+plot_dis_y <- copy(rmse_y_all)%>%
+    .[, Method:=factor(Method, levels = c("RF", "BRF", "CNN"))]%>%
+    ggplot()+
+    geom_density(aes(x=rmse_y, fill=Method), alpha=0.6)+
+    facet_wrap(~Model, ncol = 1)+
+    labs(x = "RMSE")+
+    # labs(x = "Mean R-squared")+
+    theme_few()+
+    theme(
+        strip.text.x = element_text(size=12,face="bold"),
+        legend.title = element_text(size=12,face="bold"),
+        legend.text = element_text(size=12, face="bold"),
+        legend.position = "bottom")
+
+#==== Summary Table ====#
+table_y_prep <- copy(rmse_y_all) %>%
+    .[,.(rmse_y = mean(rmse_y)), by=.(Method, Model)] %>%
+    .[,rmse_y := format(round(rmse_y,1), nsmall=1)] %>%
+    dcast(Model~Method, value.var = "rmse_y")
+
+report_table_y <- copy(table_y_prep)%>%
+    .[, CF_base := "-"]%>%
+    mutate(
+    across(
+      everything(),
+      as.character
+        )
+    )%>%
+    flextable(.) %>%
+    set_header_labels(values = list(
+        Model = "Model",
+        RF = "RF",
+        BRF = "BRF",
+        CNN = "CNN",
+        CF_base = "CF-base"
+    ))%>%
+    align(align = "center", part = "all")%>%
+    align(j=1,  align = "left", part = "all")%>%
+    #- change the borders just for consistency with other figures -#
+    hline_bottom(part="all") %>%
+    hline_top(part="header") %>%
+    autofit()
+
+
+## -----------------------------------------------
+# rmse_y_all_v2 <- rmse_y_all %>%
+#     .[,`:=`(
+#         rmse_y_scale = scales::rescale(rmse_y),
+#         rmse_optN_scale = scales::rescale(rmse_optN)
+#         ), by= .(Model, Method)]
+
+fig_y_optN <- rmse_y_all[Method %in% c("RF", "BRF", "CNN")] %>%
+    ggplot(aes(x=rmse_y, y=rmse_optN))+
+    geom_point(size=0.1)+
+    facet_grid(Model ~ Method) +
+    # geom_smooth(method='lm', se=FALSE,  aes(colour="Regression line"), size=1) +
+    # scale_colour_manual(values= "red") +
+    geom_smooth(method='lm', se=FALSE,  color = "red", size=0.6) +
+    stat_regline_equation(
+        # label.x.npc = "right",
+        # label.y.npc = "top", 
+        label.x = 2150, label.y = 80,
+        aes(label = ..rr.label..), size = 3, color = "blue") +
+    # geom_abline(slope=1, intercept=0, color="red")+
+    guides(
+        fill = guide_legend(keywidth = 1, keyheight = 1),
+        linetype = guide_legend(keywidth = 3, keyheight = 1),
+        colour= guide_legend(keywidth = 3, keyheight = 1))+
+    labs(y = " RMSE of EONR Estimation (kg/ha)")+
+    labs(x = " RMSE of Yield Prediction (kg/ha)")+
+    theme_few() +
+    theme(
+        strip.text.x = element_text(size=8,face="bold"),
+        strip.text.y = element_text(size=8,face="bold"),
+        legend.title = element_blank(),
+        legend.text = element_text(size=8, face="bold"),
+        legend.position = "bottom")
+
+# print(fig_y_optN, preview = "docx")
+# dfabline <- data.frame(
+#     x = 0:3500, y=0:3500)
+
+# figure_te <- readRDS(here("Shared/Data/for_writing/dt_TEcomparison.rds"))%>%
+#     .[, Method:= case_when(
+#         Method=="RF" ~ "RF",
+#         Method=="BRF" ~ "BRF",
+#         Method=="CF_base" ~ "CF-base")] %>%
+#     .[, Method:= factor(Method, levels = c("RF", "BRF", "CF-base"))]%>%
+#     ggplot() +
+#     geom_point(aes(x=true_tau_base, y=tau_base), size=0.5)+
+#     # geom_abline(aes(intercept = 0, slope = 1, color = "1-to-1 line"), show.legend=TRUE) +
+#     geom_line(data=dfabline, aes(x=x, y=y, color="1-to-1 line")) +
+#     scale_colour_manual(labels = "1-to-1 line", values="red") +
+#     facet_grid(Treatment ~ Method) +
+#     guides(
+#         fill = guide_legend(keywidth = 1, keyheight = 1),
+#         linetype = guide_legend(keywidth = 3, keyheight = 1),
+#         colour= guide_legend(keywidth = 3, keyheight = 1),
+#         direction = "horizontal")+
+#     labs(y = "Estimated Treatment Effect")+
+#     labs(x = "True Treatment Effect")+
+#     theme_few() +
+#     theme(
+#         strip.text.x = element_text(size=12,face="bold"),
+#         strip.text.y = element_text(size=12,face="bold"),
+#         legend.title = element_blank(),
+#         legend.text = element_text(size=12, face="bold"),
+#         legend.position = "bottom")
+
+
+
+## ---- dependson = "source-results"--------------
+
+prepare_count_tab <- rmse_y_all %>%
+    dcast(sim + Model ~ Method, value.var = c("Mean", "rmse_y"))%>%
+    .[,which_ML_y := case_when(
+        rmse_y_BRF < rmse_y_RF & rmse_y_BRF < rmse_y_CNN ~ "BRF",
+        rmse_y_RF < rmse_y_BRF & rmse_y_RF < rmse_y_CNN ~ "RF",
+        rmse_y_CNN < rmse_y_BRF & rmse_y_CNN < rmse_y_RF ~ "CNN"
+        )]%>%
+    .[,which_ML_piLoss := case_when(
+        Mean_BRF < Mean_RF & Mean_BRF < Mean_CNN ~ "BRF", 
+        Mean_RF < Mean_BRF &  Mean_RF < Mean_CNN ~ "RF", 
+        Mean_CNN < Mean_BRF & Mean_CNN < Mean_RF ~ "CNN"
+        )] %>%
+    .[,index_cnst_y_piLoss := ifelse(which_ML_piLoss==which_ML_y, 1, 0)]%>%
+    .[,ML_cnst_y_piLoss:= ifelse(index_cnst_y_piLoss==1, which_ML_piLoss, NA)]
+
+    # # RF vs BRF
+    # .[,rmse_y_ratio_RF_BRF := rmse_y_RF/rmse_y_BRF]%>%
+    # .[,rmse_optN_ratio_RF_BRF := rmse_optN_RF/rmse_optN_BRF]%>%
+    # # CNN vs RF
+    # .[,rmse_y_ratio_CNN_RF := rmse_y_CNN/rmse_y_RF]%>%
+    # .[,rmse_optN_ratio_CNN_RF := rmse_optN_CNN/rmse_optN_RF]%>%
+    # # CNN vs BRF 
+    # .[,rmse_y_ratio_CNN_BRF := rmse_y_CNN/rmse_y_BRF]%>%
+    # .[,rmse_optN_ratio_CNN_BRF := rmse_optN_CNN/rmse_optN_BRF]
+
+# nrow(.SD[ML_cnst_y_piLoss=="BRF"])
+# prepare_count_tab[ML_cnst_y_piLoss=="RF",] %>% nrow()
+# prepare_count_tab[ML_cnst_y_piLoss=="BRF",] %>% nrow()
+# prepare_count_tab[ML_cnst_y_piLoss=="CNN",] %>% nrow()
+
+# Summary Table 
+summary_res_CNN_RF_BRF <- prepare_count_tab%>%
+    .[,.(
+        count_BRF = nrow(.SD[ML_cnst_y_piLoss=="BRF",]),
+        count_RF = nrow(.SD[ML_cnst_y_piLoss=="RF",]),
+        count_CNN = nrow(.SD[ML_cnst_y_piLoss=="CNN",]),
+        count_y_BRF = nrow(.SD[which_ML_y=="BRF",]),
+        count_y_RF = nrow(.SD[which_ML_y=="RF",]),
+        count_y_CNN = nrow(.SD[which_ML_y=="CNN",]),
+        Total= sum(index_cnst_y_piLoss)
+        ), by=Model] %>%
+    .[,`:=`(
+         blank1 = NA, blank2 = NA, blank3 = NA, blank4 = NA
+        )] %>%
+    .[,.(Model, blank1, count_y_RF, count_RF,  blank2, count_y_BRF, count_BRF, blank3, count_y_CNN, count_CNN ,blank4, Total)]
+    
+# summary_res_CNN_RF_BRF[Model=="aby", count_y_RF]
+
+#- table creation -#
+report_summary_res_CNN_RF_BRF <- copy(summary_res_CNN_RF_BRF)%>%
+    flextable(.) %>%
+    border_remove() %>%
+    delete_part(part = "header") %>%
+    add_header(
+        Model="Model", 
+        blank1 = "", count_y_RF = "RF", count_RF = "RF",
+        blank2 = "", count_y_BRF = "BRF", count_BRF = "BRF",
+        blank3 = "", count_y_CNN = "CNN", count_CNN = "CNN",
+        blank4 = "", Total = "Total",
+        top = TRUE) %>%
+    merge_h(part = "header") %>%
+    hline_bottom(j=c(3:4, 6:7, 9:10), part = "header") %>%
+    add_header(
+        Model="", 
+        blank1 = "", count_y_RF = "#Y", count_RF = "#YP",
+        blank2 = "", count_y_BRF = "#Y", count_BRF = "#YP",
+        blank3 = "", count_y_CNN = "#Y", count_CNN = "#YP",
+        blank4 = "", Total = "",
+        top = FALSE) %>%
+    hline_bottom(part="all") %>%
+    hline_top(part="header") %>%
+    align(align = "center", part = "all")%>%
+    align(j=1,  align = "left", part = "all")%>%
+    footnote(
+    value = as_paragraph("NOTE: #Y indicates the number of simulation rounds in which the model provided the lowest RMSE for yield prediction. #YP indicates the number of simulation rounds in which the model provided the lower RMSE of yield prediction and the highest profit at the same time."),
+     ref_symbols = NA
+    ) %>%
+    # set_table_properties(width = .7, layout = "autofit") %>%
+    fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
+    autofit() %>%
+    width(j = c(3,4,6,7,9,10,12), width=0.6)%>%
+    width(j = c(2,5,8,11), width=0.1)
+
+    # set_table_properties(width = .6, layout = "autofit")
+
+# print(report_summary_res_CNN_RF_BRF, preview = "docx")
+# in terms of RMSE of yield prediction and ", "\U1D70B\U0302", as_sub("loss"), ", respectively. 
+
+
+
+## ---- dependson = "source-results"--------------
+
+
+##== Distribution ==##
+plot_dis_optN <- copy(report_res_subsetML)%>%
+    .[Method %in% c("RF", "BRF", "CF_base"), ]%>%
+    .[, Method := case_when(
+    # Method == "CF_stepwise" ~ "CF-stepwise",
+    Method == "CF_base" ~ "CF-base",
+    Method == "RF" ~ "RF",
+    Method == "BRF" ~ "BRF"
+    )]%>%
+    .[, Model := case_when(
+    Model == "aby" ~ "Scenario: aby",
+    Model == "abytt" ~ "Scenario: abytt",
+    Model == "aabbyy" ~ "Scenario: aabbyy",
+    Model == "aabbyytt" ~ "Scenario: aabbyytt"
+    )]%>%
+    # .[, Method:=factor(Method, levels = c("RF", "BRF", "CF-stepwise", "CF-base"))]%>%
+    .[, Method:=factor(Method, levels = c("RF", "BRF", "CF-base"))]%>%
+    .[, Model:=factor(Model, 
+        levels = c("Scenario: aby", "Scenario: abytt", "Scenario: aabbyy", "Scenario: aabbyytt"))] %>%
+    ggplot()+
+    geom_density(aes(x=rmse_optN, fill=Method), alpha=0.7)+
+    # scale_fill_viridis_d()+
+    facet_wrap(~Model, ncol = 1)+
+    # labs(x = expression(R^2))+
+    labs(x = "RMSE (kg/ha)")+
+    theme_few()+
+    theme(
+        strip.text.x = element_text(size=12,face="bold"),
+        legend.title = element_text(size=12,face="bold"),
+        legend.text = element_text(size=12, face="bold"),
+        legend.position = "bottom")
+
+
+##== Summary Table  ==##
+
+#- preparation -#
+table_optN_prep <- copy(report_res_subsetML)%>%
+    .[, .(
+        rmse_optN = mean(rmse_optN),
+        pi_loss = mean(Mean)
+        ), by=.(Method, Model)]%>%
+    .[,`:=`(
+        rmse_optN = format(round(rmse_optN,1), nsmall=1),
+        pi_loss = format(round(pi_loss,2), nsmall=2)
+        )] %>%
+    dcast(Model~Method, value.var = c("rmse_optN", "pi_loss")) %>%
+    .[,`:=`(
+         blank1 = NA, blank2 = NA, blank3 = NA, blank4 = NA, blank5 = NA
+        )] %>%
+    .[,.(Model, blank1, rmse_optN_RF, pi_loss_RF,  blank2, rmse_optN_BRF, pi_loss_BRF, blank3, rmse_optN_CNN, pi_loss_CNN ,blank4, rmse_optN_CF_base, pi_loss_CF_base)]
+
+# table_optN_prep[Model=="aby", rmse_optN_RF]
+
+# avg_optN <- copy(report_res_subsetML)%>%
+#     .[, .(
+#         Avg_rmse_optN = mean(rmse_optN),
+#         Avg_pi_loss = mean(Mean)
+#         ), by=Method] %>%
+#     .[, `:=`(
+#         Avg_rmse_optN = format(round(Avg_rmse_optN, digits=1), nsmall = 1),
+#         Avg_pi_loss = format(round(Avg_pi_loss, digits=2), nsmall=2)
+#         )] 
+
+#- table creation -#
+report_table_optN <- copy(table_optN_prep)%>%
+    mutate(
+    across(
+      everything(),
+      as.character
+        )
+    )%>%
+    # add_row(.after = 4) %>%
+    flextable(.) %>%
+    border_remove() %>%
+    delete_part(part = "header") %>%
+    add_header(
+       Model="Model", 
+        blank1 = "", rmse_optN_RF = "RF", pi_loss_RF = "RF",
+        blank2 = "", rmse_optN_BRF = "BRF", pi_loss_BRF = "BRF",
+        blank3 = "", rmse_optN_CNN = "CNN", pi_loss_CNN = "CNN",
+        blank4 = "", rmse_optN_CF_base = "CF-base", pi_loss_CF_base = "CF-base",
+        top = TRUE) %>%
+    merge_h(part = "header") %>%
+    hline_bottom(j=c(3:4, 6:7, 9:10, 12:13), part = "header") %>%
+    add_header(
+       Model="", 
+        blank1 = "", rmse_optN_RF = "RMSE", pi_loss_RF = "pi_loss",
+        blank2 = "", rmse_optN_BRF = "RMSE", pi_loss_BRF = "pi_loss",
+        blank3 = "", rmse_optN_CNN = "RMSE", pi_loss_CNN = "pi_loss",
+        blank4 = "", rmse_optN_CF_base = "RMSE", pi_loss_CF_base = "pi_loss",
+        top = FALSE) %>%
+    compose(i = 2, j = c(4, 7, 10, 13), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))) %>%
+    hline_bottom(part="all") %>%
+    hline_top(part="header") %>%
+    align(align = "center", part = "all")%>%
+    align(j=1,  align = "left", part = "all")%>%
+    # autofit() %>%
+    # width(j = c(2,5,8,11), width=0.3) %>%
+    # fix_border_issues() 
+    footnote(
+        # i = 1, j = c(4, 7, 10, 13), part = "header",
+    value = as_paragraph("NOTE: \U1D70B\U0302", as_sub(as_i("def")), " indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")),"."),
+     ref_symbols = NA
+    ) %>%
+    fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
+    autofit() %>%
+    width(j = c(3,4,6,7,9,10,12,13), width=0.6)%>%
+    width(j = c(2,5,8,11), width=0.1)
+    
+    # print(report_table_optN, preview = "docx")
+    # autofit() 
+    # width(j = c(2,5,8,11), width=0.5)
+    # width(j = c(2,5,8,11), width=0.5)
+# library(webshot2)
+# save_as_image(report_table_optN, path = here("GitControlled/Presentation", "report_table_optN.png"))
+
+# print(report_table_optN, preview = "docx")
+
+# typology <- data.frame(
+#   col_keys = names(table_optN_prep),
+#   what = c(" ", " ", "RF", "RF", " ", "BRF", "BRF", " ", "CNN", "CNN", " ", "CF-base", "CF-base"),
+#   measure = c(" ", " ", "RMSE", "pi_loss", " ", "RMSE", "pi_loss", " ", "RMSE", "pi_loss", " ", "RMSE", "pi_loss"),
+#   stringsAsFactors = FALSE )
+
+
+# copy(table_optN_prep)%>%
+#     mutate(
+#     across(
+#       everything(),
+#       as.character
+#         )
+#     )%>%
+#     add_row(.after = 4) %>%
+#     flextable(.) %>%
+#     border_remove() %>%
+#     add_body(
+#         Model="Avg.", 
+#         blank1 = NA, rmse_optN_RF = avg_optN[Method=="RF",Avg_rmse_optN], pi_loss_RF = avg_optN[Method=="RF",Avg_pi_loss],
+#         blank2 = NA, rmse_optN_BRF = avg_optN[Method=="BRF",Avg_rmse_optN], pi_loss_BRF = avg_optN[Method=="BRF",Avg_pi_loss],
+#         blank3 = NA, rmse_optN_CNN = avg_optN[Method=="CNN",Avg_rmse_optN], pi_loss_CNN = avg_optN[Method=="CNN",Avg_pi_loss],
+#         blank4 = NA, rmse_optN_CF_base = avg_optN[Method=="CF_base",Avg_rmse_optN], pi_loss_CF_base = avg_optN[Method=="CF_base",Avg_pi_loss],
+#         top = FALSE
+#         )%>%
+#     # delete_part(part = "header") %>%
+#     set_header_df(mapping = typology, key = "col_keys") %>%
+#     compose(i = 2, j = c(4, 7, 10, 13), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub("loss"))) %>%
+#     merge_h(part = "header") %>%
+#     hline_bottom(part="all") %>%
+#     hline_top(part="header") %>%
+#     align(align = "center", part = "all")%>%
+#     align(j=1,  align = "left", part = "all")%>%
+#     autofit() %>%
+#     width(j = c(2,5,8,11), width=0.5)
+
+
+
+## -----------------------------------------------
+# piLoss_summary <- report_res_subsetML[,select(.SD, Method, Model, Min.:Max., cumulative_pi_loss)]%>%
+#     .[, lapply(.SD, mean), by=.(Method, Model)] %>%
+#     .[, lapply(.SD,  function(x) as.numeric(format(mean(x), digits=3))), by=.(Method, Model)] %>%
+#     flextable()
+
+
+piLoss_density <- 
+    report_res_subsetML[Method!="CNN",] %>%
+    .[,Method := case_when(
+    Method == "CF_base" ~ "CF-base",
+    Method == "RF" ~ "RF",
+    Method == "BRF" ~ "BRF"
+    )]%>%
+    .[, Model := case_when(
+    Model == "aby" ~ "Scenario: aby",
+    Model == "abytt" ~ "Scenario: abytt",
+    Model == "aabbyy" ~ "Scenario: aabbyy",
+    Model == "aabbyytt" ~ "Scenario: aabbyytt"
+    )]%>%
+    .[,Method := factor(Method, levels = c("RF", "BRF", "CF-base"))] %>%
+    .[, Model:=factor(Model, 
+        levels = c("Scenario: aby", "Scenario: abytt", "Scenario: aabbyy", "Scenario: aabbyytt"))] %>%
+    ggplot() + 
+    geom_density(aes(x=Mean, fill=Method), alpha=0.5)+
+    # scale_fill_viridis(discrete = TRUE, alpha=0.5) +
+    # scale_fill_viridis_d()+
+    # labs(x = expression(hat(pi)["loss"], " $/ha")))+
+    labs(x = TeX("$\\hat{pi}_{loss}$ (\\$/ha)"))+
+    facet_wrap(~Model, ncol=1) +
+    theme_few()+
+    theme(
+        strip.text.x = element_text(size=12,face="bold"),
+        legend.title = element_text(size=12,face="bold"),
+        legend.text = element_text(size=12, face="bold"),
+        legend.position = "bottom")
+
+
+## -----------------------------------------------
+####=== The original code for this figure is in "1_3_CompTeEstimation.R" ===####
+
+figure_te <- readRDS("./Shared/Data/for_writing/dt_TEcomparison.rds")%>%
+    .[, Method:= case_when(
+        Method=="RF" ~ "RF",
+        Method=="BRF" ~ "BRF",
+        Method=="CF_base" ~ "CF-base")] %>%
+    .[, Method:= factor(Method, levels = c("RF", "BRF", "CF-base"))]%>%
+    ggplot() +
+    geom_point(aes(x=true_tau_base, y=tau_base), size=0.5)+
+    geom_abline(aes(intercept = 0, slope = 1), color="red", show.legend=TRUE) +
+    facet_grid(Treatment ~ Method) +
+    guides(
+        fill = guide_legend(keywidth = 1, keyheight = 1),
+        linetype = guide_legend(keywidth = 3, keyheight = 1),
+        colour= guide_legend(keywidth = 3, keyheight = 1))+
+    labs(y = "Estimated Treatment Effect (kg/ha)")+
+    labs(x = "True Treatment Effect (kg/ha)")+
+    theme_few() +
+    theme(
+        strip.text.x = element_text(size=12,face="bold"),
+        strip.text.y = element_text(size=12,face="bold"),
+        legend.title = element_blank(),
+        legend.text = element_text(size=12, face="bold"),
+        legend.position = "bottom")
+
+
+## -----------------------------------------------
+# ======================================================================
+# Examination of te esimation (CF-stepwise vs CF-base)
+# ======================================================================
+
+# te_res <- readRDS(here("Shared/Results/res_eval_tre_effects.rds"))%>%
+#     .[,.(method, N_index, R_squared)]%>%
+#     .[, N_index := case_when(
+#     N_index == "1-2" ~ "(N1,N2)",
+#     N_index == "2-3" ~ "(N2,N3)",
+#     N_index == "3-4" ~ "(N3,N4)",
+#     N_index == "4-5" ~ "(N4,N5)",
+#     N_index == "1-3" ~ "(N1,N3)",
+#     N_index == "1-4" ~ "(N1,N4)",
+#     N_index == "1-5" ~ "(N1,N5)"
+#   )]%>%
+#     .[,sim:=rep(1:1000, each=8)]
+
+##== Treatment Effects Summary Table ==##
+
+# te_res_summary <- te_res[,.(R_squared=mean(R_squared)), by=c("method", "N_index")]%>%
+#     .[, R_squared:= round(R_squared,3)]%>%
+#     flextable(.)%>%
+#     set_header_labels(
+#     values = list(
+#         method="Method",
+#         N_index ="N Rates Combinations",
+#         R_squared = "R-squared"
+#     ))%>%
+#     compose(i = 1, j = 2, part = "header", value = as_paragraph("(N", as_sup("con"), ", N", as_sup("tre"), ")"))%>%
+#     compose(i = 1, j = 3, part = "header", value = as_paragraph("R",as_sup("2")))%>%
+#     align(align = "center", part = "all")%>%
+#     align(j=1,  align = "left", part = "all")%>%
+#     # align(align = "center", part = "header")%>%
+#     # align_text_col(align = "center", header = TRUE, footer = TRUE)%>%
+#     autofit()
+
+##== Graph ==##
+#== tre calculation ==#
+
+# reg_data_all <- readRDS(here("Data/for_Simulations/reg_data.rds"))
+# test_agg_data_all <- readRDS(here("Data/for_Simulations/test_agg_data.rds"))
+
+# # estimate_tre() is defined in "functions_stepwise_vs_base.R"
+# sim_ex <- estimate_tre(x=32, reg_data_all=reg_data_all, test_data_all=test_agg_data_all)
+
+# sim_ex$r2
+
+# saveRDS(sim_ex, here("Shared", "Data","for_writing","tre_demo.rds"))
+
+# sim_output <- readRDS(here("Shared","Data","for_writing","tre_demo.rds"))
+
+# # r2 <-sim_output$r2
+# eval <- sim_output$output
+
+# cf_step <- eval[Method=="CF-stepwise"]%>%
+#   ggplot()+
+#   geom_density(aes(x=value, fill=factor(variable)),alpha=0.8)+
+#   facet_wrap(~N_index, ncol = 2)+
+#   theme_few()+
+#   theme_few()+
+#       theme(
+#       legend.position="bottom",
+#       plot.title = element_text(hjust = 0.5),
+#       panel.background = element_rect(fill = "white"),
+#         axis.ticks = element_blank(),
+#         legend.title = element_blank(),
+#         strip.text.x = element_text(size=12,face="bold"),
+#         legend.text = element_text(size=12, face="bold"),
+#         )+
+#         labs(
+#         x = "Treatment Effects(kg/ha)",
+#         colour = "Cylinders",
+#         shape = "Transmission"
+#       )
+
+
+# cf_base <- eval[Method=="CF-base"]%>%
+#   ggplot()+
+#   geom_density(aes(x=value, fill=factor(variable)),alpha=0.8)+
+#   facet_wrap(~N_index, ncol = 2)+
+#   theme_few()+
+#   theme_few()+
+#       theme(
+#       legend.position="bottom",
+#       plot.title = element_text(hjust = 0.5),
+#       panel.background = element_rect(fill = "white"),
+#         axis.ticks = element_blank(),
+#         legend.title = element_blank(),
+#         strip.text.x = element_text(size=12,face="bold"),
+#         legend.text = element_text(size=12, face="bold"),
+#         )+
+#         labs(
+#         x = "Treatment effects(kg/ha)",
+#         colour = "Cylinders",
+#         shape = "Transmission"
+#       )
+
+
+## ---- dependson = "source-results"--------------
+# ==========================================================================
+# RMSE
+# ==========================================================================
+##== Distribution ==##
+plot_dis_CF_optN <- copy(report_res_allML)%>%
+    .[Method %in% c("CF_stepwise", "CF_base"), ]%>%
+    .[, Method := case_when(
+    Method == "CF_stepwise" ~ "CF-stepwise",
+    Method == "CF_base" ~ "CF-base"
+    )]%>%
+    .[, Model := case_when(
+    Model == "aby" ~ "Scenario: aby",
+    Model == "abytt" ~ "Scenario: abytt",
+    Model == "aabbyy" ~ "Scenario: aabbyy",
+    Model == "aabbyytt" ~ "Scenario: aabbyytt"
+    )]%>%
+    .[, Method:=factor(Method, levels = c("CF-stepwise", "CF-base"))] %>%
+    .[, Model:=factor(Model, 
+        levels = c("Scenario: aby", "Scenario: abytt", "Scenario: aabbyy", "Scenario: aabbyytt"))] %>%
+    ggplot()+
+    geom_density(aes(x=rmse_optN, fill=Method), alpha=0.7)+
+    # scale_fill_viridis_d()+
+    facet_wrap(~Model, ncol = 1)+
+    labs(x = "RMSE")+
+    theme_few()+
+    theme(
+        strip.text.x = element_text(size=12,face="bold"),
+        legend.title = element_text(size=12,face="bold"),
+        legend.text = element_text(size=12, face="bold"),
+        legend.position = "bottom")
+
+##== barplot ==##
+CF_optN_boxplot <- copy(report_res_allML)%>%
+    .[Method %in% c("CF_stepwise", "CF_base"), ]%>%
+    .[, Method := case_when(
+    # Method == "CF_stepwise" ~ "CF-stepwise",
+    Method == "CF_stepwise" ~ "CF-stepwise",
+    Method == "CF_base" ~ "CF-base"
+    )]%>%
+    .[, Method:=factor(Method, levels = c("CF-stepwise", "CF-base"))]%>%
+    ggplot() + 
+    geom_boxplot(aes(x=Method, y=rmse_optN, fill=Method), alpha=0.5)+
+    geom_jitter(aes(x=Method, y=rmse_optN, fill=Method), size=0.3, alpha=0.9) +
+    # scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+    scale_fill_viridis_d()+
+    labs(y = " RMSE")+
+    facet_grid(~Model)+
+    theme_few()+
+    theme(
+        strip.text.x = element_text(size=12,face="bold"),
+        legend.title = element_text(size=12,face="bold"),
+        legend.text = element_text(size=12, face="bold"),
+        legend.position = "bottom")
+
+
+##== Summary Table  ==##
+
+#- preparation -#
+table_CF_optN_prep <- copy(report_res_allML)%>%
+    .[, .(
+        rmse_optN = mean(rmse_optN),
+        pi_loss = mean(Mean)
+        ), by=.(Method, Model)]%>%
+    .[,`:=`(
+        rmse_optN = format(round(rmse_optN,1), nsmall=1),
+        pi_loss = format(round(pi_loss,2), nsmall=2)
+        )] %>%
+    dcast(Model~Method, value.var = c("rmse_optN", "pi_loss")) %>%
+    .[,`:=`(
+         blank1 = NA, blank2 = NA
+        )] %>%
+    .[,.(Model, blank1, rmse_optN_CF_base, pi_loss_CF_base, blank2, rmse_optN_CF_stepwise, pi_loss_CF_stepwise)]
+
+# avg_CF_optN <- copy(report_res_allML)%>%
+#     .[, .(
+#         Avg_rmse_optN = mean(rmse_optN),
+#         Avg_pi_loss = mean(Mean)
+#         ), by=Method] %>%
+#     .[, `:=`(
+#         Avg_rmse_optN = format(round(Avg_rmse_optN, digits=1), nsmall = 1),
+#         Avg_pi_loss = format(round(Avg_pi_loss, digits=2), nsmall=2)
+#         )] 
+
+
+#- table creation -#
+report_table_CF_optN <- copy(table_CF_optN_prep)%>%
+    mutate(
+    across(
+      everything(),
+      as.character
+        )
+    )%>%
+    # add_row(.after = 4) %>%
+    flextable(.) %>%
+    border_remove() %>%
+    delete_part(part = "header") %>%
+    add_header(
+        Model="Model", 
+        blank1 = "", rmse_optN_CF_base = "CF-base", pi_loss_CF_base = "CF-base",
+        blank2 = "", rmse_optN_CF_stepwise = "CF-stepwise", pi_loss_CF_stepwise = "CF-stepwise",
+        top = TRUE) %>%
+    merge_h(part = "header") %>%
+    hline_bottom(j=c(3:4, 6:7), part = "header") %>%
+    add_header(
+        Model="", 
+        blank1 = "", rmse_optN_CF_base = "RMSE", pi_loss_CF_base = "pi_loss",
+        blank2 = "", rmse_optN_CF_stepwise = "RMSE", pi_loss_CF_stepwise = "pi_loss",
+        top = FALSE) %>%
+    compose(i = 2, j = c(4, 7), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub("loss"))) %>%
+    hline_bottom(part="all") %>%
+    hline_top(part="header") %>%
+    align(align = "center", part = "all")%>%
+    align(j=1,  align = "left", part = "all")%>%
+    # set_table_properties(width = .5, layout = "autofit")
+    autofit() %>%
+    width(j = c(2,5), width=0.3) %>%
+    fix_border_issues() 
+
+
+# ==========================================================================
+# profit-loss
+# ==========================================================================
+
+##== Distribution ==##
+piLoss_density_CF <- copy(report_res_allML)%>%
+    .[Method %in% c("CF_stepwise", "CF_base"), ]%>%
+    .[, Method := case_when(
+    # Method == "CF_stepwise" ~ "CF-stepwise",
+    Method == "CF_stepwise" ~ "CF-stepwise",
+    Method == "CF_base" ~ "CF-base"
+    )]%>%
+    .[, Model := case_when(
+    Model == "aby" ~ "Scenario: aby",
+    Model == "abytt" ~ "Scenario: abytt",
+    Model == "aabbyy" ~ "Scenario: aabbyy",
+    Model == "aabbyytt" ~ "Scenario: aabbyytt"
+    )]%>%
+    .[, Method:=factor(Method, levels = c("CF-stepwise", "CF-base"))]%>%
+    .[, Model:=factor(Model, 
+        levels = c("Scenario: aby", "Scenario: abytt", "Scenario: aabbyy", "Scenario: aabbyytt"))] %>%
+    ggplot() + 
+    geom_density(aes(x=Mean, fill=Method), alpha=0.5)+
+    # scale_fill_viridis(discrete = TRUE, alpha=0.5) +
+    # scale_fill_viridis_d()+
+    labs(x = expression(hat(pi)["loss"]))+
+    facet_wrap(~Model, ncol=1) +
+    theme_few()+
+    theme(
+        strip.text.x = element_text(size=12,face="bold"),
+        legend.title = element_text(size=12,face="bold"),
+        legend.text = element_text(size=12, face="bold"),
+        legend.position = "bottom")
+
+
+##== barplot ==##
+CF_piLoss_boxplot <- copy(report_res_allML)%>%
+    .[Method %in% c("CF_stepwise", "CF_base"), ]%>%
+    .[, Method := case_when(
+    # Method == "CF_stepwise" ~ "CF-stepwise",
+    Method == "CF_stepwise" ~ "CF-stepwise",
+    Method == "CF_base" ~ "CF-base"
+    )]%>%
+    .[, Method:=factor(Method, levels = c("CF-stepwise", "CF-base"))]%>%
+    ggplot() + 
+    geom_boxplot(aes(x=Method, y=Mean, fill=Method), alpha=0.5)+
+    # geom_jitter(aes(x=Method, y=Mean, fill=Method), size=0.3, alpha=0.9) +
+    # scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+    scale_fill_viridis_d()+
+    labs(y = " Mean Profit-loss")+
+    facet_grid(~Model)+
+    theme_few()+
+    theme(
+        strip.text.x = element_text(size=12,face="bold"),
+        legend.title = element_text(size=12,face="bold"),
+        legend.text = element_text(size=12, face="bold"),
+        legend.position = "bottom")
+
+
+

@@ -1,0 +1,332 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+  12pt,
+  ignorenonframetext,
+  aspectratio=169,
+]{beamer}
+\title{Machine Learning Methods for Site-specific Input Management}
+\author{Shunkei Kakimoto\(^1\), Taro Mieno\(^1\) and Takashi S. T.
+Tanaka\(^2\)}
+\date{September 1st 2021}
+\institute{\(^1\)Agricultural Economics, University of Nebraska Lincoln
+\(^2\)Applied Biological Sciences, Gifu University}
+
+\usepackage{pgfpages}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+% Prevent slide breaks in the middle of a paragraph
+\widowpenalties 1 10000
+\raggedbottom
+\setbeamertemplate{part page}{
+  \centering
+  \begin{beamercolorbox}[sep=16pt,center]{part title}
+    \usebeamerfont{part title}\insertpart\par
+  \end{beamercolorbox}
+}
+\setbeamertemplate{section page}{
+  \centering
+  \begin{beamercolorbox}[sep=12pt,center]{part title}
+    \usebeamerfont{section title}\insertsection\par
+  \end{beamercolorbox}
+}
+\setbeamertemplate{subsection page}{
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center]{part title}
+    \usebeamerfont{subsection title}\insertsubsection\par
+  \end{beamercolorbox}
+}
+\AtBeginPart{
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \ifbibliography
+  \else
+    \frame{\sectionpage}
+  \fi
+}
+\AtBeginSubsection{
+  \frame{\subsectionpage}
+}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \ifXeTeX
+    \usepackage{mathspec}
+  \else
+    \usepackage{unicode-math}
+  \fi
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usetheme[]{Madrid}
+\usecolortheme{whale}
+\usefonttheme{professionalfonts}
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Machine Learning Methods for Site-specific Input Management},
+  pdfauthor={Shunkei Kakimoto\^{}1, Taro Mieno\^{}1 and Takashi S. T. Tanaka\^{}2},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\newif\ifbibliography
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslentryspacingunit} % times entry-spacing
+\setlength{\cslentryspacingunit}{\parskip}
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+  \let\oldpar\par
+  \def\par{\hangindent=\cslhangindent\oldpar}
+  \fi
+  % set entry spacing
+  \setlength{\parskip}{#2\cslentryspacingunit}
+ }%
+ {}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+\usepackage{fancyvrb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}{Background}
+\protect\hypertarget{background}{}
+\begin{itemize}
+\tightlist
+\item
+  The application of Machine Learning(ML) methods for site-specific
+  economically optimal input rates (EOIR) (e.g., seed, fertilizer) have
+  been getting more attention in recent years \newline
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Barbosa et al. (2020) applied Convolutional Neural Network
+  \item
+    Krause et al. (2020) used Random Forest-based approaches
+  \item
+    Grant Gardner (2021), Wang et al. (2021), Coulibali, Cambouris, and
+    Parent (2020), etc.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Research Gap}
+\protect\hypertarget{research-gap}{}
+\begin{itemize}
+\tightlist
+\item
+  The conventional ML methods focus on predicting yield well rather than
+  causal identification of input on yield
+\item
+  The past studies have used predictive ability of yield for validity of
+  their models. \newline
+\end{itemize}
+
+\begin{block}{note}
+\protect\hypertarget{note}{}
+\begin{itemize}
+\tightlist
+\item
+  EOIR estimation should be based on the change in yields associated
+  with the change in input levels \emph{ceteris paribus}
+\item
+  Having good yield prediction capability does not necessarily mean it
+  is also capable of estimating EOIR well
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{New Trend of Causal Machine Learning Application}
+\protect\hypertarget{new-trend-of-causal-machine-learning-application}{}
+\begin{itemize}
+\tightlist
+\item
+  Causal Machine Learning (CML) methods:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Unlike the conventional prediction-oriented ML methods, CML focuses
+    on identifying causal impacts of an event (in our context, an
+    increase or decrease in input rate for example) \newline
+  \end{itemize}
+\item
+  \textbf{Causal Forest (CF) } (Wager and Athey 2018; Athey and Imbens
+  2016):
+
+  \begin{itemize}
+  \tightlist
+  \item
+    CF estimates heterogeneous causal impacts of a treatment (a change
+    in the input level) based on observed characteristics (e.g., organic
+    matter)
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Research Questions}
+\protect\hypertarget{research-questions}{}
+\begin{block}{}
+\protect\hypertarget{section}{}
+\begin{itemize}
+\tightlist
+\item
+  In terms of estimating EOIR, how do CF-based methods (CF-stepwise and
+  CF-base) compare to other prediction-oriented ML methods: Random
+  Forest (RF), Boosted Random Forest (BRF), and Convolutional Neural
+  Network (CNN)? \newline
+\item
+  Is the predictive ability of yield a good indicator of the performance
+  of EOIR estimation?
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}{Methods}
+\protect\hypertarget{methods}{}
+\begin{itemize}
+\tightlist
+\item
+  Conduct one thousand rounds of Monte Carlo simulations under four
+  different production scenarios
+\item
+  Compare the performance in estimating economically optimal nitrogen
+  rates (EONR) of CF-based methods (CF-base and CF-stepwise) to other
+  methods: RF, BRF, and CNN
+\item
+  For RF, BRF, and CNN, contrast their EONR performances against their
+  yield prediction performances
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Key Results: EONR estimation}
+\protect\hypertarget{key-results-eonr-estimation}{}
+\begin{center}\includegraphics[width=0.7\linewidth]{table_optN} \end{center}
+\end{frame}
+
+\begin{frame}{Key Results: EONR estimation and Yield Prediction}
+\protect\hypertarget{key-results-eonr-estimation-and-yield-prediction}{}
+\begin{center}\includegraphics[width=0.7\linewidth]{table_y} \end{center}
+\end{frame}
+
+\begin{frame}{Key Findings}
+\protect\hypertarget{key-findings}{}
+\begin{block}{}
+\protect\hypertarget{section-1}{}
+\begin{itemize}
+\tightlist
+\item
+  The proposed CF-base method is capable of estimating site-specific
+  EONR more accurately than other prediction-oriented ML methods
+  \newline
+\item
+  The ability of predicting yield does not necessarily translate to good
+  performance in estimating EONR.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{References}
+\protect\hypertarget{references}{}
+\hypertarget{refs}{}
+\begin{CSLReferences}{1}{0}
+\leavevmode\vadjust pre{\hypertarget{ref-athey2016recursive}{}}%
+Athey, Susan, and Guido Imbens. 2016. {``Recursive Partitioning for
+Heterogeneous Causal Effects.''} \emph{Proceedings of the National
+Academy of Sciences} 113 (27): 7353--60.
+
+\leavevmode\vadjust pre{\hypertarget{ref-barbosa2020modeling}{}}%
+Barbosa, Alexandre, Rodrigo Trevisan, Naira Hovakimyan, and Nicolas F
+Martin. 2020. {``Modeling Yield Response to Crop Management Using
+Convolutional Neural Networks.''} \emph{Computers and Electronics in
+Agriculture} 170: 105197.
+
+\leavevmode\vadjust pre{\hypertarget{ref-coulibali2020}{}}%
+Coulibali, Zonlehoua, Athyna Nancy Cambouris, and Serge-Étienne Parent.
+2020. {``Site-Specific Machine Learning Predictive Fertilization Models
+for Potato Crops in Eastern Canada.''} \emph{PloS One} 15 (8): e0230888.
+
+\leavevmode\vadjust pre{\hypertarget{ref-Gardner21}{}}%
+Grant Gardner, David S Bullock, Taro Mieno. 2021. {``An Economic
+Evaluation of Site-Specific Input Application r x Maps: Evaluation
+Framework and Case Study.''} \emph{Precision Agriculture}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-krause2020random}{}}%
+Krause, M, Savanna Crossman, Todd DuMond, Rodman Lott, Jason Swede,
+Scott Arliss, Ron Robbins, Daniel Ochs, and Michael A Gore. 2020.
+{``Random Forest Regression for Optimizing Variable Planting Rates for
+Corn and Soybean Using Topographical and Soil Data.''}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Wager2018a}{}}%
+Wager, Stefan, and Susan Athey. 2018. {``{Estimation and Inference of
+Heterogeneous Treatment Effects using Random Forests}.''} \emph{Journal
+of the American Statistical Association} 113 (523): 1228--42.
+\url{https://doi.org/10.1080/01621459.2017.1319839}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-Wang2021}{}}%
+Wang, Xinbing, Yuxin Miao, Rui Dong, Hainie Zha, Tingting Xia, Zhichao
+Chen, Krzysztof Kusnierek, Guohua Mi, Hong Sun, and Minzan Li. 2021.
+{``{Machine learning-based in-season nitrogen status diagnosis and
+side-dress nitrogen recommendation for corn}.''} \emph{European Journal
+of Agronomy} 123 (May 2020): 126193.
+\url{https://doi.org/10.1016/j.eja.2020.126193}.
+
+\end{CSLReferences}
+\end{frame}
+
+\end{document}

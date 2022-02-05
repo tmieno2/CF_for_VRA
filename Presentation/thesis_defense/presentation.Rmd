@@ -1,0 +1,1115 @@
+---
+title: "Machine Learning Methods for Site-specific Input Management"
+author: "Shunkei Kakimoto"
+output:
+  xaringan::moon_reader:
+    mathjax: "https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_HTMLorMML"
+    # css: [default, metropolis, metropolis-fonts] 
+    css: xaringan-themer.css 
+    lib_dir: libs
+    nature:
+      ratio: 12:8
+      highlightStyle: github
+      highlightLines: true
+      highlightSpans: true
+      countIncrementalSlides: false
+---
+
+# Table of contents
+
+1. [Introduction to R and RStudio](#intro)
+2. [Object types](#objects)
+3. [Functions and packages](#functions)
+4. [Some fundamentals on vector, matrix, list, and data.frame](#objects_basics)
+
+---
+
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+style_duo_accent(
+  header_h1_font_size = "2.1rem",
+  header_h2_font_size = "1.5rem",
+  text_font_size = "0.9rem",
+  code_font_size = "0.8rem"
+)
+
+```
+
+```{r , include=FALSE}
+library(knitr)
+library(here)
+
+opts_chunk$set(
+  fig.align = "center", #fig.width=6, fig.height=4.5, 
+  # out.width="748px", #out.length="520.75px",
+  # dpi = 100, #fig.path='Figs/',
+  cache = F#, echo=F, warning=F, message=F
+  )
+
+opts_knit$set(root.dir = here())
+# setwd("~/Box/Teaching/UNL/DataScience") 
+```
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+
+
+library(RefManageR)
+BibOptions(
+  check.entries = FALSE,
+  bib.style = "authoryear",
+  # cite.style = "alphabetic",
+  style = "markdown",
+  dashed = TRUE,
+  max.names = 3,
+  longnamesfirst=FALSE
+  )
+
+file.name <- here("Writing", "MSthesis.bib")
+bib <- ReadBib(file.name)
+
+```
+
+
+```{r, include = F}
+#--- load packages ---#
+suppressMessages(library(data.table))
+suppressMessages(library(sf))
+suppressMessages(library(tidyverse))
+suppressMessages(library(flextable))
+suppressMessages(library(officer))
+suppressMessages(library(modelsummary))
+suppressMessages(library(gridExtra))
+````
+
+```{r analyses, echo=FALSE, message=FALSE, warning=FALSE, results = "hide", fig.show='hide', cache = FALSE}
+#/*=================================================*/
+#' # Preparation
+#/*=================================================*/
+# This is where you prepare datasets and results 
+
+#/*----------------------------------*/
+#' ## Create figures and tablesb
+#/*----------------------------------*/
+# --- Convert an Rmd file into a pure R file using purl() ---#
+knitr::purl(here("Codes/CNN_PrepareResults.Rmd"), output = here("Codes/CNN_PrepareResults.R"))
+
+# --- Read the simulation results and prepare figures and tables ---#
+source(here("Codes/CNN_PrepareResults.R"))
+```
+
+
+
+```{css css-setup, echo = F}
+.remark-slide-number {
+  font-size: 10pt;
+  margin-bottom: -11.6px;
+  margin-right: 10px;
+  color: #FFFFFF; /* white */
+  opacity: 1; /* default: 0.5 */
+}
+
+.remark-slide-content.hljs-github h1 {
+  margin-top: 5px;  
+  margin-bottom: 25px;  
+}
+
+.remark-slide-content.hljs-github {
+  padding-top: 10px;  
+  padding-left: 30px;  
+  padding-right: 30px;  
+}
+
+.panel-tabs {
+  <!-- color: #062A00; -->
+  color: #841F27;
+  margin-top: 0px;  
+  margin-bottom: 0px;  
+  margin-left: 0px;  
+  padding-bottom: 0px;  
+}
+
+.panel-tab {
+  margin-top: 0px;  
+  margin-bottom: 0px;  
+  margin-left: 3px;  
+  margin-right: 3px;  
+  padding-top: 0px;  
+  padding-bottom: 0px;  
+}
+
+.panelset .panel-tabs .panel-tab {
+  min-height: 40px;
+}
+
+.remark-slide th {
+  border-bottom: 1px solid #ddd;
+}
+
+.remark-slide thead {
+  border-bottom: 0px;
+}
+
+.gt_footnote {
+  padding: 2px;  
+}
+
+.remark-slide table {
+  border-collapse: collapse;
+}
+
+.remark-slide tbody {
+  border-bottom: 2px solid #666;
+}
+
+
+.important {
+  background-color: lightpink;
+  border: 2px solid blue;
+  font-weight: bold;
+} 
+
+.bold { font-weight: bold; }
+
+.red {
+  color: #f34213;
+}
+
+
+.remark-code {
+  display: block;
+  overflow-x: auto;
+  padding: .5em;
+  background: #ffe7e7;
+} 
+
+.hljs-github .hljs {
+  background: #f2f2fd;
+}
+
+.remark-inline-code {
+  padding-top: 0px;
+  padding-bottom: 0px;
+  background-color: #e6e6e6;
+}
+
+.r.hljs.remark-code.remark-inline-code{
+  font-size: 0.9em
+}
+
+.left-full {
+  width: 80%;
+  float: left;
+}
+
+.left-code {
+  width: 38%;
+  height: 92%;
+  float: left;
+}
+
+.right-plot {
+  width: 60%;
+  float: right;
+  padding-left: 1%;
+}
+
+.left-plot {
+  width: 60%;
+  float: left;
+  padding-right: 1%;
+}
+
+
+.left6 {
+  width: 60%;
+  height: 92%;
+  float: left;
+}
+
+.left5 {
+  width: 49%;
+  height: 92%;
+  float: left;
+}
+
+.right5 {
+  width: 49%;
+  float: right;
+  padding-left: 1%;
+}
+
+.right4 {
+  width: 39%;
+  float: right;
+  padding-left: 1%;
+}
+
+.left3 {
+  width: 29%;
+  height: 92%;
+  float: left;
+}
+
+.right7 {
+  width: 69%;
+  float: right;
+  padding-left: 1%;
+}
+
+.left4 {
+  width: 38%;
+  float: left;
+}
+
+.right6 {
+  width: 60%;
+  float: right;
+  padding-left: 1%;
+}
+
+ul li{
+  margin: 7px;
+}
+
+ul, li{
+  margin-left: 15px; 
+  padding-left: 0px; 
+}
+
+ol li{
+  margin: 7px;
+}
+
+ol, li{
+  margin-left: 15px; 
+  padding-left: 0px; 
+}
+
+```
+
+```{css content-box, echo = F}
+.content-box { 
+    box-sizing: border-box;
+    background-color: #e2e2e2;
+}
+.content-box-blue,
+.content-box-gray,
+.content-box-grey,
+.content-box-army,
+.content-box-green,
+.content-box-purple,
+.content-box-red,
+.content-box-yellow {
+  box-sizing: border-box;
+  border-radius: 5px;
+  margin: 0 0 10px;
+  overflow: hidden;
+  padding: 0px 5px 0px 5px;
+  width: 100%;
+}
+.content-box-blue { background-color: #F0F8FF; }
+.content-box-gray { background-color: #e2e2e2; }
+.content-box-grey { background-color: #F5F5F5; }
+.content-box-army { background-color: #737a36; }
+.content-box-green { background-color: #d9edc2; }
+.content-box-purple { background-color: #e2e2f9; }
+.content-box-red { background-color: #ffcccc; }
+.content-box-yellow { background-color: #fef5c4; }
+.content-box-blue .remark-inline-code,
+.content-box-blue .remark-inline-code,
+.content-box-gray .remark-inline-code,
+.content-box-grey .remark-inline-code,
+.content-box-army .remark-inline-code,
+.content-box-green .remark-inline-code,
+.content-box-purple .remark-inline-code,
+.content-box-red .remark-inline-code,
+.content-box-yellow .remark-inline-code { 
+  background: none;
+}
+
+.full-width {
+    display: flex;
+    width: 100%;
+    flex: 1 1 auto;
+}
+```
+
+```{css blockuote, echo = F}
+blockquote, .blockquote {
+  display: block;
+  margin-top: 0.1em;
+  margin-bottom: 0.2em;
+  margin-left: 5px;
+  margin-right: 5px;
+  border-left: solid 10px #0148A4;
+  border-top: solid 2px #0148A4;
+  border-bottom: solid 2px #0148A4;
+  border-right: solid 2px #0148A4;
+  box-shadow: 0 0 6px rgba(0,0,0,0.5);
+  /* background-color: #e64626; */
+  color: #e64626;
+  padding: 0.5em;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+}
+
+.blockquote p {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+.blockquote > h1:first-of-type {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+.blockquote > h2:first-of-type {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+.blockquote > h3:first-of-type {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+.blockquote > h4:first-of-type {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+
+.text-shadow {
+  text-shadow: 0 0 4px #424242;
+}
+```
+
+```{css scroll, echo = F}
+/******************
+ * Slide scrolling
+ * (non-functional)
+ * not sure if it is a good idea anyway
+slides > slide {
+  overflow: scroll;
+ padding: 5px 40px;
+}
+.scrollable-slide .remark-slide {
+  height: 400px;
+  overflow: scroll !important;
+}
+ ******************/
+
+.scroll-box-8 {
+  height:8em;
+  overflow-y: scroll;
+}
+.scroll-box-10 {
+  height:10em;
+  overflow-y: scroll;
+}
+.scroll-box-12 {
+  height:12em;
+  overflow-y: scroll;
+}
+.scroll-box-14 {
+  height:14em;
+  overflow-y: scroll;
+}
+.scroll-box-16 {
+  height:16em;
+  overflow-y: scroll;
+}
+.scroll-box-18 {
+  height:18em;
+  overflow-y: scroll;
+}
+.scroll-box-20 {
+  height:20em;
+  overflow-y: scroll;
+}
+.scroll-box-24 {
+  height:24em;
+  overflow-y: scroll;
+}
+.scroll-box-30 {
+  height:30em;
+  overflow-y: scroll;
+}
+.scroll-output {
+  height: 90%;
+  overflow-y: scroll;
+}
+
+ 
+```
+
+
+
+class: inverse, center, middle
+name: intro
+
+# Introduction
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+
+# Background of site-specific N managment.
++ Nitrogen is an essential nutrient for crop production
+  + it helps to attain higher yield with richer grain quality (e.x., protenin content)  
++ Excess amount of nitrogen application use is not only the economic loss but also potentially causes environmental loss(e.g., nitrate leaching).
+
+<!-- + This is the reason why site-specific nitrogen management has been gathering attention
+ The aim is to apply neccessary amount of nitrogen to neccesary site of the field, By doing so, we can reudce the loss, which result in economic benefit and environmental loss.   -->
+
+---
+<!-- + This is the reason why site-specific nitrogen management has been gathering attention but -->
+# Difficulty of site-specific N management
++ "for the same field cropped with the same cultuvart the optimal N rate in not constant across the field becasue of the spatial vailiability of crop growing conditions and soil properties."[`r Citet(bib, "basso2011strategic")`]
++ "Nitrogen responses vary widely across fields and years, and are affected by factors such as soil type and weathersawyer2006concepts" [`r Citet(bib, "sawyer2006concepts")`]
+
++ plant-soil process over N is affected by environmental condition in a highly complex way
+  +   
+
+
+---
+
+# Recent efforts to do site-specific input management 
++ theme: ML methods seem to be suitable for capturing heterogeneous impact of N application use on yield
+
++ Limitation of the current toolbox: Traditional Regression approaches 
+  -> They have some limitations on capturing heterogeneity in yield response functions
+  -> reuqire to pre-specifed potentially restrictive functional form
+    - (this also means that ) researchers have to indentify which factors contribute to 
++ Consequeses of misspecified modeling leads to recommendation maps that do not utilize the full potential of VRA. (which result in making VRA less )
+
+<!-- "Functional form employed in econometric analysis often lack theoretical grounding and are not sufficiently flexible to capture the multiple interactions, non-linearities and heterogeneity fso common to biological or social process in agricultural and environmental systems" -->
+---
+
+# ML methods for estimating optimal N rate
++ ML methods: 
+  + can select functional forms flexibiltity in a data-driven way. 
+  + can model more complex non-liner and multi-way interactions of variabels 
+
++ The algorithm of ML methods is optimized for achiving high prediction accuracy in out-of-sample
+
++ The past studies have used high predictive ability of  ML methods(Random forest, Boosted random forest, LASSO, ect.) for estimating economically optimal N rates (EONR)
+  + `r Citet(bib, c("Qin2018", "lawes2019", "Ransom2019"))` attempted to directly predict EONR using soil and weather information
+  + `r Citet(bib, c("Wang2021", "coulibali2020"))` estimate EONR based on the identified yield response function to N 
+(These studies estimate optimal nitrogen application rtates at the field levle, not site-specifically within a field)
+
+
+---
+
+# Causal inference with ML method
+
+
+
+---
+
+# Prediction VS Causal inference
+
+Theme: What’s the difference?
++ Prediction and causal effect estimation are two distinctive statistical objects
+
+For example, in our case, 
++ yield preidiction and estimation of causal impacts of a change in input level on yield are different.
+
++ yield prediction problem: What is the best prediction of yield for a particure site? 
+  - Prediction-oriented ML methods would successfully answere this question by learning the pattern of the relationship between observed yield and field characteristics site-specifically and  find the best functional resulting low prediction error in an independent test set.
+
++ causal effect of an input on yield: What is the effect of changing the N application rete on yield for a particular site?
+  - Such “change” in yields cannot be observed in reality
+  - Sampling uncertainty
+  - More of asymptotic properties about the parameter estimates are required
+
+
++ In summary, the successful prediction of yield does not necessarily mean successful identification of the causal impact of an input on yield, and vice versa. This is because their goals are different and therefore their approches are different. 
+
+
+---
+
+name: objective
+# Objective of the study
+
++ It is crucial to  estimate heterogeneous impact of N fartilization on yield for site-speicific nitrogne management.
++ CF seems to be an appealing tool for identifying the heterogeneous impacts of an input because its algorithm is optimized for that pourpose.
+
++ The objective of the study is to evaluate the performance of CF for site-specific input use recommneation.
+  -  Specifically,  we attempt to show how we can use CF for site-specific EONR estimation. We propose two approaches with CF and test their performance comparing with RF and BRF, which are widely accepted prediction-oriented ML methods in the previous studies.
+
+
+
+---
+
+# The flow of the rest of the presentation
++ To study the comparative performace of CF for site-specific input use recommendation, we conduct 1000 rounds of Monte Calro simulation.
+
+(1). Field, yield response fucntion, variation in parameters to be used for the analysis
+(2). Data generation
+(3). Methods
+(4). Results 
+
+
+---
+
+
+# Field setup  
+<!-- plot map -->
+.left5[
+<!-- + The geographical field data for the simulated on-farm precision experiments was created based on an actual field of Data-Intensive Farm Management (DIFM) project [`r Citet(bib, "bullock2019")`].  -->
+
++ .content-box-green[**plot**]: 240 by 60 feet dimensions, 384 plots in total
++ .content-box-green[**subplot**]: Each one of the four grids in a plot, 1536 subplots in total 
++ .content-box-green[**cell**]: Each one of the six grids in a subplot, 9216 cells in total 
++ The field size is about 507 acres. 
++ The basic unit of the field is the cell, and the field characteristics data is generated on a cell basis. 
+
+```{r, echo=FALSE, out.width = "250px", fig.cap="Figure: Example of a Plot"}  
+ex_plot
+```
+]
+
+.right5[
+```{r, echo=FALSE, out.width = "600px", fig.cap="Figure: Layout of The Simulated Field(plot-levle)"}  
+plot_field
+```
+]
+
+---
+
+# Field setup  
+<!-- subplot map -->
+.left5[
+<!-- + The geographical field data for the simulated on-farm precision experiments was created based on an actual field of Data-Intensive Farm Management (DIFM) project [`r Citet(bib, "bullock2019")`].  -->
+
++ .content-box-green[**plot**]: 240 by 60 feet dimensions, 384 plots in total
++ .content-box-green[**subplot**]: Each one of the four grids in a plot, 1536 subplots in total 
++ .content-box-green[**cell**]: Each one of the six grids in a subplot, 9216 cells in total 
++ The field size is about 507 acres. 
++ The basic unit of the field is the cell, and the field characteristics data is generated on a cell basis. 
+
+```{r, echo=FALSE, out.width = "250px", fig.cap="Figure: Layout of the Subplots in a Plot"}  
+ex_plot_subplots
+```
+]
+
+.right5[
+```{r, echo=FALSE, out.width = "600px", fig.cap="Figure: Layout of The Simulated Field(subplot-level)"}  
+plot_subplots
+```
+]
+---
+
+# Field setup  
+<!-- cell map -->
+.left5[
+<!-- + The geographical field data for the simulated on-farm precision experiments was created based on an actual field of Data-Intensive Farm Management (DIFM) project [`r Citet(bib, "bullock2019")`].  -->
+
++ .content-box-green[**plot**]: 240 by 60 feet dimensions, 384 plots in total
++ .content-box-green[**subplot**]: Each one of the four grids in a plot, 1536 subplots in total 
++ .content-box-green[**cell**]: Each one of the six grids in a subplot, 9216 cells in total 
++ The field size is about 507 acres. 
++ The basic unit of the field is the cell, and the field characteristics data is generated on a cell basis. 
+
+```{r, echo=FALSE, out.width = "250px", fig.cap="Figure: Layout of the Cells in a Plot"}  
+ex_plot_subplots_cells
+```
+]
+
+.right5[
+```{r, echo=FALSE, out.width = "600px", fig.cap="Figure: Layout of The Simulated Field(cell-levle)"}  
+field_map
+```
+]
+
+---
+
+
+# True  site-specific yield response function
+.left6[
+.content-box-purple[**The Mitscherlich-Baule response functions**]
+<br>
+\begin{equation}
+f_i(N) = ymax_i(1-exp(\alpha_i + \beta_i \cdot N))
+\end{equation}
+  + $ymax_i$: an asymptotic yield plateau(kg/ha)
+  + $\alpha_i$: inherent soil N content
+  + $\beta_i$: plant N-fertilizer uptake efficiency
+  + $N$: applied N fertilization rate(kg/ha)
+  + $i$: cell $i$ of the field
+]
+
+
+.right4[
+```{r, echo=FALSE, fig.cap="Figure: An Example of the Mitscherlich-Baule response curve"}
+sample_MB_curve
+```
+]
+
+
+---
+
+# True site-specific optimal N rate
+
+.left6[
+.content-box-purple[**The Mitscherlich-Baule response functions**]
+<br>
+\begin{equation}
+f_i(N) = ymax_i(1-exp(\alpha_i + \beta_i \cdot N))
+\end{equation}
+  + $ymax_i$: an asymptotic yield plateau(kg/ha)
+  + $\alpha_i$: inherent soil N content
+  + $\beta_i$: plant N-fertilizer uptake efficiency
+  + $N$: applied N fertilization rate(kg/ha)
+  + $i$: cell $i$ of the field $(i \in \{1,...,9216\})$
+<br>
+<br>
+
+.content-box-purple[**"True" site specific profit-maximizing N rate(EONR)**]
+
+\begin{equation}
+N^{opt}_i =\underset{\mathrm{N}}{argMax}(P_{C} \cdot f_i(N) - P_N \cdot N) 
+\end{equation}
+  + $P_C$: corn price (3.5 $/kg)
+  + $P_N$: the price of N fertilizer(0.6 $/kg) 
+
+]
+
+.right4[
+```{r, echo=FALSE, fig.cap="Figure: An Example of the Mitscherlich-Baule response curve"}
+sample_MB_curve
+```
+]
+
+
+---
+
+# True yield calculation
++ In reality, the realized crop yield is affected by spatially stochastic field characteristics such as the effects of weather conditions. 
+$$
+F_i(N) = ymax_i(1-exp(\alpha_i + \beta_i \cdot N))+u_i
+$$
+  + where, $u_i$ is the random yield disturbance term
+
+.content-box-purple[**Assumptions about the error term**]
++ It is assumed that $\beta_i$ and $u_{i}$ are associated to some extent
+  +  For example, precipitation may not only affect crop yield according to the spatial heterogeneous soil water capacity, but also can contribute to N runoff, or soil nitrate leaching[`r Citet(bib, "he2016sensitivity")`] which results in lower plant N-fertilizer uptake efficiency.
+
+
+---
+
+# Modeling assumptions
+.content-box-purple[**Variations in parameters**]
+
+.content-box-green[**Setup1. Create irrelevant site-specific parameters**]
++ $\theta1_i$, $\theta2_i$
+  + irrelevant to the ture yield response function
+  + correlated with $\beta_i$ to some extent
+
+.content-box-green[**Setup2. Create two splitted site-specific parameters from each of the true response parameters**]
++ $\alpha1_i, \alpha2_i, \beta1_i, \beta2_i, ymax1_i, ymax2_i$
+  + For example, $ymax_i \times r_i =ymax1_i$ and $ymax_i \times (1-r_i) =ymax2_i$ 
+  + where, $r_i$ is a split ratio difined site-specifically
+
+---
+
+# Modeling assumptions
+.content-box-purple[**Variations in parameters**]
+
+.content-box-green[**Setup1. Create irrelevant site-specific parameters**]
++ $\theta1_i$, $\theta2_i$
+  + irrelevant to the ture yield response function
+  + correlated with $\beta_i$ to some extent
+
+.content-box-green[**Setup2. Create two splitted site-specific parameters from each of the true response parameters**]
++ $\alpha1_i, \alpha2_i, \beta1_i, \beta2_i, ymax1_i, ymax2_i$
+  + For example, $ymax_i \times r_i =ymax1_i$ and $ymax_i \times (1-r_i) =ymax2_i$ 
+  + where, $r_i$ is a split ratio difined site-specifically 
+
+
+.content-box-purple[**Modeling scenarios**]
+
+Name                                 | Combinations of parameters
+------------------------------------ | ------------------------------------
+.bold[aby]                           | $\alpha_i$, $\beta_i$, $ymax_i$
+.bold[abytt]                         | $\alpha_i$, $\beta_i$, $ymax_i$, $\theta1_i$, $\theta2_i$
+.bold[aabbyy]                        | $\alpha1_i$, $\alpha2_i$, $\beta1_i$, $\beta2_i$, $ymax1_i$, $ymax2_i$
+.bold[aabbyytt]                      | $\alpha1_i$, $\alpha2_i$, $\beta1_i$, $\beta2_i$, $ymax1_i$, $ymax2_i$, $\theta1_i$, $\theta2_i$
+<!-- 1. $\alpha_i$, $\beta_i$, $ymax_i$; `aby` modeling sinario 
+2. $\alpha_i$, $\beta_i$, $ymax_i$, $\theta1_i$, $\theta2_i$; `abytt` modeling sinario 
+3. $\alpha1_i$, $\alpha2_i$, $\beta1_i$, $\beta2_i$, $ymax1_i$, $ymax2_i$; `aabbyy` modeling sinario
+4. $\alpha1_i$, $\alpha2_i$, $\beta1_i$, $\beta2_i$, $ymax1_i$, $ymax2_i$, $\theta1_i$, $\theta2_i$; `aabbyytt` modeling sinario -->
+
+
+---
+<!-- # Field Charateristics Data Generation: step1 -->
+# Field Charateristics Data Generation
+
+.left4[
+.content-box-green[**Step1**]
++ Site-specific parameter dataset, $\{(ymax_i, \alpha_i, \beta_i, u_i, \theta1_i, \theta2_i, r_i):i = \{1,...,9216\}\}$ are simualted
+  + Each parameter is simulated by generating spatially autocorrelated random fields 
+  + Unconditional Gaussian geostatistical simulation based on the spherical variogram models is used
+]
+
+.right5[
+```{r, echo=FALSE, fig.cap="Figure: An Example Spatial Distributions of Field Charateristics"}
+grid.arrange(field_ymax, field_alpha, field_beta, field_m_error, ncol=2,nrow=2)
+```
+]
+
+---
+<!-- # Field Charateristics Data Generation: step2 -->
+# Field Charateristics Data Generation
+
+.left4[
+.content-box-green[**Step1**]
++ Site-specific parameter dataset, $\{(ymax_i, \alpha_i, \beta_i, u_i, \theta1_i, \theta2_i, r_i):i = \{1,...,9216\}\}$ are simualted
+  + Each parameter is simulated by generating spatially autocorrelated random fields 
+  + Unconditional Gaussian geostatistical simulation based on the spherical variogram models is used
+
+.content-box-green[**Step2**]
++ $\alpha1_i, \alpha2_i, \beta1_i, \beta2_i, ymax1_i, ymax2_i$ are generated
++ True optimal N $(N^{opt}_i)$ calculation
+]
+
+.right5[
+```{r, echo=FALSE, fig.cap="Figure: An Example Spatial Distributions of Field Charateristics"}
+grid.arrange(field_ymax, field_alpha, field_beta, field_m_error, ncol=2,nrow=2)
+```
+]
+
+---
+<!-- # Field Charateristics Data Generation: step3 -->
+# Field Charateristics Data Generation
+.pull-left[
+.content-box-green[**Step1**]
++  Site-specific parameter dataset, $\{(ymax_i, \alpha_i, \beta_i, u_i, \theta1_i, \theta2_i, r_i):i = \{1,...,9216\}\}$ are simualted
+  + Each parameter is simulated by generating spatially autocorrelated random fields 
+  + Unconditional Gaussian geostatistical simulation based on the spherical variogram models is used
+
+.content-box-green[**Step2**]
++ $\alpha1_i, \alpha2_i, \beta1_i, \beta2_i, ymax1_i, ymax2_i$ are generated
++ True optimal N $(N^{opt}_i)$ calculation
+
+.content-box-purple[**Repeat step1 and step2 1000 times**]
+]
+
+
+.pull-right[
+```{r, echo=FALSE, fig.cap="Figure: An Example Spatial Distributions of True optimal Nitrogne Rate"}
+field_optN
+```
+]
+
+---
+
+# On-farm Field Experiment Data Generation
+
+.pull-left[
+.content-box-green[**Randomized N Experiment**]
++ Five different N rates are ramdomly assigned to the field's $384$ plots. 
+  + The N application rates are selected from the range of true optimal N rates for that simulation round so that N rates to be used for the trial cover the range of true optimal N.
+
+]
+
+.pull-right[
+```{r, echo=FALSE, fig.cap="Figure: An Example of Experimental Design of Nitrogen"}
+field_Ndesign
+```
+]
+
+---
+
+# On-farm Field Experiment Data Generation
+
+.pull-left[
+.content-box-green[**Randomized N Experiment**]
++ Five different N rates are ramdomly assigned to the field's $384$ plots. 
+  + The N application rates are selected from the range of true optimal N rates for that simulation round so that N rates to be used for the trial cover the range of true optimal N.
+
+.content-box-green[**Yield Data Generation**]
++ $F_i(N) = ymax_i(1-exp(\alpha_i + \beta_i \cdot N))+u_i$
++ Due to physical size of the crop harvester, yield can be recorded only at subplot resolution.   
+]
+
+.pull-right[
+```{r, echo=FALSE, fig.cap="Figure: An Example Spatial Distribution of True Yield(Cell-Level)"}
+field_yield
+```
+]
+
+---
+
+# On-farm Field Experiment Data Generation
+
+.pull-left[
+.content-box-green[**Randomized N Experiment**]
++ Five different N rates are ramdomly assigned to the field's $384$ plots. 
+  + The N application rates are selected from the range of true optimal N rates for that simulation round so that N rates to be used for the trial cover the range of true optimal N.
+
+.content-box-green[**Yield Data Generation**]
++ $F_i(N) = ymax_i(1-exp(\alpha_i + \beta_i \cdot N))+u_i$
++ Due to physical size of the crop harvester, it is assumed that yield can be recorded only at subplot resolution.
+]
+
+.pull-right[
+```{r, echo=FALSE, fig.cap="Figure: An Example Spatial Distribution of True Yield(Subplot-Level)"}
+field_yield_subplot
+```
+]
+
+---
+class: inverse, center, middle
+name: intro
+
+# Method
+
+<html><div style='float:left'></div><hr color='#EB811B' size=1px width=796px></html>
+
+---
+
+# ML method: Random Forest (RF)
+
+.left4[
++ RF is an ensemble of regression trees
++ At each of the reaf of the tree, the predicted value of a particular sample is the average of the dependent variable for all the observations fallen into that leaf
++ An individual regression tree is built by recursively splitting covariate space into two disjoint regions(leaves) using a specific value(splitting value) of a certain covariate(splitting variable)
++ The split is selected in a way that minimizes the mean square of error(MES; $[\sum_{i=1}^N (y_i - \widehat{y}_i)^2]/N$) across the two new leaves
++ The component of each regreesion tree is grown with the bootstrap sample or subsample and the splits are determined from a random subset of the covariates 
+    + RF can effectively reduce the variance and attain a more precise prediction than any single tree.
++ The outcome of RF is the average of outcomes from the all the trees
+]
+
+.right6[
+```{r, echo=FALSE, fig.cap="An Illustrative Example of regression tree"}
+knitr::include_graphics(here("Writing", "Presentation" ,"regtree_ex.pdf"))
+```
+]
+
+---
+
+# ML method: Boosted Random Forest (BRF)
++ `Boosting` is a general method for improving the accuracy of anly given learning algolithm`r Citet(bib, c("freund1999short"))`
++ While RF builds many trees independently using the same randomized processes, BRF builds trees sequentially allowing the current tree to correct for the bias of those that were built before it.
++ `r Citet(bib, c("Ghosal2020a"))` proposed "one step of gradient boosting" method and showed it can improve the bias of RF 
++ BRF has been shown to perform better than RF in predicting yield
+
+
+---
+
+# ML method: Causal Forest (CF)
+
++ `r Citet(bib, c("athey2016recursive"))` and `r Citet(bib, c("Wager2018a"))` developed CF to estimate heterogeneous treatment effects 
++ CF is an ensemble of causal tree(CT)
++ At each leaf of the tree, the treatment effect is calculated as the difference in the mean yield of the treated and control groups for all the observations fallen into that leaf
++ The split is identified in a way that maximiaizes the heterogneity of treatment effects
+  + the split is selected such that maximizing the variance of treatment effects across the resulting two leaves while giving a penalty to a split that creates large within-leaf variance
++ CF average the estimated treatment effects from all the CT
+
+---
+
+# ML method: Causal Forest (CF)
++ $N^{con}=81$(kg/ha), $N^{tre}=116$(kg/ha)
++ Covariates: $\alpha$, $\beta$, $ymax$
+ 
+```{r, echo=FALSE,  out.width = "600px", out.height = "500px", fig.cap="An Illustrative Example of causal tree"}
+knitr::include_graphics(here("Writing","Presentation", "ctree_ex.pdf"))
+```
+
+---
+
+# ML method: Causal Forest (CF)
++ **Honesty condition**
+  + The samples used for tree building is devided into two parts randomly. The first part is used for within-leaf treatment effet estimation, and the second part is used in deciding where to put split
+  + This condition avoids overestimating the heterogeneity of treatment effects
+<br />
+<br />
++ **Uncounfoundedness assumption** 
+  + No unobserved variables affect both treatment assignment and the outcome.
+
+---
+
+# Estimating EONR with RF and BRF
+
+.content-box-purple[**Training phase**]
++ For each modeling scenario, a single yield response function is identified by RF or BRF respectively
+  + Let $\widehat{g}(N,\mathbf{c})$ be an estimated yield response function
+
+.content-box-purple[**Prediction phase**]
+
+.content-box-green[**Identify site-specific yield response function to N**]
++ Let $\widehat{y}_{i}(N)$ be a yield response function to $N$ for some site $i$
+
+\begin{equation}
+\widehat{y}_{i}(N) \equiv \widehat{g}(N,\mathbf{c_{i}})
+\end{equation}
+
+.content-box-green[**Estimate Site-specific EONR**]
+
+\begin{equation}
+\widehat{N}^{opt}_i =\underset{\mathrm{N}}{argMax}(P_{C} \cdot \widehat{y}_{i}(N) - P_N \cdot N) 
+\end{equation}
+
+---
+
+# Estimating EONR with CF: .content-box-purple[**Training phase**]
+
+.content-box-green[**Setup**]
++ CF identifies heterogeneous treatment effects of N rates on yield based on the field characteristics
+$$\widehat{\tau}_{N^{con} \rightarrow N^{tre}}(\mathbf{c_i})=E[Y_i(N^{tre})-Y_i(N^{con})|\mathbf{c_i}]$$
+  - $Y_i(N^{tre})$, $Y_i(N^{con})$: potential yield outcomes
+  - $\mathbf{c_i}$: site-specific field characteristics
+
++ N application rates: $N_1,N_2,N_3,N_4,N_5$, where $N_1<N_2<...<N_5$
+<br />
+
+.content-box-green[**Two approaches for estimating site-specific EONR with CF**]
+
+Approach 1: `CF-stepwise`
++ $(N^{con},N^{tre}) \in \{(N_1, N_2),(N_2, N_3),(N_3, N_4),(N_4, N_5)\}$
++ $\widehat{\tau}_{N_1 \rightarrow N_2}(\mathbf{c_i}), \widehat{\tau}_{N_2 \rightarrow N_3}(\mathbf{c_i}), \widehat{\tau}_{N_3 \rightarrow N_4}(\mathbf{c_i}), \widehat{\tau}_{N_4 \rightarrow N_5}(\mathbf{c_i})$
+
+Approach 2: `CF-base`
++ $(N^{con},N^{tre}) \in \{(N_1, N_2),(N_1, N_3),(N_1, N_4),(N_1, N_5)\}$
++ $\widehat{\tau}_{N_1 \rightarrow N_2}(\mathbf{c_i}), \widehat{\tau}_{N_1 \rightarrow N_3}(\mathbf{c_i}), \widehat{\tau}_{N_1 \rightarrow N_4}(\mathbf{c_i}), \widehat{\tau}_{N_1 \rightarrow N_5}(\mathbf{c_i})$
+  
+
+---
+
+# Estimating EONR with CF: .content-box-purple[**Prediction phase**]
+
+.content-box-green[**Predict *change* in yield**]
++ Let $\Delta Y_{N_1 \rightarrow N_m}(\mathbf{c_{i}})$ be the .red[*change*] in yields going from  $N_1$ to $N_m$ $(m\in\{1,2,3,4,5\})$ for some site $i$
+  + when $m=1$, $\Delta Y_{N_1 \rightarrow N_1}(\mathbf{c_{i}})=0$
+
+  `CF-stepwise`
++ $\Delta Y_{N_1 \rightarrow N_m}(\mathbf{c_{i}}) = \sum_{k=1}^{m-1} \widehat{\tau}_{N_{k} \rightarrow N_{k+1}}(\mathbf{c_{i}})$
+  + For example, $\Delta Y_{N_1 \rightarrow N_3}(\mathbf{c_{i}}) = \widehat{\tau}_{N_1 \rightarrow N_2}(\mathbf{c_i}) + \widehat{\tau}_{N_2 \rightarrow N_3}(\mathbf{c_i})$
+
+  `CF-base`
++ $\Delta Y_{N_1 \rightarrow N_m}(\mathbf{c_{i}}) = \widehat{\tau}_{N_{1} \rightarrow N_{m}}(\mathbf{c_{i}})$
+  + For example, $\Delta Y_{N_1 \rightarrow N_3}(\mathbf{c_{i}}) = \widehat{\tau}_{N_1 \rightarrow N_3}(\mathbf{c_i})$
+
+.content-box-green[**Estimate Site-specific EONR**]
++ Find the N rate that leads to maximum .red[*change*] in profit relative to the least N rate, site-specifically
+$$\widehat{N}^{opt}_i =\underset{\mathrm{N \in \{N_1,N_2,N_3,N_4,N_5\}}}{argMax}(P_c \cdot\Delta Y_{N_1 \rightarrow N}(\mathbf{c_{i}}) - P_N \cdot (N - N_1))$$
+
+---
+
+# Flow of Entire Simulation
+
+```{r, echo=FALSE,  out.width = "700px", fig.cap="Figure: Flow Chart of Entire Simulation"}
+knitr::include_graphics(here("Writing","Presentation", "Flow_chart_all.png"))
+```
+
+---
+
+
+# Results
+.left5[
+<br>
+<br>
+```{r, echo=FALSE, out.width = "500px", tab.cap="Table: Mean R-squared of Esimated site-specific EONR by Each ML Approach "}
+table_res400_summary_type1
+```
+]
+
+.right5[
+```{r, echo=FALSE, out.width = "550px", fig.cap = "Figure: Density plots of R-squared of Estimated site-specific EONR by Each ML Approach "}
+dist_case
+```
+]
+
+---
+
+# Discussions
+.content-box-purple[The difference in the performance of treatment effect estimations between CF-stepwise and CF-base]
+.left5[
++ Check how accurately CF-stepwise and CF-base estimate heterogeneous treatment effects 
+  + Conduct the 1000 rounds of simulation using the same data we used before
+  + Calculate R-squared of the estimated treatment effects 
+]
+
+.right5[
+```{r, echo=FALSE, tab.cap="Table: Mean R-squared of Estimated Treatment Effects by CF-stepwise and CF-base "}
+te_res_summary
+```
+]
+
+
+---
+
+# Discussions
+.content-box-purple[The difference in the performance of treatment effect estimations between CF-stepwise and CF-base]
+.left5[
++ Check how accurately CF-stepwise and CF-base estimate heterogeneous treatment effects with "aby" modeling scenario
+  + Conduct the 1000 rounds of simulation using the same data we used before
+  + Calculate R-squared of the estimated treatment effects 
+
+.content-box-purple[Results]
+
++ The performance of CF-stepwise in estimating treatment effects gets worse as N treatment rates increases.
++ The performance of CF-base gets better as N treatment rates increases.
+]
+
+.right5[
+```{r, echo=FALSE, tab.cap="Table: Mean R-squared of Estimated Treatment Effects by CF-stepwise and CF-base "}
+te_res_summary
+```
+]
+
+---
+
+# Discussions
+.content-box-purple[The difference in the treatment effects estimation approach between CF-stepwise and CF-base]
+
+.left5[
+```{r, echo=FALSE, fig.cap="Figure: An Illustrative Example of CF-stepwiese Approach for Treatment Effect Estimation "}
+sample_MB_curve_step
+```
+]
+
+.right5[
+```{r, echo=FALSE, fig.cap = "Figure: An Illustrative Example of CF-base Approach for Treatment Effect Estimation "}
+sample_MB_curve_base
+```
+]
+
+---
+
+# Discussions
+.content-box-purple[CF-stepwise]
+.left5[
+
+]
+
+.right5[
+```{r, echo=FALSE, fig.cap = "Figure: Illustrative Example Distributions of True and Estimated Treatment Effects under CF-stepwise Approach(Case: aby)"}
+cf_step
+```
+]
+
+---
+
+# Discussions
+.content-box-purple[CF-base]
+.left5[
+
+]
+
+.right5[
+```{r, echo=FALSE, fig.cap = "Illustrative Example Distributions of True and Estimated Treatment Effects under CF-stepwise Approach(Case: aby)"}
+cf_base
+```
+]
+
+---
+
+
+# References
+
+```{r, results='asis', echo=FALSE}
+PrintBibliography(bib)
+```
+
+
+

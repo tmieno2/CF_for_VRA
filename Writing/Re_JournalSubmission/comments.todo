@@ -1,0 +1,120 @@
+ Reviewwer 1:
+   □ 1. **The first point of the highlight describes the advantages of the CF model over other machine learning methods. The advantages of the CF model are not suitable for the highlight of this study. Therefore, I suggest that the authors revise the first point of the highlight.**
+
+   □ 2. **In the second section (lines 76-184), the authors describe the fundamental information necessary to identify EOIR in general and discuss the causal forest approach in detail. The structure of the manuscript is redundant. Some of the descriptions belong to the methods section. Therefore, I suggest that the authors adjust the content of the section. Move some content to the supplement material and others to the methods section.**
+
+   □ 3. **The description of materials and methods section is redundant, please move some unimportant details description to supplementary materials.**
+
+
+   ✔ 4. **What is the unit of the topographical slope？ (line 131)** @done (31-01-22 10:59)
+   + Slope = "rise over run", or vertical height increase over horizontal distance.
+   + The topography data are derived from one-meter Data Elevation Models (DEM) publicly available from the National Elevation Dataset.
+     + The 1-meter DEM product is a hydroflattened, topographic bare-earth raster DEM, with a 1-meter x 1-meter cell size.
+
+  + units is decimal (m/m), percent(%) or the angle of slope (degree). ? (http://geokov.com/education/slope-gradient-topographic.aspx)
+    + decimal: y/x
+    + percent: y/x*100
+      + for every 100 m you move horizontally, you climb 17 m higher.
+    + angle of slope: arctan(y/x)
+    
+    + angle: degree
+
+    + Conclusion
+      + slope: 
+      + EC: deciSiemens per meter (dS/m)
+
+
+   ✔ 5. **There are 3 numbers in each small frame of Figure 1, please describe the meaning of each number in detail in the figure caption. (line 137)** @done (31-01-22 10:59)
+   + "The first number in each node indicates the predicted treatment effects (in kg/ha). The number and the percentage of observations belonging to the node are shown below that." 
+
+
+   □ 6. **Some formulas in the manuscript are not numbered (lines 116, 120, 268, 291, 371, 389).**
+   + I numbered only referenced equations. Should I number all the equations?
+     + Important formulae (e.g.definitions) must be displayed. All formulae which are to be referred to later on must be displayed and numbered consecutively throughout the paper; the number should appear on the right-hand side of the page. 
+   + 
+
+
+   ✔ 7. What are the exact number and proportion of test set training sets? (line 192) @done (31-01-22 10:28)
+   + This sentence might be confusing: "For each simulated field, we generated a training data set and a validation data set (l.192)"
+   + Instead, we might want to explain the detail about how we used those 1000 simulations for training and testing sets. 
+     + "The first step in our simulation was to generate one thousand synthetic fields that “resembled” an actual field. After creating 1000 fields data, one of the field is used as training and another field was used as testing dataset."
+    
+
+
+   □ 8. **I can't open the code link (https://github.com/tmieno2/ML_VRA.git, lines 199 and 249) with my browsers (chrome, edge, and Firefox). Please upload the code to the public research data repositories (Zenodo, Mendeley Data, figshare, Harvard Dataverse, etc.), not GitHub. Please generate a separate DOI for your code and cite it.**
+   + clean the codes 
+   + 
+
+
+   ✔ 9. Please convert the length units of the manuscript to international length units. (line 207) @done (31-01-22 10:53)
+   + so this means that I should convert "ft" to "m"
+     + plot size: 60-ft × 240-ft -> 18.288-m \times 73.152-m
+     + subplot size: 60-ft × 60-ft -> 18.288-m \times 18.288-m
+     + plot size: 10-ft × 10-ft -> 3.048-m \times 3.048-m
+
+
+   ✔ 10. **Please add the number of rows and columns to the plots, subplots, and cells schematics in Figure 2. (line 209)** @done (28-01-22 16:01)
+   + Re-create the figure: add number of columns and rows (e.g. 6 X 6) under each figure
+
+   □ **11. The titles of sections 3.2.1 and 3.2.2 do not provide useful information to the readers, please revise the titles. (lines 342 and 373)**
+   + the title of section 3.2.1:  RF, BRF, and CNN
+     + 
+   + the title of section 3.2.2:  CF
+     +
+
+
+   □ **12. The titles of 4.1 and 4.2 are confusing, please revise. (lines 410 and 457)**
+   + I think we can remain the title of section 4.1
+   + The title of section 4.2 can be changed to like "The relationship between the performance of yield prediction and EONR estimation?"
+
+
+   □ **13. Why there are no CNN results in Figures 8,9, and 10? (lines 439, 441, and 453)**
+   + As we found that 
+   + should I add note, to 
+
+   □ **14. I suggest that the authors add to the supplementary material a table of the training accuracy of the different models.**
+   + run CF just on training dataset, report the results.
+
+   □ **15. Please add a separate section for research gaps or uncertainties. Are there any prerequisite assumptions for using the CF model?**
+
+   □ **16. Please revise the conclusion. Most of the content is discussing the uncertainty of the study. Please move the statement about uncertainty to a separate uncertainty section.**
+
+
+
+Reviwwer 2:
+  ✔ All tables and figs: No capitalization of the titles, other than first letter. @done (28-01-22 10:04)
+ 
+  □ **Fig, 1. Indicate units for slope and EC in title.** 
+  + The topography data are derived from one-meter Data Elevation Models (DEM) publicly available from the National Elevation Dataset.
+    + %_raise
+
+  + a Veris machine that measures electrical conductivity and organic matter
+    + EC is expressed in milliSiemens per meter (mS/m) or at times is reported in deciSiemens per meter (dS/m) 
+      + deciSiemens per meter (dS/m)
+
+
+  ✔ **Table 1 and Fig. 3: show units where applicable.** @done (31-01-22 11:18)
+  + I included units in Table 1 and Fig. 3  
+    + Table 1: I added the 
+    + Fig. 3: units are applicable to ymax and the error term (kg/ha)
+
+  ✔ p. 21 l. 334: For example, instead of using , directly, some some topographical land features and soil properties (remove 1 some) @done (28-01-22 10:25)
+  + removed some
+
+  ✔ p. 24: l403 The accuracy of EONR estimation was judged based on the RMSE (/ℎ)of EONR estimation @done (28-01-22 10:31)
+  + changed from kg/ha to /ha
+
+  ✔ p. 26 l. 424. To examine whether this problem is a product solely of the specific choice @done (28-01-22 10:30)
+
+  ✔ P. 29 l 449: Points are clustered much more tightly about the 1-to-1 line much for CF-base than RF and BRF. (remove much) @done (28-01-22 10:32)
+  + I removed "much" from that sentence.
+
+  □ Table 3. Provide units.
+
+
+
+
+Other things:
+  □ make font type for figure title and NOTE
+
+  □ Reorganize Prepare Results (maybe it might be better to divide the code into some files)

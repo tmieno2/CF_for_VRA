@@ -1,0 +1,441 @@
+# parallel::mclapply
+
++ https://www.r-bloggers.com/2020/09/future-1-19-1-making-sure-proper-random-numbers-are-produced-in-parallel-processing/
+
++ https://stackoverflow.com/questions/30456481/controlling-seeds-with-mclapply
+
++ https://stackoverflow.com/questions/40536067/how-to-adjust-future-global-maxsize-in-r
+	
++ https://www.rdocumentation.org/packages/future/versions/1.6.1/topics/future_lapply
+
++ https://www.jottr.org/2017/02/19/future-rng/
+
+
+```{r}
+library(here)
+library(mgcv)
+library(ggplot2)
+library(grf)
+library(sf)
+library(measurements)
+library(data.table)
+library(tidyverse)
+library(future.apply)
+library(parallel)
+#--- source functions ---#
+setwd("~/Dropbox/ResearchProject/ML_VRA")
+source("./GitControlled/Codes/0_3_functions_main_sim.R")
+
+# /*----------------------------------*/
+#' ## Datasets
+# /*----------------------------------*/
+# === prices ===#
+pCorn <- price_table[2, pCorn]
+pN <- price_table[2, pN]
+
+reg_data_all <- readRDS("./Shared/Data/for_Simulations/reg_data.rds")
+test_data_all <- readRDS("./Shared/Data/for_Simulations/test_agg_data.rds")
+```
+
+
+
+
+## Single-core case with set.seed()
+```{r}
+# check whether set.seed() works for single core 
+x=1
+
+set.seed(1378)
+cf_temp1 <- 
+	get_opt_N(
+    	reg_data = reg_data_all[sim==x&padding==1,],
+    	test_data = test_data_all[sim==x&padding==1,],
+    	var_ls= c("alpha","beta","ymax"),
+    	rates_ls= reg_data_all[sim==x,]$rate%>%unique()%>%sort(),
+    	Method = "CF_base"
+)
+
+
+set.seed(1378)
+cf_temp2 <- 
+	get_opt_N(
+    	reg_data = reg_data_all[sim==x&padding==1,],
+    	test_data = test_data_all[sim==x&padding==1,],
+    	var_ls= c("alpha","beta","ymax"),
+    	rates_ls= reg_data_all[sim==x,]$rate%>%unique()%>%sort(),
+    	Method = "CF_base"
+)
+
+identical(cf_temp1, cf_temp2)
+```
+
++ In the single-core case, set.seed() works.
+
+
+## Multi-core case (mclapply) with set.seed()
+
+```{r}
+set.seed(1378)
+
+cf_temp1 <- 
+	mclapply(
+		1:2, function(x) {
+			get_opt_N(
+    			reg_data = reg_data_all[sim==x&padding==1,],
+    			test_data = test_data_all[sim==x&padding==1,],
+    			var_ls= c("alpha","beta","ymax"),
+    			rates_ls= reg_data_all[sim==x,]$rate%>%unique()%>%sort(),
+    			Method = "CF_base"
+    			)
+		},
+		mc.cores = detectCores() - 2
+	) %>%
+	rbindlist()
+
+
+set.seed(1378)
+
+cf_temp2 <- 
+	mclapply(
+		1:2, function(x) {
+			get_opt_N(
+    			reg_data = reg_data_all[sim==x&padding==1,],
+    			test_data = test_data_all[sim==x&padding==1,],
+    			var_ls= c("alpha","beta","ymax"),
+    			rates_ls= reg_data_all[sim==x,]$rate%>%unique()%>%sort(),
+    			Method = "CF_base"
+    			)
+		},
+		mc.cores = detectCores() - 2
+	) %>%
+	rbindlist()
+
+identical(cf_temp1, cf_temp2)
+```
+
++ In the multi-core case, set.seed() does not works.
+
+
+
+## Multi-core case (mclapply) with set.seed
++ use set.seed inside of mc.lapply
+
+```{r}
+
+cf_temp1 <- 
+	mclapply(
+		1:2, function(x) {
+			set.seed(1378)
+
+			get_opt_N(
+    			reg_data = reg_data_all[sim==x&padding==1,],
+    			test_data = test_data_all[sim==x&padding==1,],
+    			var_ls= c("alpha","beta","ymax"),
+    			rates_ls= reg_data_all[sim==x,]$rate%>%unique()%>%sort(),
+    			Method = "CF_base"
+    			)
+		},
+		mc.cores = detectCores() - 2
+	) %>%
+	rbindlist()
+
+
+cf_temp2 <- 
+	mclapply(
+		1:2, function(x) {
+			set.seed(1378)
+
+			get_opt_N(
+    			reg_data = reg_data_all[sim==x&padding==1,],
+    			test_data = test_data_all[sim==x&padding==1,],
+    			var_ls= c("alpha","beta","ymax"),
+    			rates_ls= reg_data_all[sim==x,]$rate%>%unique()%>%sort(),
+    			Method = "CF_base"
+    			)
+		},
+		mc.cores = detectCores() - 2
+	) %>%
+	rbindlist()
+
+identical(cf_temp1, cf_temp2)
+```
++ This works. 
+
+
+# Multi-core case (mclapply) with set.seed (`RNGkind("L'Ecuyer-CMRG")`)
++ https://stackoverflow.com/questions/30456481/controlling-seeds-with-mclapply
+
+```{r}
+RNGkind("L'Ecuyer-CMRG")
+
+set.seed(1378)
+
+cf_temp1 <- 
+	mclapply(
+		1:2, function(x) {
+			get_opt_N(
+    			reg_data = reg_data_all[sim==x&padding==1,],
+    			test_data = test_data_all[sim==x&padding==1,],
+    			var_ls= c("alpha","beta","ymax"),
+    			rates_ls= reg_data_all[sim==x,]$rate%>%unique()%>%sort(),
+    			Method = "CF_base"
+    			)
+		},
+		mc.cores = detectCores() - 2
+	) %>%
+	rbindlist()
+
+
+RNGkind("L'Ecuyer-CMRG")
+
+set.seed(1378)
+
+cf_temp2 <- 
+	mclapply(
+		1:2, function(x) {
+			get_opt_N(
+    			reg_data = reg_data_all[sim==x&padding==1,],
+    			test_data = test_data_all[sim==x&padding==1,],
+    			var_ls= c("alpha","beta","ymax"),
+    			rates_ls= reg_data_all[sim==x,]$rate%>%unique()%>%sort(),
+    			Method = "CF_base"
+    			)
+		},
+		mc.cores = detectCores() - 2
+	) %>%
+	rbindlist()
+
+identical(cf_temp1, cf_temp2)
+```
++ This works.
+
+
+
+# Multi-core case (mclapply) with set.seed (`mc.set.seed=TRUE`)
+
+```{r}
+set.seed(1378)
+
+cf_temp1 <- 
+	mclapply(
+		1:2, function(x) {
+			get_opt_N(
+    			reg_data = reg_data_all[sim==x&padding==1,],
+    			test_data = test_data_all[sim==x&padding==1,],
+    			var_ls= c("alpha","beta","ymax"),
+    			rates_ls= reg_data_all[sim==x,]$rate%>%unique()%>%sort(),
+    			Method = "CF_base"
+    			)
+		},
+		mc.cores = detectCores() - 2,
+		mc.set.seed = TRUE
+	) %>%
+	rbindlist()
+
+
+set.seed(1378)
+
+cf_temp2 <- 
+	mclapply(
+		1:2, function(x) {
+			get_opt_N(
+    			reg_data = reg_data_all[sim==x&padding==1,],
+    			test_data = test_data_all[sim==x&padding==1,],
+    			var_ls= c("alpha","beta","ymax"),
+    			rates_ls= reg_data_all[sim==x,]$rate%>%unique()%>%sort(),
+    			Method = "CF_base"
+    			)
+		},
+		mc.cores = detectCores() - 2,
+		mc.set.seed = TRUE
+	) %>%
+	rbindlist()
+
+identical(cf_temp1, cf_temp2)
+```
++ This does not work
+
+
+# Multi-core case (future_lapply) with set.seed (`future.seed = TRUE`)
+
+```{r}
+plan(multicore, workers = detectCores()-2)
+options(future.globals.maxSize= 850*1024^2)
+
+set.seed(1378)
+cf_temp1 <- 
+	future_lapply(
+		1:2, function(x) {
+			get_opt_N(
+    			reg_data = reg_data_all[sim==x&padding==1,],
+    			test_data = test_data_all[sim==x&padding==1,],
+    			var_ls= c("alpha","beta","ymax"),
+    			rates_ls= reg_data_all[sim==x,]$rate%>%unique()%>%sort(),
+    			Method = "CF_base"
+    			)
+		},
+		future.seed = TRUE
+	) %>%
+	rbindlist()
+
+
+
+
+set.seed(1378)
+cf_temp2 <- 
+	future_lapply(
+		1:2, function(x) {
+			get_opt_N(
+    			reg_data = reg_data_all[sim==x&padding==1,],
+    			test_data = test_data_all[sim==x&padding==1,],
+    			var_ls= c("alpha","beta","ymax"),
+    			rates_ls= reg_data_all[sim==x,]$rate%>%unique()%>%sort(),
+    			Method = "CF_base"
+    			)
+		},
+		future.seed = TRUE
+	) %>%
+	rbindlist()
+
+identical(cf_temp1, cf_temp2)
+```
+
++ This works fine. I also found that this way we can avoid using the same seed every loop unlike `mclapply()`
+
++ For example,
+
+```{r}
+#/*----------------------------------*/
+#' ## mclapply
+#/*----------------------------------*/
+# RNGkind("Mersenne-Twister")
+
+func <- function(x) runif(10)
+
+# === 1st iteration === #
+set.seed(1378)
+
+
+rng1 <- unlist(
+    mclapply(X = 1:10,
+             FUN = function(x) runif(1),
+             mc.cores = detectCores()-2,
+             mc.set.seed = TRUE)
+)
+
+
+rng2 <- unlist(
+    mclapply(X = 1:10,
+             FUN = function(x) runif(1),
+             mc.cores = detectCores()-2,
+             mc.set.seed = TRUE)
+)
+
+identical(rng1, rng2)
+
+x1 <- c(rng1, rng2)
+
+# === 2nd iteration === #
+set.seed(1378)
+
+rng1 <- unlist(
+    mclapply(X = 1:10,
+             FUN = function(x) runif(1),
+             mc.cores = detectCores()-2,
+             mc.set.seed = TRUE)
+)
+
+
+rng2 <- unlist(
+    mclapply(X = 1:10,
+             FUN = function(x) runif(1),
+             mc.cores = detectCores()-2,
+             mc.set.seed = TRUE)
+)
+
+identical(rng1, rng2)
+
+x2 <- c(rng1, rng2)
+
+
+identical(x1, x2)
+
+
+#/*----------------------------------*/
+#' ## future_lapply
+#/*----------------------------------*/
+
+
+
+# === 1st iteration === #
+set.seed(1378)
+
+rng1 <- unlist(
+    future_lapply(X = 1:10,
+             FUN = function(x) runif(1),
+             future.seed = TRUE)
+)
+
+
+rng2 <- unlist(
+    future_lapply(X = 1:10,
+             FUN = function(x) runif(1),
+             future.seed = TRUE)
+)
+
+identical(rng1, rng2)
+
+x1 <- c(rng1, rng2)
+
+# === 2nd iteration === #
+set.seed(1378)
+
+rng1 <- unlist(
+    future_lapply(X = 1:10,
+             FUN = function(x) runif(1),
+             future.seed = TRUE)
+)
+
+
+rng2 <- unlist(
+    future_lapply(X = 1:10,
+             FUN = function(x) runif(1),
+             future.seed = TRUE)
+)
+
+identical(rng1, rng2)
+
+x2 <- c(rng1, rng2)
+
+
+identical(x1, x2)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
