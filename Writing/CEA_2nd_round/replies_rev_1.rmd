@@ -1,0 +1,145 @@
+---
+title: "Reply to Reviewer #1"
+author: Shunkei Kakimoto
+output:
+  bookdown::word_document2:
+    fig_caption: yes
+    number_sections: no
+    global_numbering: true
+    reference_docx: word_template.docx
+---
+
+# Comments:
+
+**1. The first point of the highlight describes the advantages of the CF model over other machine learning methods. The advantages of the CF model are not suitable for the highlight of this study. Therefore, I suggest that the authors revise the first point of the highlight.**
+
+<span style="color:blue">  
+Yes, we agree with your point, and we have decided to simply drop it from our highlights.
+
+</span>
+
+**2. In the second section (lines 76-184), the authors describe the fundamental information necessary to identify EOIR in general and discuss the causal forest approach in detail. The structure of the manuscript is redundant. Some of the descriptions belong to the methods section. Therefore, I suggest that the authors adjust the content of the section. Move some content to the supplement material and others to the methods section.**
+<span style="color:blue">  
+
+**Materials and Method to just Method: Monte Carlo Simulations?**
+
+We do see a redundancy of expalining how CF can be used to identify site-specific input recommendations. It is explained twice in 2.2 and 3.2.2, while 2.2 is intended for a more general case than 3.2.2 that is specific to our simulations. Therefore, we decided to take out 2.2. We also renamed 2.1 to "Estimating EOIR and Treatment Effects"
+
+The core objective of the paper is to test the CF against existing ML methods in predicting EOIR and economic performance of resulting site-specific input use recommendations. To this core objective, ML simulations are our core method. For this reason, in our Materials and Methods section, we would like to avoid the explanation of how CF works just like we do not give much explanations to any of RF, BRF, and CNN, which are well-established and mostly understood already by the readers of this journal. However, since this article is the first to apply CF in the field of agronomy, let alone site-specific input management, we believe that it is worthwhile to present how it works in detail and what conditions are necessary for it to work well. Now, if we place such description inside the Materials and Method section, it will break the flow of explaning how MC simulations work, temporarily distracting readers from how MC simulations are conducted to the details of how CF works. Instead of this, we believe that it is beneficial to first give readers knowledge on how CF works and the potential advantages over the existing predition-oriented ML methods as essential knowledge before we move onto how our MC simulations are conducted in the Materials and Method section, in which we would like to focus on how MC simulations are conducted. Therefore, we kept 2.3 and 2.4 in the current manuscript.
+
+We talk about identifying site-specific economically optimal input rates in three different places. However, each of them serves distinctive purposes and we would like to keep the current structure if that is acceptable to you. 
+
+Section 2.1: bluh bluh
+Section 3.: true optimal N
+Section 3.: estiamted optimal N
+
+
+</span>
+
+**3. The description of materials and methods section is redundant, please move some unimportant details description to supplementary materials.**
+
+<span style="color:blue">  
+We first apologogize that misleading section and subsection titles may have caused confusions about your perceived structural redundancy of this article.
+
+We wrote the initial manuscript with avoiding redundancy in mind and we beleived that we did not have any redundancy in our paper. Therefore, we struggled tremendously to see where the redundancies are. We would really appreciate it if you could specify where you see redundancies and why so that we can address prorperly.
+
+In MC simulation studies, we believe that presenting how data is generated in detail is crucial because the results are dependent on how data is generated. It is much like any emprical studies using real experiment data provides lots of details about the experiemnts. We take reproducibility seriously and we believe that the details we peovided in our manuscript is appropriate. Therefore, we had very hard time telling which is unnecessary and not. We would really appreciate it if you could specify which parts are not critical. 
+
+</span>
+
+
+**4. What is the unit of the topographical slope？ (line 131)**
+<span style="color:blue">  
+
++ I provided the unit in the text. It is degree. 
+
+</span>
+
+
+**5. There are 3 numbers in each small frame of Figure 1, please describe the meaning of each number in detail in the figure caption. (line 137)**
+<span style="color:blue">  
+
++ I added the explanation for those numbers as a footnote in the figure. 
+</span>
+
+
+**6. Some formulas in the manuscript are not numbered (lines 116, 120, 268, 291, 371, 389).**
+<span style="color:blue">  
+
++ I numbered all the formulas. 
+</span>
+
+
+**7. What are the exact number and proportion of test set training sets? (line 192)**
+<span style="color:blue">  
+
++ I modified this sentence "For each simulated field, we generated a training data set and a validation data set." For each simulation round, one of the fields was used as a training data set, and another field that is different from the one used as a training data set in that round was used as a validation data set.
+
+</span>
+
+
+**8. I can’t open the code link (https://github.com/tmieno2/ML_VRA.git, lines 199 and 249) with my browsers (chrome, edge, and Firefox). Please upload the code to the public research data repositories (Zenodo, Mendeley Data, figshare, Harvard Dataverse, etc.), not GitHub. Please generate a separate DOI for your code and cite it.**
+<span style="color:blue">  
++ I uploaded to the simulation codes and the data on Mendeley Data. The link is suggested on section 3: Materials and Methods.
+
+</span>
+
+
+**9. Please convert the length units of the manuscript to international length units. (line 207)**
+<span style="color:blue">  
+
++ I converted to those units to meter (m)
+
+</span>
+
+
+**10. Please add the number of rows and columns to the plots, subplots, and cells schematics in Figure 2. (line 209)**
+<span style="color:blue">  
+
++ I updated Figure 2. The number of rows and columns of plots, subplots, and cells schematics are indicated each map in Figure 2.
+</span>
+
+
+**11. The titles of sections 3.2.1 and 3.2.2 do not provide useful information to the readers, please revise the titles. (lines 342 and 373)**
+<span style="color:blue">  
+
++ I changed the title of section 3.2 to "Training Models and Estimating Site-specific EONRs". Further, I revised the title of sections 3.2.1 and 3.2.2 to "Estimation of site-specific EONRs by RF, BRF, and CNN" and "Estimation of site-specific EONRs by CF", respectively. 
+</span>
+
+
+**12. The titles of 4.1 and 4.2 are confusing, please revise. (lines 410 and 457)**
+<span style="color:blue">  
+
++ I changed the title of section 4.2 to "The relationships between yield prediction performance and EONR prediction performance". 
+</span>
+
+**13. Why there are no CNN results in Figures 8,9, and 10? (lines 439, 441, and 453)**
+<span style="color:blue">  
+
++ As explained in section 4.1, CNN completely failed to predict site-specific EONR because the estimated yield response function were always linear (please see the Table 1). Therefore, I do not think that visualizing the CNN results provide any meaningful implications to understand its performance of EONR estimation performance.
++ I added the explanation for not showing CNN results in Figures 8,9, and 10. ("CNN is not shown as its RMSEs of the EONR estimations and $\hat{\pi}_{def}$ always take $62.8$ kg/ha and \$$58.99$/ha, respectively")
+
+</span>
+
+
+**14. I suggest that the authors add to the supplementary material a table of the training accuracy of the different models.**
+<span style="color:blue">  
+
++ run simulations on training dataset, and report the results.
+</span>
+
+
+**15. Please add a separate section for research gaps or uncertainties. Are there any prerequisite assumptions for using the CF model?**
+<span style="color:blue">  
+
+
+</span>
+
+
+**16. Please revise the conclusion. Most of the content is discussing the uncertainty of the study. Please move the statement about uncertainty to a separate uncertainty section.**
+
+<span style="color:blue">  
+
+
+</span>
+
