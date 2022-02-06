@@ -21,3 +21,6 @@ Results/*
 .DS_Store
 */.Rapp.history
 
+/Shared/*
+.Rhistory
+CF_for_VRA.Rproj
