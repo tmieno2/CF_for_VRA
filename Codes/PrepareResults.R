@@ -1,4 +1,4 @@
-## ----set-up, cache = F-----------------------------
+## ----set-up, cache = F------------------------------------------------------------------------
 library(knitr)
 library(here)
 
@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
 )
 
 
-## ----packages, cache = FALSE, include = FALSE------
+## ----packages, cache = FALSE, include = FALSE-------------------------------------------------
 # === packages ===#
 # --- data wrangling--- #
 library(sf)
@@ -36,7 +36,7 @@ library(modelsummary)
 library(latex2exp)
 
 
-## ----setup, warning=FALSE, message=FALSE, cache= FALSE----
+## ----setup, warning=FALSE, message=FALSE, cache= FALSE----------------------------------------
 # field <- readRDS("Shared/Data/for_Simulations/field_padding.rds") %>%
 #     filter(padding==1)%>%
 #     dplyr::select(unique_cell_id)
@@ -57,7 +57,7 @@ field_cell_sf <-
   readRDS()
 
 
-## --------------------------------------------------
+## ---------------------------------------------------------------------------------------------
 variogram_tb <-
   data.frame(
     Parameters = c("ymax_ij", "alpha_ij", "beta_ij", "varepsilon_ij"),
@@ -96,7 +96,7 @@ variogram_tb <-
   autofit()
 
 
-## ----field-map-visualization, dependson = "setup"----
+## ----field-map-visualization, dependson = "setup"---------------------------------------------
 
 # == plot-level field without padding area ==##
 vis_field_plot <-
@@ -216,7 +216,7 @@ knitr::plot_crop(file)
 dev.off()
 
 
-## ---- dependson = "setup"--------------------------
+## ---- dependson = "setup"---------------------------------------------------------------------
 field_Ndesign <-
   ggplot() +
   geom_sf(
@@ -229,7 +229,7 @@ field_Ndesign <-
   theme_void()
 
 
-## ---- dependson = "setup"--------------------------
+## ---- dependson = "setup"---------------------------------------------------------------------
 # === cell-level === #
 vis_yield_cell <-
   ggplot(field_cell_sf) +
@@ -247,7 +247,7 @@ vis_yield_subplot <-
   theme_void()
 
 
-## ---- dependson = "setup"--------------------------
+## ---- dependson = "setup"---------------------------------------------------------------------
 # === cell-level === #
 vis_optN_cell <-
   ggplot(field_cell_sf) +
@@ -257,7 +257,7 @@ vis_optN_cell <-
   theme_void()
 
 
-## ---- dependson = "setup"--------------------------
+## ---- dependson = "setup"---------------------------------------------------------------------
 #### ==== ymax map ====####
 field_ymax <-
   ggplot(field_cell_sf) +
@@ -300,7 +300,7 @@ field_m_error <-
 # grid.arrange(field_ymax, field_alpha, field_beta, field_m_error, ncol=2, nrow=2)
 
 
-## ----source-results, message=FALSE, warning=FALSE, cache= FALSE----
+## ----source-results, message=FALSE, warning=FALSE, cache= FALSE-------------------------------
 
 # ===================================
 # Forest results
@@ -332,7 +332,7 @@ report_res_subsetML <-
   .[Method != "CF_stepwise", ]
 
 
-## ---- dependson = "source-results"-----------------
+## ---- dependson = "source-results"------------------------------------------------------------
 
 rmse_y_all <-
   copy(report_res_allML) %>%
@@ -387,7 +387,7 @@ report_table_y <-
   autofit()
 
 
-## --------------------------------------------------
+## ---------------------------------------------------------------------------------------------
 fig_y_optN <-
   rmse_y_all[Method %in% c("RF", "BRF", "CNN")] %>%
   ggplot(aes(x = rmse_y, y = rmse_optN)) +
@@ -423,7 +423,7 @@ fig_y_optN <-
 # dfabline <- data.frame(x = 0:3500, y=0:3500)
 
 
-## ---- dependson = "source-results"-----------------
+## ---- dependson = "source-results"------------------------------------------------------------
 
 prepare_count_tab <-
   rmse_y_all %>%
@@ -497,7 +497,7 @@ report_summary_res_CNN_RF_BRF <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---- dependson = "source-results"-----------------
+## ---- dependson = "source-results"------------------------------------------------------------
 
 # === Distribution of RMSE of EONR estimates === #
 
@@ -604,7 +604,7 @@ report_table_optN <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## --------------------------------------------------
+## ---------------------------------------------------------------------------------------------
 piLoss_density <-
   report_res_subsetML[Method != "CNN", ] %>%
   .[, Method := case_when(
@@ -638,7 +638,7 @@ piLoss_density <-
   )
 
 
-## --------------------------------------------------
+## ---------------------------------------------------------------------------------------------
 #### === The original code for this figure is in "1_3_CompTeEstimation.R" ===####
 
 figure_te <-

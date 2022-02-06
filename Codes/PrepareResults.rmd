@@ -721,3 +721,52 @@ figure_te <-
   )
 ```
 
+
+```{r}
+# /*=================================================*/
+#' # Sample CT figure (cach)
+# /*=================================================*/
+
+library(causalTree)
+library(here)
+library(rpart)
+library(rattle)
+
+data_sf <- st_read(here("Shared/Data/snider_high_res.gpkg")) %>%
+    na.omit() %>%
+    dplyr::rename(tgtn=NPlan,tgts=SRPlan)
+
+data_dt <- data.table(data_sf) %>%
+    setnames(names(.),tolower(names(.)))
+
+tgts_ls <- data_dt[,tgts] %>% unique() %>% sort
+
+ctree_data <- copy(data_dt) %>%
+  .[tgts %in% tgts_ls[1:2],] %>%
+  .[,treat:=ifelse(tgts==tgts_ls[2],1,0)] %>%
+  #--- Corn Yield: 1 bu/acre ->  62.77 kg/ha---#
+  .[,yield:= yield*62.77]
+
+tree <- causalTree(
+  yield ~ slope+ecs,
+  data = ctree_data,
+  treatment = ctree_data$treat,
+  split.Rule = "CT",
+  cv.option = "CT",
+  split.Honest = T,
+  cv.Honest = T,
+  split.Bucket = F,
+  xval = 5,
+  cp = 0,
+  minsize = 20,
+  propensity = 0.5
+)
+
+opcp <- tree$cptable[,1][which.min(tree$cptable[,4])]
+opfit <- prune(tree, opcp)
+
+
+# pdf(here("GitControlled/Writing/JournalSubmission/ctree_ex.png"))
+fancyRpartPlot(opfit,sub='')
+# dev.off()
+```
