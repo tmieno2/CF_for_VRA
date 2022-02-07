@@ -39,6 +39,8 @@ library(latex2exp)
 # figure and table set up
 
 ```{r}
+
+
 theme_update(
   axis.title.x =
     element_text(
