@@ -15,7 +15,7 @@ In the first node, all the samples ($1024$ observations) belong to the node, and
 Another way to writing Eq. \@ref(eq:eqn6) that may help understanding the yield response (Eq. \@ref(eq:eqn6)) better conceptually is as follows:
 
 \begin{alinged}
-f(N, \mathbf{c}) = ymax(\mathbf{c})(1-exp(\alpha(\mathbf{c}) + \beta(\mathbf{c}) N)) + \varepsilon. 
+f(N, \mathbf{c}) = ymax(\mathbf{c})(1-exp(\alpha(\mathbf{c}) + \beta(\mathbf{c}) \cdot N)) + \varepsilon. 
 \end{alinged}
 
 In this formulation, it is made clear that the base parameters $\alpha$, $\beta$, and $ymax$ are functions of a vector of field characteristics variables $\mathbf{c}=(c_1,\dots,c_K)$, which vary spatially on the field. 
@@ -25,7 +25,7 @@ Which of $c_1,\dots,c_K$ has an influence vary by the parameters. For example, $
 Each subplot has different values of $\mathbf{c}$, and yield at the subplot level can be written as
 
 \begin{equation}
-f(N_{i}, \mathbf{c}_{i}) = ymax(\mathbf{c}_{i})(1-exp(\alpha(\mathbf{c}_{i}) + \beta(\mathbf{c}_{i}) N_{i})) + \varepsilon_{i}. 
+f(N_{i}, \mathbf{c}_{i}) = ymax(\mathbf{c}_{i})(1-exp(\alpha(\mathbf{c}_{i}) + \beta(\mathbf{c}_{i})\cdot N_{i})) + \varepsilon_{i}. 
 \end{equation}
 
 The simplified notation of this equation, where $c_i$ is dropped, is \@ref(eq:eqn6) in section <span style = "color: blue;"> section number here </span>. 
@@ -53,8 +53,8 @@ field_alpha + field_beta + field_ymax + field_m_error + vis_optN_cell + plot_lay
 ## Splitting the base parameters {#split-pars}
 
 For scenarios "aabbyy" and "aabbyytt", each of the base parameters $\alpha$, $\beta$, and $ymax$ are splitted into two part in a spatially correlated manner. Speficiallu, for each cell $(i,j)$, we assigned one of a set of spatially autocorrelated weights $r^{\alpha}_{i,j} \in (0,1)$ to the $\alpha$ variable, another set of spatially autocorrelated weights $r^{\beta}_{i,j} \in (0,1)$ to the $\beta$ variable, and another set of spatially autocorrelated weights $r^{ymax}_{i,j} \in (0,1)$ to the ${ymax}_{i,j}$ variable. Each of the weight variables are generated using unconditional Gaussian geostatistical simulation just like the base parameters. (There was no spatial correlation between the $r^{\alpha}_{i,j}$ and $r^{\beta}_{i,j}$ data, between $r^{\alpha}_{i,j}$ and $r^{ymax}_{i,j}$ data, or between $r^{\beta}_{i,j}$ and $r^{ymax}_{i,j}$.) Six new covariates were created with the weights and the original covariates $\alpha_{i,j}$, $\beta_{i,j}$ and $ymax_{i,j}$. These were 
-$\alpha_{1}_{i,j} = r^{\alpha}_{i,j} \alpha_{i,j}$, $\alpha_{2}_{i,j} = (1- r^{\alpha}_{i,j}) \alpha_{i,j}$,
-$\beta_{1}_{i,j} = r^{\beta}_{i,j} \beta_{i,j}$, $\beta_{2}_{i,j} = (1- r^{\beta}_{i,j}) \beta_{i,j}$,
-$ymax_{1}_{i,j} = r^{ymax}_{i,j} ymax_{i,j}$, and $ymax_{2}_{i,j} = (1- r^{ymax}_{i,j}) ymax_{i,j}$. The codes used to implement the abovementioned parameter splitting is available at https://github.com/tmieno2/ML_VRA.git.
+$\alpha^{1}_{i,j} = r^{\alpha}_{i,j} \alpha_{i,j}$, $\alpha^{2}_{i,j} = (1- r^{\alpha}_{i,j}) \alpha_{i,j}$,
+$\beta^{1}_{i,j} = r^{\beta}_{i,j} \beta_{i,j}$, $\beta^{2}_{i,j} = (1- r^{\beta}_{i,j}) \beta_{i,j}$,
+$ymax^{1}_{i,j} = r^{ymax}_{i,j} ymax_{i,j}$, and $ymax^{2}_{i,j} = (1- r^{ymax}_{i,j}) ymax_{i,j}$. The codes used to implement the abovementioned parameter splitting is available at https://github.com/tmieno2/ML_VRA.git.
 
 <span style = "color: blue;"> Shun, provide the link to Mandeley data and cite it </span>

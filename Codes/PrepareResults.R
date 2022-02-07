@@ -1,4 +1,4 @@
-## ----set-up, cache = F----
+## ----set-up, cache = F--------------------------------------------------------
 library(knitr)
 library(here)
 
@@ -8,7 +8,7 @@ knitr::opts_chunk$set(
   cache = TRUE
 )
 
-## ----packages, cache = FALSE, include = FALSE----
+## ----packages, cache = FALSE, include = FALSE---------------------------------
 # === packages ===#
 # --- data wrangling--- #
 library(sf)
@@ -34,8 +34,7 @@ library(modelsummary)
 library(latex2exp)
 
 
-
-## ---------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 theme_update(
   axis.title.x =
     element_text(
@@ -81,14 +80,12 @@ theme_update(
   panel.border = element_rect(fill = NA)
 )
 
-
 set_flextable_defaults(
   font.family = "Cambria"
   )
 
 
-## ----setup, warning=FALSE, message=FALSE, cache= FALSE----------------------------------------
-
+## ----setup, warning=FALSE, message=FALSE, cache= FALSE------------------------
 # field <- readRDS("Shared/Data/for_Simulations/field_padding.rds") %>%
 #     filter(padding==1)%>%
 #     dplyr::select(unique_cell_id)
@@ -109,7 +106,7 @@ field_cell_sf <-
   readRDS()
 
 
-## ----------------------
+## -----------------------------------------------------------------------------
 variogram_tb <-
   data.frame(
     Parameters = c("ymax_ij", "alpha_ij", "beta_ij", "varepsilon_ij"),
@@ -148,7 +145,7 @@ variogram_tb <-
   autofit()
 
 
-## ----field-map-visualization, dependson = "setup"----
+## ----field-map-visualization, dependson = "setup"-----------------------------
 
 # === Preparation === #
 ex_plot <- field_plot_sf[224, ]
@@ -168,7 +165,7 @@ plot <-
   geom_sf(data = field_plot_sf) +
   geom_sf(data = ex_plot, fill = "green", size = 1) +
   coord_sf(expand = FALSE) +
-  theme_void() +
+  # theme_void() +
   ggtitle(TeX("$12 \\times 32$ plots")) +
   theme(plot.title = element_text(hjust = 0.5))
 
@@ -244,7 +241,7 @@ field_structure <-
   theme_void() 
 
 
-## ---- dependson = "setup"----
+## ---- dependson = "setup"-----------------------------------------------------
 field_Ndesign <-
   ggplot() +
   geom_sf(
@@ -257,7 +254,7 @@ field_Ndesign <-
   theme_void()
 
 
-## ---- dependson = "setup"----
+## ---- dependson = "setup"-----------------------------------------------------
 # === cell-level === #
 vis_yield_cell <-
   ggplot(field_cell_sf) +
@@ -275,7 +272,7 @@ vis_yield_subplot <-
   theme_void()
 
 
-## ---- dependson = "setup"----
+## ---- dependson = "setup"-----------------------------------------------------
 # === cell-level === #
 vis_optN_cell <-
   ggplot(field_cell_sf) +
@@ -285,7 +282,7 @@ vis_optN_cell <-
   theme_void()
 
 
-## ---- dependson = "setup"----
+## ---- dependson = "setup"-----------------------------------------------------
 #### ==== ymax map ====####
 field_ymax <-
   ggplot(field_cell_sf) +
@@ -328,7 +325,7 @@ field_m_error <-
 # grid.arrange(field_ymax, field_alpha, field_beta, field_m_error, ncol=2, nrow=2)
 
 
-## ----source-results, message=FALSE, warning=FALSE, cache= FALSE----
+## ----source-results, message=FALSE, warning=FALSE, cache= FALSE---------------
 
 # ===================================
 # Forest results
@@ -360,7 +357,7 @@ report_res_subsetML <-
   .[Method != "CF_stepwise", ]
 
 
-## ---- dependson = "source-results"----
+## ---- dependson = "source-results"--------------------------------------------
 
 rmse_y_all <-
   copy(report_res_allML) %>%
@@ -415,7 +412,7 @@ report_table_y <-
   autofit()
 
 
-## ----------------------
+## -----------------------------------------------------------------------------
 fig_y_optN <-
   rmse_y_all[Method %in% c("RF", "BRF", "CNN")] %>%
   ggplot(aes(x = rmse_y, y = rmse_optN)) +
@@ -451,7 +448,7 @@ fig_y_optN <-
 # dfabline <- data.frame(x = 0:3500, y=0:3500)
 
 
-## ---- dependson = "source-results"----
+## ---- dependson = "source-results"--------------------------------------------
 
 prepare_count_tab <-
   rmse_y_all %>%
@@ -525,7 +522,7 @@ report_summary_res_CNN_RF_BRF <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---- dependson = "source-results"----
+## ---- dependson = "source-results"--------------------------------------------
 
 # === Distribution of RMSE of EONR estimates === #
 
@@ -632,7 +629,7 @@ report_table_optN <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ----------------------
+## -----------------------------------------------------------------------------
 piLoss_density <-
   report_res_subsetML[Method != "CNN", ] %>%
   .[, Method := case_when(
@@ -666,7 +663,7 @@ piLoss_density <-
   )
 
 
-## ----------------------
+## -----------------------------------------------------------------------------
 #### === The original code for this figure is in "1_3_CompTeEstimation.R" ===####
 
 figure_te <-
@@ -699,31 +696,34 @@ figure_te <-
   )
 
 
-## ---- cache = TRUE----------------------------------------------------------------------------
+## ---- cache = TRUE------------------------------------------------------------
 # /*=================================================*/
 #' # Sample CT figure 
 # /*=================================================*/
+
 
 library(causalTree)
 library(rattle)
 
 data_sf <- st_read(here("Shared/Data/snider_high_res.gpkg")) %>%
-    na.omit() %>%
-    dplyr::rename(tgtn=NPlan,tgts=SRPlan)
+  na.omit() %>%
+  dplyr::rename(tgtn = NPlan, tgts = SRPlan)
 
 data_dt <- data.table(data_sf) %>%
-    setnames(names(.),tolower(names(.)))
+  setnames(names(.), tolower(names(.)))
 
-tgts_ls <- data_dt[,tgts] %>% unique() %>% sort
+tgts_ls <- data_dt[, tgts] %>%
+  unique() %>%
+  sort()
 
 ctree_data <- copy(data_dt) %>%
-  .[tgts %in% tgts_ls[1:2],] %>%
-  .[,treat:=ifelse(tgts==tgts_ls[2],1,0)] %>%
+  .[tgts %in% tgts_ls[1:2], ] %>%
+  .[, treat := ifelse(tgts == tgts_ls[2], 1, 0)] %>%
   #--- Corn Yield: 1 bu/acre ->  62.77 kg/ha---#
-  .[,yield:= yield*62.77]
+  .[, yield := yield * 62.77]
 
 tree <- causalTree(
-  yield ~ slope+ecs,
+  yield ~ slope + ecs,
   data = ctree_data,
   treatment = ctree_data$treat,
   split.Rule = "CT",
@@ -737,6 +737,7 @@ tree <- causalTree(
   propensity = 0.5
 )
 
-opcp <- tree$cptable[,1][which.min(tree$cptable[,4])]
+opcp <- tree$cptable[, 1][which.min(tree$cptable[, 4])]
 opfit <- prune(tree, opcp)
+
 
