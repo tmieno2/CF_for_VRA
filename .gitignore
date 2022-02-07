@@ -13,6 +13,7 @@ Writing/*files/*
 Writing/*.pdf
 Writing/*.png
 Writing/*.docx
+Writing/*/*.docx
 .Rproj.user
 .DS_Store
 */.Rapp.history

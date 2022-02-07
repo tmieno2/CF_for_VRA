@@ -12,16 +12,15 @@ output:
 # Comments:
 
 **1. All tables and figs: No capitalization of the titles, other than first letter.**
+
 <span style="color:blue"> 
- 
-+ I modified all the titles of tables and figures.
+We modified all the titles of tables and figures according to your suggestions.
 </span>
 
 
 **2. Fig, 1. Indicate units for slope and EC in title.**
 <span style="color:blue"> 
- 
-+ I added the explanation about the units of slope and EC in line 131.
+The units of slope and EC are added in the description, which can be found in Appendix A.
 </span>
 
 
@@ -33,36 +32,34 @@ output:
 
 
 **4. p. 21 l. 334: For example, instead of using , directly, some some topographical land features and soil properties (remove 1 some)**
+
 <span style="color:blue"> 
- 
-+ I removed extra "some" from the sentence.
+The extra "some" was removed from the sentence.
 </span>
 
 
-**5. p. 24: l403 The accuracy of EONR estimation was judged based on the RMSE (/h)of EONR estimation**
+**5. p. 24 l. 403: The accuracy of EONR estimation was judged based on the RMSE (/h)of EONR estimation**
+
 <span style="color:blue"> 
- 
-+ I corrected the typo. 
+The typo was corrected. 
 </span>
 
 
-**6. p. 26 l. 424. To examine whether this problem is a product solely of the specific choice**
+**6. p. 26 l. 424: To examine whether this problem is a product solely of the specific choice**
+
 <span style="color:blue">  
-
-+ I corrected the grammatical error. Before: "To examine whether this problem is product" to "To examine whether this problem is a product..." 
+The grammatical error was corrected. 
 </span>
-
 
 **7. P. 29 l 449: Points are clustered much more tightly about the 1-to-1 line much for CF-base than RF and BRF. (remove much)**
 <span style="color:blue">  
-
-+ I removed "much" from that sentence.
+We removed "much" from the sentence.
 </span>
 
 
 **8. Table 3. Provide units.**
 <span style="color:blue"> 
 
-+ I added the unit (kg/ha) to the Table: Mean RMSE of Yield Prediction by ML Methods and Modeling Scenarios. Similarly, I provided units to other result tables.
+The unit (kg/ha) was provided in Table <span style = "color: blue;"> Shun say the table number here </span>. Similarly, units are provided to other result tables.
 </span>
 
