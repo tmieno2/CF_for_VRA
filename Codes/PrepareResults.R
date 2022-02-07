@@ -1,17 +1,14 @@
-## ----set-up, cache = F------------------------------------------------------------------------
+## ----set-up, cache = F----
 library(knitr)
 library(here)
 
 here::i_am("GitControlled/Writing/manuscript_cea.rmd")
 
 knitr::opts_chunk$set(
-  cache = TRUE,
-  warning = FALSE,
-  message = FALSE
+  cache = TRUE
 )
 
-
-## ----packages, cache = FALSE, include = FALSE-------------------------------------------------
+## ----packages, cache = FALSE, include = FALSE----
 # === packages ===#
 # --- data wrangling--- #
 library(sf)
@@ -36,7 +33,54 @@ library(modelsummary)
 library(latex2exp)
 
 
-## ----setup, warning=FALSE, message=FALSE, cache= FALSE----------------------------------------
+## ----figure_setup, cache = F----
+theme_update(
+  axis.title.x =
+    element_text(
+      size = 12, angle = 0, hjust = .5, vjust = -0.3, face = "plain"
+    ),
+  axis.title.y =
+    element_text(
+      size = 12, angle = 90, hjust = .5, vjust = .9, face = "plain"
+    ),
+  axis.text.x =
+    element_text(
+      size = 10, angle = 0, hjust = .5, vjust = 1.5, face = "plain"
+    ),
+  axis.text.y =
+    element_text(
+      size = 10, angle = 0, hjust = 1, vjust = 0, face = "plain"
+    ),
+  axis.ticks =
+    element_line(
+      size = 0.3, linetype = "solid"
+    ),
+  axis.ticks.length = unit(.15, "cm"),
+  #--- legend ---#
+  legend.text =
+    element_text(
+      size = 10, angle = 0, hjust = 0, vjust = 0, face = "plain"
+    ),
+  legend.title =
+    element_text(
+      size = 10, angle = 0, hjust = 0, vjust = 0, face = "plain"
+    ),
+  legend.key.size = unit(0.5, "cm"),
+  #--- strip (for faceting) ---#
+  strip.text = element_text(size = 10),
+  #--- plot title ---#
+  plot.title = element_text(family = "Times", face = "bold", size = 12),
+  #--- margin ---#
+  # plot.margin = margin(0, 0, 0, 0, "cm"),
+  #--- panel ---#
+  panel.grid.major = element_blank(),
+  panel.grid.minor = element_blank(),
+  panel.background = element_blank(),
+  panel.border = element_rect(fill = NA)
+)
+
+
+## ----setup, warning=FALSE, message=FALSE, cache= FALSE----
 # field <- readRDS("Shared/Data/for_Simulations/field_padding.rds") %>%
 #     filter(padding==1)%>%
 #     dplyr::select(unique_cell_id)
@@ -57,7 +101,7 @@ field_cell_sf <-
   readRDS()
 
 
-## ---------------------------------------------------------------------------------------------
+## ----------------------
 variogram_tb <-
   data.frame(
     Parameters = c("ymax_ij", "alpha_ij", "beta_ij", "varepsilon_ij"),
@@ -96,7 +140,7 @@ variogram_tb <-
   autofit()
 
 
-## ----field-map-visualization, dependson = "setup"---------------------------------------------
+## ----field-map-visualization, dependson = "setup"----
 
 # == plot-level field without padding area ==##
 vis_field_plot <-
@@ -216,7 +260,7 @@ knitr::plot_crop(file)
 dev.off()
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"----
 field_Ndesign <-
   ggplot() +
   geom_sf(
@@ -229,7 +273,7 @@ field_Ndesign <-
   theme_void()
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"----
 # === cell-level === #
 vis_yield_cell <-
   ggplot(field_cell_sf) +
@@ -247,7 +291,7 @@ vis_yield_subplot <-
   theme_void()
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"----
 # === cell-level === #
 vis_optN_cell <-
   ggplot(field_cell_sf) +
@@ -257,7 +301,7 @@ vis_optN_cell <-
   theme_void()
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"----
 #### ==== ymax map ====####
 field_ymax <-
   ggplot(field_cell_sf) +
@@ -300,7 +344,7 @@ field_m_error <-
 # grid.arrange(field_ymax, field_alpha, field_beta, field_m_error, ncol=2, nrow=2)
 
 
-## ----source-results, message=FALSE, warning=FALSE, cache= FALSE-------------------------------
+## ----source-results, message=FALSE, warning=FALSE, cache= FALSE----
 
 # ===================================
 # Forest results
@@ -332,7 +376,7 @@ report_res_subsetML <-
   .[Method != "CF_stepwise", ]
 
 
-## ---- dependson = "source-results"------------------------------------------------------------
+## ---- dependson = "source-results"----
 
 rmse_y_all <-
   copy(report_res_allML) %>%
@@ -387,7 +431,7 @@ report_table_y <-
   autofit()
 
 
-## ---------------------------------------------------------------------------------------------
+## ----------------------
 fig_y_optN <-
   rmse_y_all[Method %in% c("RF", "BRF", "CNN")] %>%
   ggplot(aes(x = rmse_y, y = rmse_optN)) +
@@ -423,7 +467,7 @@ fig_y_optN <-
 # dfabline <- data.frame(x = 0:3500, y=0:3500)
 
 
-## ---- dependson = "source-results"------------------------------------------------------------
+## ---- dependson = "source-results"----
 
 prepare_count_tab <-
   rmse_y_all %>%
@@ -497,7 +541,7 @@ report_summary_res_CNN_RF_BRF <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---- dependson = "source-results"------------------------------------------------------------
+## ---- dependson = "source-results"----
 
 # === Distribution of RMSE of EONR estimates === #
 
@@ -604,7 +648,7 @@ report_table_optN <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---------------------------------------------------------------------------------------------
+## ----------------------
 piLoss_density <-
   report_res_subsetML[Method != "CNN", ] %>%
   .[, Method := case_when(
@@ -638,7 +682,7 @@ piLoss_density <-
   )
 
 
-## ---------------------------------------------------------------------------------------------
+## ----------------------
 #### === The original code for this figure is in "1_3_CompTeEstimation.R" ===####
 
 figure_te <-
@@ -669,4 +713,45 @@ figure_te <-
     legend.text = element_text(size = 12, face = "bold"),
     legend.position = "bottom"
   )
+
+
+## ----------------------
+# /*=================================================*/
+#' # Sample CT figure (cach)
+# /*=================================================*/
+
+data_sf <- st_read(here("Shared/Data/snider_high_res.gpkg")) %>%
+  na.omit() %>%
+  dplyr::rename(tgtn = NPlan, tgts = SRPlan)
+
+data_dt <- data.table(data_sf) %>%
+  setnames(names(.), tolower(names(.)))
+
+tgts_ls <- data_dt[, tgts] %>%
+  unique() %>%
+  sort()
+
+ctree_data <- copy(data_dt) %>%
+  .[tgts %in% tgts_ls[1:2], ] %>%
+  .[, treat := ifelse(tgts == tgts_ls[2], 1, 0)] %>%
+  #--- Corn Yield: 1 bu/acre ->  62.77 kg/ha---#
+  .[, yield := yield * 62.77]
+
+tree <- causalTree(
+  yield ~ slope + ecs,
+  data = ctree_data,
+  treatment = ctree_data$treat,
+  split.Rule = "CT",
+  cv.option = "CT",
+  split.Honest = T,
+  cv.Honest = T,
+  split.Bucket = F,
+  xval = 5,
+  cp = 0,
+  minsize = 20,
+  propensity = 0.5
+)
+
+opcp <- tree$cptable[, 1][which.min(tree$cptable[, 4])]
+opfit <- prune(tree, opcp)
 

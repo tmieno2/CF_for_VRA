@@ -16,7 +16,7 @@ eqnPrefix:
 abstract: "Estimating site-specific crop yield response to changes in input (e.g., seed, fertilizer) management is a critical step in making economically optimal site-specific input recommendations. Past studies have attempted to estimate yield response functions using various Machine Learning (ML) methods, including the Random Forest (RF), Boosted Random Forest (BRF), and Convolutional Neural Network (CNN) methods. This study proposes use of the Causal Forest (CF) model, which is one of the emerging ML methods that comprise \"Causal Machine Learning.\" Unlike previous yield-prediction-oriented ML methods, CF focuses strictly on estimating heterogeneous treatment effects (changes in yields that result from changes in input application rates) of inputs. We report results of using Monte Carlo simulations assuming various production scenarios to test the effectiveness of CF in estimating site-specific economically optimal nitrogen rates (EONRs), comparing CF with the yield-prediction-oriented ML methods RF, BRF, and CNN. CF's estimations of site-specific EONRs were superior under all scenarios considered. Furthermore, we also show that the quality of a model's yield predictions provides little if any information about the quality of its EONR predictions."  
 ---
 
-```{r echo = F, include = FALSE}
+```{r echo = F, include = FALSE, cache = F}
 library(knitr)
 library(here)
 here::i_am("GitControlled/Writing/manuscript_cea.rmd")
@@ -30,8 +30,7 @@ opts_chunk$set(
   fig.retina = 5,
   warning = F,
   message = F,
-  cache = FALSE, # <-- T
-  cache.lazy = FALSE,
+  cache = TRUE,
   echo = F
 )
 ```
@@ -40,7 +39,7 @@ opts_chunk$set(
 # === packages ===#
 library(tidyverse)
 library(data.table)
-
+library(sf)
 library(png)
 library(RColorBrewer)
 library(patchwork)
@@ -60,6 +59,9 @@ library(raster)
 library(bookdown)
 library(png)
 library(grid)
+library(causalTree)
+library(rpart)
+library(rattle)
 ```
 
 ```{r analyses, results = "hide", fig.show='hide', cache = FALSE}
@@ -114,8 +116,7 @@ Recent papers using ML methods to estimate the effectiveness of various agricult
 
 ## Causal Forest
 
-CF was developed specifically for identifying heterogeneous treatment effects [@athey2016recursive; @Wager2018a]. Like RF, CF works by building an ensemble of trees, called *causal trees* (CT), by recursively partitioning covariate space into two leaves, where each leaf estimates conditional average treatment effects as the mean differences between the dependent variable (here, yield) of the treated and control observations that belong to the leaf (please see Appendix for an example of a causal tree). 
-
+CF was developed specifically for identifying heterogeneous treatment effects [@athey2016recursive; @Wager2018a]. Like RF, CF works by building an ensemble of trees, called *causal trees* (CT), by recursively partitioning covariate space into two leaves, where each leaf estimates conditional average treatment effects as the mean differences between the dependent variable (here, yield) of the treated and control observations that belong to the leaf (see Appendix \@ref(ctree-ex) for an example of a causal tree that can help further clarify how CF works). 
 
 While both RF and CF build trees by recursively partitioning samples, they differ critically in their criteria for splitting. In RF, the sample is split to minimize the mean squared error (MSE) of yield prediction in building trees. Unfortunately, the MSE of treatment effect predictions is not useful for building a CT since the true treatment effects are never observable. However, @athey2016recursive showed that minimizing the expected MSE of the treatment effect is equivalent to maximizing the variance of treatment effects across the resulting two leaves and minimizing the within-leaf variance. Consequently, by splitting samples in a way that maximizes the variance of treatment effects across the resulting two leaves, CF overcomes the fundamental problem created by the unobservability of true treatment effects. CF requires that the tree-building process is "honest" for treatment effects estimation to be unbiased. Honest tree-building first randomly splits in two the training data samples, then uses one of the subsamples to determine how to split the tree, and uses the other to estimate the treatment effects [@athey2016recursive; @Wager2018a]. This honest subsampling technique avoids overestimation of the heterogeneity of estimated treatment effects. Since CF splits samples to maximize the heterogeneity of estimated treatment effects, using the same sample for both the sample splitting and treatment effect calculations renders itself sensitive to noise or outliers, allowing high noise levels to exaggerate the treatment effects. 
 
@@ -126,7 +127,7 @@ Whether the indirect (yield-prediction-first) and direct approach is used can le
 
 # Materials and Methods
 
-Monte Carlo simulations were conducted for nitrogen experiments for corn production to estimate site-specific EONRs. The simulations' first step generated one thousand synthetic fields that "resembled" an actual field. Then, for each simulation round, one of the fields was used as a training data set, and another field that is different from the one used as a training data set in that round was used as a validation data set. Field characteristics and yield were simulated assuming the Mitscherlich-Baule (MB) yield response function. We used the RF, BRF, and CNN ML methods to estimate yield response functions, and we used the CF method to estimate treatment effects. For each method, we estimated site-specific EONRs using the training data set, and checked the statistical performance of the predicted site-specific EONR using the validation data set. Detailed descriptions of these steps are provided below. The *R* and *python* codes that implement the simulation analyses are available at https://github.com/tmieno2/ML_VRA.git.
+Monte Carlo simulations were conducted for nitrogen experiments for corn production to estimate site-specific EONRs. The simulations' first step generated one thousand synthetic fields that "resembled" an actual field. Field characteristics and yield were simulated assuming the Mitscherlich-Baule (MB) yield response function. We used the RF, BRF, and CNN ML methods to estimate yield response functions, and we used the CF method to estimate treatment effects. For each method, we estimated site-specific EONRs using the training data set, and checked the statistical performance of the predicted site-specific EONR using the validation data set. Detailed descriptions of these steps are provided below. The *R* and *python* codes that implement the simulation analyses are available at https://github.com/tmieno2/ML_VRA.git.
 
 
 ## Data Generation
@@ -141,108 +142,45 @@ The simulated field was created based on an actual 51-ha Illinois field on which
 readPNG(here("GitControlled/Writing/field_structure.png")) %>% grid.raster()
 ```
 
-### Underlying Yield Response Function
-
-We modeled the yield response function as having the following Mitscherlich-Baule functional form, which is flexible in its shape, allows for the existence of a yield plateau, and has been shown to be a plausible specification for N fertilization models for corn [@frank1990; @llewelyn1997; @paris1992].
-
-\begin{equation}
-f(N, \mathbf{c}) = ymax(\mathbf{c})(1-exp(\alpha(\mathbf{c}) + \beta(\mathbf{c}) N)) + \varepsilon. (\#eq:eqn5)
-\end{equation}
-
-The first term on the right-hand side of Eq. \@ref(eq:eqn5) is the deterministic yield component. The variable $N$ represents the nitrogen fertilizer application rate (kg/ha) which the trial designs varied by plot. Also in Eq. \@ref(eq:eqn3), $\alpha$, $\beta$, and $ymax$ are functions of a vector of field characteristics variables $\mathbf{c}=(c_1,...,c_K)$, which vary spatially on the field. For example, $\alpha$ and $ymax$, which affect yield independently from the applied N fertilizer rate, might be interpreted as depending on the ingredient soil N content supplied by residual N, soil organic matter, etc. $\beta$ can be interpreted as reflecting how efficiently the crop uses N to create grain mass, and might depend on soil properties that affect the availability of applied N fertilizer to the crop, say due to N immobilization, leaching, denitrification, and volatilization [@johnson2005nitrogen; @alva2006nitrogen]. The error term of the yield $\varepsilon$ represents the composite of all the unobserved factors that affect crop yield beyond $\alpha$, $\beta$, $ymax$ and $N$. 
-
-A fictional "researcher" is modeled as not knowing the function form of $f$, as having limited knowledge about which variables make up $\mathbf{c}$, or even the number of elements of $\mathbf{c}$, and as having limited ability to measure the values that many of the variables that constitute $\mathbf{c}$ take on across the field. 
-
-
 ### Cell-specific Yield Functions and True Economically Optimal N Rates
 
-Let $i \in \{1,2,...,1536\}$ index a simulated field's subplots and $j \in \{1,2,...,36\}$ index cells within subplots. Let $N^{i}$ be the N fertilization rate on plot $i$, and let $\mathbf{c}^{i,j}$ be the value of $\mathbf{c}$ on cell $(i,j)$, Eq. \@ref(eq:eqn6) shows the yield level on cell $j$ in subplot $i$ is affected by the N rate applied on subplot $i$:
+We modeled the yield response function as having the Mitscherlich-Baule functional form, which is flexible in its shape, allows for the existence of a yield plateau, and has been shown to be a plausible specification for N fertilization models for corn [@frank1990; @llewelyn1997; @paris1992].
+
+Let $i \in \{1,2,\dots,1536\}$ index a simulated field's subplots and $j \in \{1,2,\dots,36\}$ index cells within subplots. Let $N_{i}$ be the N fertilization rate on subplot $i$. Eq. \@ref(eq:eqn6) shows the yield level on cell $j$ in subplot $i$:
 
 \begin{equation}
-f(N^{i}, \mathbf{c}^{i,j}) = ymax(\mathbf{c}^{i,j})(1-exp(\alpha(\mathbf{c}^{i,j}) + \beta(\mathbf{c}^{i,j}) N^{i})) + \varepsilon^{i,j}. (\#eq:eqn6)
+f(N_{i}: \alpha_{i,j}, \beta_{i,j}, ymax_{i,j}) = ymax_{i,j}(1-exp(\alpha_{i,j} + \beta_{i,j} \cdot N_{i})) + \varepsilon^{i,j}. (\#eq:eqn6)
 \end{equation}
 
-To simplify notation, denote  $\alpha(\mathbf{c}^{i,j})$ as $\alpha^{i,j}$, $\beta(\mathbf{c}^{i,j})$ as $\beta^{i,j}$, and $ymax(\mathbf{c}^{i,j})$ as $ymax^{i,j}$. Then, a cell-specific yield function can be written as, 
+The first term on the right-hand side of Eq. \@ref(eq:eqn6) is the deterministic yield component. The variable $N$ represents the nitrogen fertilizer application rate (kg/ha) which the trial designs varied by plot. Also in Eq. \@ref(eq:eqn6), $\alpha$, $\beta$, and $ymax$ are spatially varying parameters that govern how yield level is determined in conjunction with the applied N rate. They reflect local cell-level production conditions, such as soil characteristics and topography. For example, $\alpha$ and $ymax$, which affect yield independently from the applied N fertilizer rate, might be interpreted as depending on the ingredient soil N content supplied by residual N, soil organic matter, etc. $\beta$ can be interpreted as reflecting how efficiently the crop uses N to create grain mass, and might depend on soil properties that affect the availability of applied N fertilizer to the crop, say due to N immobilization, leaching, denitrification, and volatilization [@johnson2005nitrogen; @alva2006nitrogen]. The error term of the yield $\varepsilon$ represents the composite of all the unobserved factors that affect crop yield beyond $\alpha$, $\beta$, $ymax$ and $N$. Each cell $(i,j)$'s "true" optimal N application rate, denoted $N^{opt}_{i,j}$, was calculated by solving a profit maximization problem by cell assuming that the prices of corn and N fertilizer were $\$0.138/kg$ and $\$1.323/kg$, respectively. These prices are used consistently for our simualtions. See Appendix \@ref(par-gen) for further details on how the paremeters were generated and sample maps of the parameters and true economically optimal N rates. 
 
-\begin{equation}
-f^{i,j}(N) = ymax^{i,j}(1-exp(\alpha^{i,j} + \beta^{i,j} N^{i})) + \varepsilon^{i,j}. (\#eq:eqn7)
-\end{equation}
-
-Parameters $\alpha^{i,j}$, $\beta^{i,j}$, $\beta^{i,j}$, and $\varepsilon^{i,j}$ were modeled as spatially autocorrelated using unconditional Gaussian geostatistical simulation based on the spherical variogram model. The `gstat` package (version 2.0.6 [@gstat1; @gstat2]) in R was used for this purpose. Table \@ref(tab:variogram-parameters) shows the main variogram parameter values used in generating $\alpha^{i,j}$, $\beta^{i,j}$, $ymax^{i,j}$, and $\varepsilon^{i,j}$, which were chosen to generate yields consistent with those observed in experiments conducted by the DIFM project. (Codes used to generate parameter values are available at https://github.com/tmieno2/ML_VRA.git.) The range and nugget of all parameters were assumed to be $400$ m and 0. The means of $ymax$, $\alpha$, $\beta$, and $\varepsilon$ were assumed to be $12000$ kg/ha, $-0.5$, $0$ and $0$, and their sills were assumed to be $2.0 \times 10^{6}$ kg/ha, $0.02$, $1.0$ and $0.015$. Figure \@ref(fig:fig-parameters) shows an example of the generated parameters. 
-
-<br>
-
-```{r fig-parameters, fig.width=6, fig.height=5, fig.cap = "An Illustrative Example of Spatial Distributions of Field Characteristics", cache = TRUE}
-# field_alpha + field_beta + field_ymax
-grid.arrange(field_ymax, field_alpha, field_beta, field_m_error, ncol = 2, nrow = 2)
-```
-
-Each cell $(i,j)$'s "true" optimal N application rate, denoted $N_{opt}^{i,j}$, was calculated by solving a profit maximization problem:
-
-\begin{equation}
-N_{opt}^{i,j} = \operatorname*{argmax}_{N}(P_{C} f^{i,j}(N) - P_N N), (\#eq:eqn8)
-\end{equation}
-
-where, $p =\$0.138/kg$ and $w =\$1.323/kg$ were the assumed prices of the corn and N fertilizer. Figure \@ref(fig:fig-optN) maps an example of the identified "true" cell-specific optimal N rates. 
-
-
-```{r fig-optN, fig.width=3, fig.height=4, fig.cap = "An illustrative example of a spatial distribution of true optimal N rate"}
-vis_optN_cell
-```
-
-<br>
-
-### Trial Design
+### Trial Design and Yield Data Generation for Modeling
 
 In each simulation round, five field-trial N rates were determined based on the range of the round's cell-specific EONRs. 
 Let $Q_q$ ($q \in [0,1]$) denote the $100 \times q$ percent quantile of the round's cell-specific EONRs. Then, the five trial design rates were $N_1 = Q_{0.05} - 20$, $N_5 = Q_{0.95} + 20$, $N_2 = N_1 + 0.25(N_5 - N_1)$, $N_3 = N_1 + 0.50(N_5 - N_1)$, $N_4 = N_1 + 0.75(N_5 - N_1)$. 
-In each round, a Latin square design was followed to assign each plot one of the five N rates so established. Figure \@ref(fig:fig-nExp) shows an example of a trial design. The N rate was orthogonal to the error term in every simulation's example of trial design. This is important because if they were correlated, bias in the estimation of the impact of N on yield would be introduced into all of the ML methods. Since the treatment effect at each leaf is obtained simply by taking the difference of the average value of the dependent variable between the control and treated group within the leaf, CF requires the exogeneity of the treatment conditional on the independent variables to estimate the treatment effect consistently. Note that the violation of this condition would lead to biased estimation using the CF and the other ML methods. 
+In each round, a Latin square design was followed to assign each plot one of the five N rates so established. The left-most panel of Figure \@ref(fig:fig-nExp-yield) shows an example of a trial design. The N rate was orthogonal to the error term in every simulation's example of trial design. This is important because if they were correlated, bias in the estimation of the impact of N on yield would be introduced into all of the ML methods. Since the treatment effect at each leaf is obtained simply by taking the difference of the average value of the dependent variable between the control and treated group within the leaf, CF requires the exogeneity of the treatment conditional on the independent variables to estimate the treatment effect consistently. Note that the violation of this condition would lead to biased estimation using the CF and the other ML methods. 
 
-
-```{r fig-nExp, fig.width=3, fig.height=4, fig.cap = "An illustrative example of experimental design of N"}
-field_Ndesign
-```
-
-<br>
-
-
-### Yield Data Generation and Aggregation
-
-A cell-level data set for the whole field, $\{(y^{i,j}, N_{opt}^{i,j}, N^{i,j}, \mathbf{c}^{i,j}): i \in \{1,2,...,1536\}, j \in \{1,2,...,36\}\}$ was generated. For a generic cell $(i,j)$, yield $y^{i,j}$ was generated through Eq. \@ref(eq:eqn5), applying parameter values $\mathbf{c^{i,j}}=(\alpha^{i,j}, \beta^{i,j}, ymax^{i,j})$, the disturbance term level $\varepsilon^{i,j}$, and the cell's assigned experimental N rate, $N^{i,j}$. Figure \@ref(fig:field-yield-cell) presents the yield map from one of the simulations. 
-
-```{r field-yield-cell, fig.width=3, fig.height=4, fig.cap = "An illustrative example of a yield distribution map at the cell resolution"}
-vis_yield_cell
-```
-
-<br>
-
-Data were aggregated up to the subplot level by taking the mean of the cell-level values inside each subplot, which were the unit of observation. The subplot data were therefore
+A cell-level data set for the whole field, $\{(y_{i,j}, N^{opt}_{i,j}, N_{i,j}, \mathbf{c}_{i,j}): i \in \{1,2,\dots,1536\}, j \in \{1,2,\dots,36\}\}$ was generated by plugging in the parameter values, the error term, and the assigned nitrogen rates into \@ref(eq:eqn6). The cell-level data were then aggregated up to the subplot level by taking the mean of the cell-level values inside each subplot, which were the unit of observation. The subplot data were therefore
 
 \begin{equation}
-\{(y^{i}, N_{opt}^{i}, N^{i}, \mathbf{c}^{i}) = \frac{1}{36}\sum_{j=1}^{36} (y^{i,j}, N_{opt}^{i,j}, N^{i,j}, \mathbf{c}^{i,j}): i \in \{1,2,...,1536\}\}. (\#eq:eqn9)
+\{(y_{i}, N^{opt}_{i}, N_{i}) = \frac{1}{36}\sum_{j=1}_{36} (y_{i,j}, N^{opt}_{i,j}, N_{i,j}): i \in \{1,2,\dots,1536\}\}. (\#eq:eqn9)
 \end{equation}
 
+The right panel of Figure \@ref(fig:fig-nExp-yield) shows an example of observed yield data. Note that data generation at the cell level was conducted to reflect the real-world spatial heterogeneity in soil/field characteristics within the subplot level. But data aggregation to the subplot level was conducted because the large sizes of harvesters make it impossible to monitor yields accurately at smaller scales.
 
-Figure \@ref(fig:field-yield-subplot) shows an example of observed yield data. Note that data generation at the cell level was conducted to reflect the real-world spatial heterogeneity in soil/field characteristics within the subplot level. But data aggregation to the subplot level was conducted because the large sizes of harvesters make it impossible to monitor yields accurately at smaller scales.
+```{r fig-nExp-yield, fig.width=7, fig.height=6, fig.cap = "An example of experimental design of N and generated yield at the subplot resolution"}
 
-```{r field-yield-subplot, fig.width=3, fig.height=4, fig.cap = "An illustrative example of a yield distribution map at the subplot resolution"}
-vis_yield_subplot
+(field_Ndesign + ggtitle("(a) Trial Design")) |
+  (vis_yield_subplot + ggtitle("(b) Simulated Yield Level"))
 ```
-
-<br>
 
 ## Modeling Scenarios
 
-To evaluate the performances of RF, BRF, CNN and CF, we examined four modeling scenarios, each defined by a dataset assumed to be available to the researcher. The first modeling scenario, denoted "aby" assumed that the researcher has a dataset of the actual values $\alpha^{i,j}$, $\beta{i,j}$, $ymax^{i,j}$ for every cell $(i,j)$ and use $\alpha$, $\beta$ and $ymax$ as covariates in the ML models. This scenario represents an ideal situation for the researcher, in which all the relevant variables are observed, but the true functional form of heterogeneous yield response functions are not known. More realistic scenarios can be compared with this ideal scenario.
+To evaluate the performances of RF, BRF, CNN and CF, we examined four modeling scenarios, each defined by a dataset assumed to be available to the researcher. The first modeling scenario, denoted "aby" assumed that the researcher has a dataset of the actual values $\alpha_{i}$, $\beta_{i}$, $ymax_{i}$ in the yield response function for every subplot $i$ and use $\alpha$, $\beta$ and $ymax$ as covariates in the ML models. This scenario represents an ideal situation for the researcher, in which all the relevant variables are observed, but the true functional form of heterogeneous yield response functions are not known. More realistic scenarios can be compared with this ideal scenario.
 
-In subsequent modeling scenarios, we made the simulated experimental data more realistic by varying the degree to which the researcher understood what the needed covariates' values were those in the data set. In the second scenario, denoted "abytt," we introduced additional variables $\theta_1$ and $\theta_2$, and the researcher's data set contained values of $\alpha^{i}$, $\beta^{i}$, $ymax^{i}$, $\theta_1^{i}$ and $\theta_2^{i}$ for all subplots $i=1,...,1536$. $\theta_1$ and $\theta_2$ had no effect on yield, but their cell-level values were spatially correlated with $\beta^{i,j}$, and so their subplot-level values were correlated with $\beta^{i}$. This scenario was meant to reflect the lack of scientific consensus about which variables explain heterogeneous yield response to N, making it likely that the researcher would include irrelevant variables like $\theta_1$ and $\theta_2$ in real-world data analysis. 
+In subsequent modeling scenarios, we made the simulated experimental data more realistic by varying the degree to which the researcher understood what the needed covariates' values were those in the data set. In the second scenario, denoted "abytt," we introduced additional variables $\theta^1$ and $\theta^2$, and the researcher's data set contained values of $\alpha_{i}$, $\beta_{i}$, $ymax_{i}$, $\theta^1_{i}$ and $\theta^2_{i}$ for all subplots $i=1,\dots,1536$. $\theta^1$ and $\theta^2$ had no effect on yield, but they were spatially correlated with $\beta^{i}. This scenario was meant to reflect the lack of scientific consensus about which variables explain heterogeneous yield response to N, making it likely that the researcher would include irrelevant variables like $\theta^1$ and $\theta^2$ in real-world data analysis. 
 
-In the third scenario, denoted "aabbyy," the researcher's data set did not contain values of $\alpha^{i}$, $\beta^{i}$, or $ymax^{i}$. Rather, it contained subplot-level values of permutations of $\alpha$, $\beta$, and $ymax$. Specifically, for each cell $(i,j)$, we assigned one of a set of spatially autocorrelated weights $r_{\alpha}^{i,j} \in (0,1)$ to the $\alpha$ variable, another set of spatially autocorrelated weights $r_{\beta}^{i,j} \in (0,1)$ to the $\beta$ variable, and another set of spatially autocorrelated weights $r_{ymax}^{i,j} \in (0,1)$ to the ${ymax}^{i,j}$ variable. (There was no spatial correlation between the $r_{\alpha}^{i,j}$ and $r_{\beta}^{i,j}$ data, between $r_{\alpha}^{i,j}$ and $r_{ymax}^{i,j}$ data, or between $r_{\beta}^{i,j}$ and $r_{ymax}^{i,j}$.) Six new covariates were created with the weights and the original covariates $\alpha^{i,j}$, $\beta^{i,j}$ and $ymax^{i,j}$. 
-These were 
-$\alpha_{1}^{i,j} = r_{\alpha}^{i,j} \alpha^{i,j}$, $\alpha_{2}^{i,j} = (1- r_{\alpha}^{i,j}) \alpha^{i,j}$,
-$\beta_{1}^{i,j} = r_{\beta}^{i,j} \beta^{i,j}$, $\beta_{2}^{i,j} = (1- r_{\beta}^{i,j}) \beta^{i,j}$,
-$ymax_{1}^{i,j} = r_{ymax}^{i,j} ymax^{i,j}$, and $ymax_{2}^{i,j} = (1- r_{ymax}^{i,j}) ymax^{i,j}$.
-For each $\alpha$, $\beta$ and $ymax$, these procedures created two new covariates that were highly spatially correlated with the original covariate, which was meant to reflect that many of the soil/field characteristics used to analyze OFPE data are spatially correlated. The values of $\alpha^{i,j}$, $\beta^{i,j}$ and $ymax^{i,j}$ did not indicate specific soil or field characteristics, but were functions of such. In reality, scientists cannot directly observe variables that can accurately predict yield plateau level, soil N content and N uptake efficiency. Rather, they use multiple observed soil/field characteristics to explain such phenological phenomena. For example, instead of using $ymax^{i,j}$ directly, some topographical land features and soil properties such as elevation and soil sand content could be used as yield-limiting factors [@jiang2004effect; @kravchenko2000correlation]. In reality, scientists may include more than three variables as covariates. This scenario should reduce the accuracy of EONR modeling for all the models compared to the ideal case. 
+In the third scenario, denoted "aabbyy," the researcher's data set did not contain values of $\alpha_{i}$, $\beta_{i}$, or $ymax_{i}$. Rather, it contained subplot-level values of permutations of $\alpha$, $\beta$, and $ymax$. Each of the three parameters were split into two parts in a spatially correlated manner, and six new covariates were created (see Appendix \@ref(split-pars) for the details about this prameter splitting process). These were $\alpha^{1}_{i}$, $\alpha^{2}_{i}$, $\beta^{1}_{i}$, $\beta^{2}_{i}$, $ymax^{1}_{i}$, and $ymax^{2}_{i}$. The two splitted variables were spatially correlated to reflect that many of the soil/field characteristics used to analyze OFPE data are spatially correlated. The values of $\alpha_{i}$, $\beta_{i}$ and $ymax_{i}$ did not indicate specific soil or field characteristics, but were functions of such. In reality, scientists cannot directly observe variables that can accurately predict yield plateau level, soil N content and N uptake efficiency. Rather, they use multiple observed soil/field characteristics to explain such phenological phenomena. For example, instead of using $ymax_{i}$ directly, some topographical land features and soil properties such as elevation and soil sand content could be used as yield-limiting factors [@jiang2004effect; @kravchenko2000correlation]. In reality, scientists may include more than three variables as covariates. This scenario should reduce the accuracy of EONR modeling for all the models compared to the ideal case. 
 
 The fourth scenario, denoted "aabbyytt," had the same components as aabbyy, but also included the $\theta_1$ and $\theta_2$ covariates.
 
@@ -250,7 +188,7 @@ The fourth scenario, denoted "aabbyytt," had the same components as aabbyy, but 
 
 ### Training and Estimation of Site-specific EONRs by RF, BRF, and CNN
 
-The RF, BRF, and CNN methods all followed the same conceptual steps to estimate site-specific EONR: 1) estimate the yield production functions and 2) calculate site-specific EONRs based on that estimated function. For the given modeling scenario, RF and BRF predict yield by using all the available covariates as explanatory variables in the estimation process. The `grf` package (version 1.2.0 [@tibshirani2018package]) in R was used for RF and BRF modeling. RF, BRF, and CF from the `grf` package have several tunable hyperparameters (e.g., the minimum node size in each tree, the number of covariates used for node splitting, and parameters involving honest tree-building process), and the optimal values for these parameters were selected by cross-validation. Individual trees in a forest were built with randomly subsampled observations, leading to a different prediction in every forest even when the same data set was used. To reduce the variance of predictions for prediction accuracy, we set the number of trees (*num.trees*) at a high value, $4000$.
+The RF, BRF, and CNN methods all followed the same conceptual steps to estimate site-specific EONR: 1) estimate the yield production functions and 2) calculate site-specific EONRs based on that estimated function. For the given modeling scenario, RF and BRF predict yield by using all the available covariates as explanatory variables in the estimation process. The `grf` package (version 1.2.0 [@tibshirani2018package]) in R was used for RF and BRF modeling. RF ann BRF from the `grf` package have several tunable hyperparameters (e.g., the minimum node size in each tree, the number of covariates used for node splitting, and parameters involving honest tree-building process), and the optimal values for these parameters were selected by cross-validation. Individual trees in a forest were built with randomly subsampled observations, leading to a different prediction in every forest even when the same data set was used. To reduce the variance of predictions for prediction accuracy, we set the number of trees (*num.trees*) at a high value, $4000$.
 
 CNN leaves room for researchers to determine its architecture. We used a slightly modified version of one of the multi-stream CNN architectures proposed by @barbosa2020modeling, called "Late Fusion." Briefly stated, explanatory variables except N rate (e.g. $\alpha^{i,j}$, $\beta^{i,j}$, etc.) entered the model as a set of $6 \times 6$ element rasters.The input size of the N rate is treated as $1 \times 1$ because it is spatially homogeneous within each subplot. First, each input was connected to an independent convolutional layer with eight $3 \times 3$ filters each with stride one, followed by a $2 \times 2$ max-pooling layer with stride two. Then, a fully-connected rectified linear unit (ReLU) layer with sixteen neurons was added after each max-pooling layer, followed by a single ReLU neuron. Finally, multiple neurons were concatenated and fed to the fully-connected ReLU layer with sixteen neurons, followed by an output with a linear activation function. @barbosa2020modeling demonstrated that among several CNN architectures, this architecture modeled crop yield response to N rate management best. CNN was implemented in *Python* v3.7.6 using *Pytorch* v1.7.0 [@paszke2017automatic]. The Adam optimizer [@kingma2014adam] was used with a learning rate of $0.001 \%$ (default value). To avoid over-fitting, early stopping was used to monitor validation loss with a ten epochs of patience. 
 
@@ -264,7 +202,7 @@ where $p$ and $w$ are the prices of corn and N.
 
 ### Training and Estimation of Site-specific EONRs by CF
 
-Unlike RF, BRF, and CNN, CF estimates the impact of a binary treatment. In our context, CF estimates changes in yields (i.e., $\hat{\tau}_{N^{con} \rightarrow N^{tre}}(\mathbf{\Omega^{i}})$) caused by changes in N application rates from one experimental rate (control N rate, i.e., $N^{con}$) to another experimental rate (treatment N rate, i.e., $N^{tre}$). Since we have five N application rates, four "experiments" (treatments) are identified based on four ($N^{con}$, $N^{tre}$) combinations. A possible grouping to make such pairwise N application rate combinations, which we call the "CF-base," used $(N_1, N_2),(N_1, N_3),(N_1, N_4)$, and $(N_1, N_5)$. In this approach, the treatment effect is always estimated against the lowest N rate ($N_1$) as $N^{con}$.
+Unlike RF, BRF, and CNN, CF estimates the impact of a binary treatment. In our context, CF estimates changes in yields (i.e., $\hat{\tau}_{N^{con} \rightarrow N^{tre}}(\mathbf{\Omega^{i}})$) caused by changes in N application rates from one experimental rate (control N rate, i.e., $N^{con}$) to another experimental rate (treatment N rate, i.e., $N^{tre}$). Since we have five N application rates, four "experiments" (treatments) are identified based on four ($N^{con}$, $N^{tre}$) combinations. A possible grouping to make such pairwise N application rate combinations, which we call the "CF-base," used $(N_1, N_2),(N_1, N_3),(N_1, N_4)$, and $(N_1, N_5)$. In this approach, the treatment effect is always estimated against the lowest N rate ($N_1$) as $N^{con}$. The `grf` package (version 1.2.0 [@tibshirani2018package]) in R was used for CF estimation. Just like RF and BRF, hyperparameters were tuned using cross-validatiaon.
 
 For estimating site-specific EONR, the trained CF-base were used to predict site-specific changes in yields resultant from changes in application rates from $N_1$ to $N_m$ $(m\in\{2,3,4,5\})$. Let $\Delta Y_{N_1 \rightarrow N_m}(\mathbf{\Omega^{i}})$ be the the estimated treatment effect of changing subplot $i$'s application rate from $N_1$ to $N_m$ for site $i$. 
 
@@ -276,13 +214,15 @@ Since the CF-base approach always estimates the treatment effects using the lowe
 
 With the treatment effects from the base obtained, site-specific EONRs were identified by finding the N rate resulting in the highest profit for each $i$. Yield levels were not predicted at any point in the CF-based approaches.
 
-### Model Evaluation
+### Evaluation of yield and EONR predictions
 
-The accuracy of EONR estimation was judged based RMSE ($kg/ha$) of the EONR estimation against the true EONR at the subplot level. Using the EONR estimates, we also calculated profit-deficits ($\$/ha$) (i.e., $\hat{\pi}_{def}$) we calculated relative to the true maximum profit at the subplot level, defined as profit under the true yield response functions evaluated at $N_{opt}^{i}$. For RF, BRF, and CNN, the accuracy of yield prediction was judged based on the RMSE ($kg/ha$) of the yield prediction against the true yields at the subplot level. 
+For evaluation of yield and EONR predictions, a dataset from a different simulation round was used as the test dataset. For example, for simulation number 1, train dataset from simulation number 2 was used as the test dataset. This process works because the train datasets were generated by the same data generating process, yet have different underlying field parameters ($\alpha$, $\beta$, $ymax$). Furtehr, each of the "train" datasets are generated independet of one another. Thefore, for a particular simulation round, the dataset in any of the other simualtions can serve as a valid test dataset. This practice avoid creating another set of 1000 simulations fields unnecessarily.
+
+The accuracy of EONR estimation was judged based on RMSE ($kg/ha$) of the EONR estimation against the true EONR at the subplot level. Using the EONR estimates, we also calculated profit-deficits ($\$/ha$) (i.e., $\hat{\pi}_{def}$) we calculated relative to the true maximum profit at the subplot level, defined as profit under the true yield response functions evaluated at $N^{opt}^{i}$. For RF, BRF, and CNN, the accuracy of yield prediction was judged based on the RMSE ($kg/ha$) of the yield prediction against the true yields at the subplot level. 
 
 # Results and Discussions
 
-## EONR Estimation
+## Comparison of EONR estimation accuracy
 
 Table \@ref(tab:table-optN-subplot-wide) shows the mean RMSE of the EONR estimation and $\hat{\pi}_{def}$ over the one thousand simulations; it makes immediately clear that CF-base considerably outperformed the other ML methods, and that the profits based on CF-base's EONR estimates were the closest to the true maximum profits. BRF performed considerably better predicting EONR than did RF.
 
@@ -320,10 +260,11 @@ figure_te
 `r ftext('NOTE: The red line in the figures denotes the 1-to-1 line to show the ideal relationship between true and estimated treatment effects.', fp_text(font.size = 9))`
 
 
-## The relationship between yield prediction performance and EONR prediction performance
+## The relationship between yield and EONR prediction performances.
+
 For RF, BRF and CNN, Figure \@ref(fig:plot-y-optN) plots the RMSE values of EONR estimation against the RMSE values of yield prediction, and the red lines show the best-fit line describing the relationship between them. For all the models the regression line was almost flat, showing little if any correlation between the two measures. In other words, the quality of a model's yield predictions provided little if any information about the quality of its EONR predictions. 
 
-```{r plot-y-optN, fig.width=7, fig.height=5, fig.cap = "The relationship in the performance between EONR estimation and yield prediction by ML methods and modeling scenarios"}
+```{r plot-y-optN, fig.width=7, fig.height=7, fig.cap = "The relationship in the performance between EONR estimation and yield prediction by ML methods and modeling scenarios"}
 fig_y_optN
 ```
 
@@ -341,8 +282,7 @@ report_table_y
 
 <br>
 
-All previous research has followed a two-step procedure to estimate site-specific EONRs. The first step was to select the model that predicts yield most accurately, and the following step used the selected model to predict EONR.
-Table \@ref(tab:count-table) shows that following this process led to the choice of the best (as measured by profit) EONR prediction model in fewer than $30\%$ of the "aby" and "abytt" simulation rounds, $40\%$ of the "aabbyy" simulation rounds, and $50\%$ of the "aabbyytt" simulation rounds. For example, the table shows that, in the "aby" scenario, RF attained the lowest RMSE for yield prediction in `r summary_res_CNN_RF_BRF[Model=="aby", count_y_RF]` of $1000$ iterations, and attained the lowest $\hat{\pi}_{def}$ in `r summary_res_CNN_RF_BRF[Model=="aby", count_RF]` of those `r summary_res_CNN_RF_BRF[Model=="aby", count_y_RF]` iterations. That is, in `r summary_res_CNN_RF_BRF[Model=="aby", count_y_RF]-summary_res_CNN_RF_BRF[Model=="aby", count_RF]` out of `r summary_res_CNN_RF_BRF[Model=="aby", count_y_RF]` rounds, the RF models best at yield prediction did not provide EONR estimates that led to high profits. Similarly, in no cased did the CNN method provide both the best yield prediction and the best EONR estimation simultaneously. For example, Table \@ref(tab:count-table) shows that BRF predicted yield best in `r summary_res_CNN_RF_BRF[Model=="aby", count_BRF]` of the `r summary_res_CNN_RF_BRF[Model=="aby", count_y_BRF]` "aby" simulation rounds in which it predicted yields best. But, BRF predicted yields best in fewer than $30\%$ of the rounds, implying that the two-step procedure failed more than $70\%$ of the time. 
+All previous research has followed a two-step procedure to estimate site-specific EONRs. The first step was to select the model that predicts yield most accurately, and the following step used the selected model to predict EONR. Table \@ref(tab:count-table) shows that following this process led to the choice of the best (as measured by profit) EONR prediction model in fewer than $30\%$ of the "aby" and "abytt" simulation rounds, $40\%$ of the "aabbyy" simulation rounds, and $50\%$ of the "aabbyytt" simulation rounds. For example, the table shows that, in the "aby" scenario, RF attained the lowest RMSE for yield prediction in `r summary_res_CNN_RF_BRF[Model=="aby", count_y_RF]` of $1000$ iterations, and attained the lowest $\hat{\pi}_{def}$ in `r summary_res_CNN_RF_BRF[Model=="aby", count_RF]` of those `r summary_res_CNN_RF_BRF[Model=="aby", count_y_RF]` iterations. That is, in `r summary_res_CNN_RF_BRF[Model=="aby", count_y_RF]-summary_res_CNN_RF_BRF[Model=="aby", count_RF]` out of `r summary_res_CNN_RF_BRF[Model=="aby", count_y_RF]` rounds, the RF models best at yield prediction did not provide EONR estimates that led to high profits. Similarly, in no cased did the CNN method provide both the best yield prediction and the best EONR estimation simultaneously. For example, Table \@ref(tab:count-table) shows that BRF predicted yield best in `r summary_res_CNN_RF_BRF[Model=="aby", count_BRF]` of the `r summary_res_CNN_RF_BRF[Model=="aby", count_y_BRF]` "aby" simulation rounds in which it predicted yields best. But, BRF predicted yields best in fewer than $30\%$ of the rounds, implying that the two-step procedure failed more than $70\%$ of the time. 
 
 <br>
 
@@ -355,11 +295,7 @@ report_summary_res_CNN_RF_BRF
 Virtually all the previous studies have used yield prediction accuracy to rank and select models. This is understandable, since whereas yield can be "ground-truthed" the true causal impact of a treatment cannot be determined from real-world data, making it impossible to cross-validate EONR. 
 However, the simulation results reported here show clearly that using a model's yield prediction accuracy as a model selection criterion is not well justified if the ultimate objective is accurate estimation of site-specific EONRs. 
 
-# Conclusion
-
-ML methods are appealing tools that can potentially improve site-specific input rate management by capturing heterogeneous treatment effects introduced by complex non-linear and multidimensional interactions of soil and field characteristics. Many kinds of prediction-oriented ML methods have been used for this purpose. We have introduced the use of CF, a relatively new method, which, unlike prediction-oriented ML methods, focuses on the identification of heterogeneous causal effects of treatment.
-
-We examined the use of CF-base for site-specific input management recommendations. Using Monte Carlo simulations under various modeling scenarios, we compared the CF estimations of site-specific EONRs to those of the prediction-oriented ML methods RF, BRF, and CNN. CF-base consistently outperformed the other methods across all the modeling scenarios in terms of EONR prediction and profit generation. We also showed that the model's yield prediction accuracy was uncorrelated with its EONR prediction accuracy, implying that yield prediction accuracy should not be used as a model selection criterion if the ultimate goal of the experiment is to create a site-specific EOIR map.
+# Limitations and Future Studies
 
 Despite the relatively simple nature of the simulations, results reported provide intriguing evidence of potential advantages of CF over other ML methods when the purpose of the research is to increase the economic efficiency of input management. Of course, the reported research did not model all situations, and further research is needed. First, a drawback of the CF method is that because it does not estimate a continuous yield response function, it can only compare the economic outcomes of a limited set of experimental N rates included in the field trial that provides the data. This raises important questions about trial design. How many distinct experimental input application rates should be included? All the trial designs examined here were based on five N rates. Having examined models with additional rates would have increased the number of possible N rates from which the EONR were selected, but reduced treatment pair replications and estimation accuracy.
 
@@ -368,6 +304,14 @@ Second, the size of the field used in the OFPE can affect the relative performan
 Third, another interesting subject for future research is the potential of combining the ML methods with post-estimation spatial smoothing of the estimated EONR. It is well known that soil/field characteristics are spatially correlated [@f2007methods;@goovaerts1999geostatistics]; this spatial correlation is likely to cause spatial correlation in EONRs, which would suggest that post-estimation spatial smoothing of EONRs may further improve the accuracy of EONR estimation.
 
 Finally, a natural and fruitful extension of the reported research would be to test CF and other ML methods in a dynamic setting on which multiple years of experiments are conducted, allowing weather events into the analysis as explanatory variables. Crop simulation models (e.g., APSIM, DSSAT) could replace the Mitscherlich-Baule production function used here to model the underlying yield response function, which could generate more realistic data, using actual soil/field characteristics and weather instead of abstract parameters in the analysis, and so better include the dynamic nature of cropping systems in the study of N management [@archontoulis2020predicting;@puntel2016modeling;@puntel2018systems].
+
+# Conclusion
+
+ML methods are appealing tools that can potentially improve site-specific input rate management by capturing heterogeneous treatment effects introduced by complex non-linear and multidimensional interactions of soil and field characteristics. Many kinds of prediction-oriented ML methods have been used for this purpose. We have introduced the use of CF, a relatively new method, which, unlike prediction-oriented ML methods, focuses on the identification of heterogeneous causal effects of treatment.
+
+We examined the use of CF-base for site-specific input management recommendations. Using Monte Carlo simulations under various modeling scenarios, we compared the CF estimations of site-specific EONRs to those of the prediction-oriented ML methods RF, BRF, and CNN. CF-base consistently outperformed the other methods across all the modeling scenarios in terms of EONR prediction and profit generation. We also showed that the model's yield prediction accuracy was uncorrelated with its EONR prediction accuracy, implying that yield prediction accuracy should not be used as a model selection criterion if the ultimate goal of the experiment is to create a site-specific EOIR map.
+
+
 
 # Acknowledgement
 
@@ -383,25 +327,7 @@ This research was supported by a USDA-NIFA-AFRI Food Security Program Coordinate
 
 \newpage
 
-# (APPENDIX) Appendix {-}
+# Supplementary Appendix {-}
 
-# Appendix A: Causal Tree Example {-}
-
-Figure \@ref(fig:ct-ex) shows an example of CT where the treatment is an increase in seed rate from $27,000$ seeds/ha (control) to $31,000$ seeds/ha (treated) with apparent electrical conductivity ($\textit{ecs}$)($dS/m$) and topographical $\textit{slope}$ ($degree$) as variables to explain the heterogeneity of the impact of the treatment impact. In the first node, all the samples ($1024$ observations) belong to the node, and the causal effect of the treatment was calculated as the difference in the mean yield of the treated and control groups, which turned out to be $593$ kg/ha in this example. 
-
-```{r ct-ex, fig.width=4, fig.height=4, fig.align="center", fig.cap = "An illustrative example of causal tree"}
-fancyRpartPlot(opfit, sub = "")
+```{r, child = "appendix.Rmd"}
 ```
-
-`r ftext('NOTE: The first number in each node indicates the predicted treatment effects (in kg/ha). The number and the percentage of observations belonging to the node are shown below that.', fp_text(font.size = 9))`
-
-The first data split criterion is whether the $\textit{ecs}$ value is greater or less than $25$. The observations with $\textit{ecs}$ greater than or equal to $25$ move to the left node, while those with $\textit{ecs}$ less than $25$ move to the right. For each of the subsamples, the treatment effect is identified as the difference in the mean yields of the treated and control groups within the subsample. The treatment effect for the low-$\textit{ecs}$ observations was $619$ kg/ha, and for the high-$\textit{ecs}$ observations was $982$ kg/ha. This means that for the impact of the increase in seed rate the treatment effect is heterogeneous over space, having a larger positive impact on yield in high-$\textit{ecs}$ areas. Trees are further developed to have more groups of subsamples to allow for more flexible representations of the heterogeneous treatment effects. The estimated heterogeneous treatments effects can then be used to identify site-specific EOIRs. It is noteworth that at no point CF estimates yield "level". 
-
-
-
-
-
-
-
-
-

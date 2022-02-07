@@ -25,33 +25,30 @@ Yes, we agree with your point, and we have decided to simply drop it from our hi
 
 We do see a redundancy of expalining how CF can be used to identify site-specific input recommendations. It is explained twice in 2.2 and 3.2.2, while 2.2 is intended for a more general case than 3.2.2 that is specific to our simulations. Therefore, we decided to take out 2.2. We also renamed 2.1 to "Estimating EOIR and Treatment Effects"
 
-The core objective of the paper is to test the CF against existing ML methods in predicting EOIR and economic performance of resulting site-specific input use recommendations. To this core objective, ML simulations are our core method. For this reason, in our Materials and Methods section, we would like to avoid the explanation of how CF works just like we do not give much explanations to any of RF, BRF, and CNN, which are well-established and mostly understood already by the readers of this journal. However, since this article is the first to apply CF in the field of agronomy, let alone site-specific input management, we believe that it is worthwhile to present how it works in detail and what conditions are necessary for it to work well. Now, if we place such description inside the Materials and Method section, it will break the flow of explaning how MC simulations work, temporarily distracting readers from how MC simulations are conducted to the details of how CF works. Instead of this, we believe that it is beneficial to first give readers knowledge on how CF works and the potential advantages over the existing predition-oriented ML methods as essential knowledge before we move onto how our MC simulations are conducted in the Materials and Method section, in which we would like to focus on how MC simulations are conducted. Therefore, we kept 2.3 and 2.4 in the current manuscript.
-
-We talk about identifying site-specific economically optimal input rates in three different places. However, each of them serves distinctive purposes and we would like to keep the current structure if that is acceptable to you. 
-
-Section 2.1: bluh bluh
-Section 3.: true optimal N
-Section 3.: estiamted optimal N
-
+We have moved an example of causal tree (previously in seciton 2.3), but decide to keep the explanation of how CF works. The core objective of the paper is to test the CF against existing ML methods in predicting EOIR and economic performance of resulting site-specific input use recommendations. To this core objective, ML simulations are our core method. For this reason, in our Materials and Methods section, we would like to avoid the explanation of how CF works just like we do not give much explanations to any of RF, BRF, and CNN, which are well-established and mostly understood already by the readers of this journal. However, since this article is the first to apply CF in the field of agronomy, let alone site-specific input management, we believe that it is worthwhile to present how it works in detail and what conditions are necessary for it to work well. Now, if we place such description inside the Materials and Method section, it will break the flow of explaning how MC simulations work, temporarily distracting readers from how MC simulations are conducted to the details of how CF works. Instead of this, we believe that it is beneficial to first give readers knowledge on how CF works and the potential advantages over the existing predition-oriented ML methods as essential knowledge before we move onto how our MC simulations are conducted in the Materials and Method section, in which we would like to focus on how MC simulations are conducted. Therefore, we kept 2.3 and 2.4 in the current manuscript.
 
 </span>
 
 **3. The description of materials and methods section is redundant, please move some unimportant details description to supplementary materials.**
 
 <span style="color:blue">  
-We first apologogize that misleading section and subsection titles may have caused confusions about your perceived structural redundancy of this article.
 
-We wrote the initial manuscript with avoiding redundancy in mind and we beleived that we did not have any redundancy in our paper. Therefore, we struggled tremendously to see where the redundancies are. We would really appreciate it if you could specify where you see redundancies and why so that we can address prorperly.
+In rereponse to this comments, we made several changes. 
 
-In MC simulation studies, we believe that presenting how data is generated in detail is crucial because the results are dependent on how data is generated. It is much like any emprical studies using real experiment data provides lots of details about the experiemnts. We take reproducibility seriously and we believe that the details we peovided in our manuscript is appropriate. Therefore, we had very hard time telling which is unnecessary and not. We would really appreciate it if you could specify which parts are not critical. 
+First, we consolidated 3.1.2 and 3.1.3 in the previous round into a single subsubsection called "Cell-specific Yield Functions and True Economically Optimal N Rates." In doing so, we dropped detailed explanation of the conceptual framework behind the yield response functions based on cell-leve characteristics, $c_i$, and moved it to the supplemnentary appendix (Appendix B). We also removed our detailed description of how parameters and error term were generated and moved it to Appendix C along with relevant tables and figures (spefically table x and figures x, y, z) <span style = "color: blue;"> Shun put table and figure numbers here </span>.
+
+Second, we consolidated 3.1.4 and 3.1.5 in the previous round into a single subsubsection called "Trial Design and Yield Data Generation for Modeling." In doing so, we cut some texts and combined figure x and y in the previous round into a single figure (figure x in the current manuscript).
+
+Third, we removed detailed description of how some parameters are splitted into two parts and moved it to the Appendix.
+
+In MC simulation studies, we believe that presenting how data is generated in detail is crucial because the results are dependent on how data is generated. It is much like any emprical studies using real experiment data provides lots of details about the experiemnts. We take reproducibility seriously and we believe that the details we peovided in our current manuscript is appropriate and it is hard for us to further slim down the section. Moreover, we believe we no longer have any redundancy in this section any more. 
 
 </span>
-
 
 **4. What is the unit of the topographical slope？ (line 131)**
 <span style="color:blue">  
 
-+ I provided the unit in the text. It is degree. 
+It is degree. The unit is now provided in Appendix A.
 
 </span>
 
@@ -59,58 +56,64 @@ In MC simulation studies, we believe that presenting how data is generated in de
 **5. There are 3 numbers in each small frame of Figure 1, please describe the meaning of each number in detail in the figure caption. (line 137)**
 <span style="color:blue">  
 
-+ I added the explanation for those numbers as a footnote in the figure. 
+The explanation for those numbers are added as a footnote to the figure (Figure <span style = "color: blue;"> Shun, figure number </span>). 
 </span>
 
 
 **6. Some formulas in the manuscript are not numbered (lines 116, 120, 268, 291, 371, 389).**
-<span style="color:blue">  
 
-+ I numbered all the formulas. 
+<span style="color:blue">  
+All the formulas are now numbered. 
 </span>
 
 
 **7. What are the exact number and proportion of test set training sets? (line 192)**
 <span style="color:blue">  
 
-+ I modified this sentence "For each simulated field, we generated a training data set and a validation data set." For each simulation round, one of the fields was used as a training data set, and another field that is different from the one used as a training data set in that round was used as a validation data set.
+We aplogogize that we are not clear on this respect. 
+
+Trainign dataset and test dataset are completely separate. Models are trained on the entirety of the train data for each simulation, and then the trained model is tested against a test dataset that are different in the underdyling field parameters $\alphe$, $\beta$, and $ymax$. The train dataset, however, was split into several parts when cross-validation was performed in determing the optimal hyperparameters at each simulation round.
+
+We added the following paragraph to section <span style = "color: blue;"> Shun section number here </span> to make this point clear.
+
+"For evaluation of yield and EONR predictions, a dataset from a different simulation round was used as the test dataset. For example, for simulation number 1, train dataset from simulation number 2 was used as the test dataset. This process works because the train datasets were generated by the same data generating process, yet have different underlying field parameters ($\alpha$, $\beta$, $ymax$). Furtehr, each of the "train" datasets are generated independet of one another. Thefore, for a particular simulation round, the dataset in any of the other simualtions can serve as a valid test dataset. This practice avoid creating another set of 1000 simulations fields unnecessarily."
 
 </span>
-
 
 **8. I can’t open the code link (https://github.com/tmieno2/ML_VRA.git, lines 199 and 249) with my browsers (chrome, edge, and Firefox). Please upload the code to the public research data repositories (Zenodo, Mendeley Data, figshare, Harvard Dataverse, etc.), not GitHub. Please generate a separate DOI for your code and cite it.**
+
 <span style="color:blue">  
-+ I uploaded to the simulation codes and the data on Mendeley Data. The link is suggested on section 3: Materials and Methods.
+We realized that the github repository was private and that was why you were not able to access it. We made a public github repository named CF_for_VRA ([here](https://github.com/tmieno2/CF_for_VRA)).
+
+The simulation codes and the data were also shared on Mendeley Data (<span style = "color: blue;"> Shun, provide the link here </span>) according to the Editor's suggestion for the ease of access. The link is also provided <span style = "color: blue;"> Shun, be speficic about where it is </span>.
 
 </span>
-
 
 **9. Please convert the length units of the manuscript to international length units. (line 207)**
 <span style="color:blue">  
 
-+ I converted to those units to meter (m)
+All the lenth units were converted to meter (m)
 
 </span>
-
 
 **10. Please add the number of rows and columns to the plots, subplots, and cells schematics in Figure 2. (line 209)**
 <span style="color:blue">  
 
-+ I updated Figure 2. The number of rows and columns of plots, subplots, and cells schematics are indicated each map in Figure 2.
+The number of rows and columns of plots, subplots, and cells schematics are now indicated Figure 2.
 </span>
 
 
 **11. The titles of sections 3.2.1 and 3.2.2 do not provide useful information to the readers, please revise the titles. (lines 342 and 373)**
-<span style="color:blue">  
 
-+ I changed the title of section 3.2 to "Training Models and Estimating Site-specific EONRs". Further, I revised the title of sections 3.2.1 and 3.2.2 to "Estimation of site-specific EONRs by RF, BRF, and CNN" and "Estimation of site-specific EONRs by CF", respectively. 
+<span style="color:blue">  
+We realized that section 3.1 has also a bad title. Therefore, we changed it to "Training Models and Estimating Site-specific EONRs". Further, the title of sections 3.2.1 and 3.2.2 were changed to "Estimation of site-specific EONRs by RF, BRF, and CNN" and "Estimation of site-specific EONRs by CF", respectively. 
 </span>
 
 
 **12. The titles of 4.1 and 4.2 are confusing, please revise. (lines 410 and 457)**
 <span style="color:blue">  
 
-+ I changed the title of section 4.2 to "The relationships between yield prediction performance and EONR prediction performance". 
+The title of 4.1 was changed to "Comparison of EONR estimation accuracy" to reflect its contents. The title of section 4.2 was changed to "The relationship between yield and EONR prediction performances". 
 </span>
 
 **13. Why there are no CNN results in Figures 8,9, and 10? (lines 439, 441, and 453)**
@@ -130,8 +133,8 @@ In MC simulation studies, we believe that presenting how data is generated in de
 
 
 **15. Please add a separate section for research gaps or uncertainties. Are there any prerequisite assumptions for using the CF model?**
-<span style="color:blue">  
 
+<span style="color:blue">  
 
 </span>
 

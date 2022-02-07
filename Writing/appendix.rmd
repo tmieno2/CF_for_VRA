@@ -1,0 +1,36 @@
+# Appendix A: Causal Tree Example {#ctree-ex}
+
+Figure \@ref(fig:ct-ex) shows an example of CT where the treatment is an increase in seed rate from $27,000$ seeds/ha (control) to $31,000$ seeds/ha (treated) with apparent electrical conductivity ($\textit{ecs}$)($dS/m$) and topographical $\textit{slope}$ ($degree$) as variables to explain the heterogeneity of the impact of the treatment impact.  
+
+```{r ct-ex, fig.width=5, fig.height=5, fig.align="center", fig.cap = "An illustrative example of causal tree"}
+fancyRpartPlot(opfit, sub = "")
+```
+
+NOTE: The first number in each node indicates the predicted treatment effects (in kg/ha). The number and the percentage of observations belonging to the node are shown below that.
+
+In the first node, all the samples ($1024$ observations) belong to the node, and the causal effect of the treatment was calculated as the difference in the mean yield of the treated and control groups, which turned out to be $593$ kg/ha in this example. The first data split criterion is whether the $\textit{ecs}$ value is greater or less than $25$. The observations with $\textit{ecs}$ greater than or equal to $25$ move to the left node, while those with $\textit{ecs}$ less than $25$ move to the right. For each of the subsamples, the treatment effect is identified as the difference in the mean yields of the treated and control groups within the subsample. The treatment effect for the low-$\textit{ecs}$ observations was $619$ kg/ha, and for the high-$\textit{ecs}$ observations was $982$ kg/ha. This means that for the impact of the increase in seed rate the treatment effect is heterogeneous over space, having a larger positive impact on yield in high-$\textit{ecs}$ areas. Trees are further developed to have more groups of subsamples to allow for more flexible representations of the heterogeneous treatment effects. The estimated heterogeneous treatments effects can then be used to identify site-specific EOIRs. It is noteworth that at no point CF estimates yield "level". 
+
+# Appendix B: Parameter Generation 
+
+## Base parameters $\alpha$, $\beta$, and $ymax$ {#par-gen}
+Parameters $\alpha^{i,j}$, $\beta^{i,j}$, $ymax^{i,j}$, and $\varepsilon^{i,j}$ were modeled as spatially autocorrelated using unconditional Gaussian geostatistical simulation based on the spherical variogram model. The `gstat` package (version 2.0.6 [@gstat1; @gstat2]) in R was used for this purpose 
+
+Table \@ref(tab:variogram-parameters) shows the main variogram parameter values used in generating $\alpha^{i,j}$, $\beta^{i,j}$, $ymax^{i,j}$, and $\varepsilon^{i,j}$, which were chosen to generate yields consistent with those observed in experiments conducted by the DIFM project. (Codes used to generate parameter values are available at https://github.com/tmieno2/ML_VRA.git.) The range and nugget of all parameters were assumed to be $400$ m and 0. The means of $ymax$, $\alpha$, $\beta$, and $\varepsilon$ were assumed to be $12000$ kg/ha, $-0.5$, $0$ and $0$, and their sills were assumed to be $2.0 \times 10^{6}$ kg/ha, $0.02$, $1.0$ and $0.015$. See Figure \@ref(fig:fig-parameters) for an example of the generated parameters. 
+
+```{r fig-optN, fig.width=3, fig.height=4, fig.cap = "An illustrative example of a spatial distribution of true optimal N rate"}
+
+vis_optN_cell
+```
+
+```{r fig-parameters, fig.width=6, fig.height=5, fig.cap = "An Illustrative Example of Spatial Distributions of Field Characteristics", cache = TRUE}
+# field_alpha + field_beta + field_ymax
+grid.arrange(field_ymax, field_alpha, field_beta, field_m_error, ncol = 2, nrow = 2)
+```
+
+## Splitting the base parameters {#split-pars}
+
+For scenarios "aabbyy" and "aabbyytt", each of the base parameters $\alpha$, $\beta$, and $ymax$ are splitted into two part in a spatially correlated manner. Speficiallu, for each cell $(i,j)$, we assigned one of a set of spatially autocorrelated weights $r_{\alpha}^{i,j} \in (0,1)$ to the $\alpha$ variable, another set of spatially autocorrelated weights $r_{\beta}^{i,j} \in (0,1)$ to the $\beta$ variable, and another set of spatially autocorrelated weights $r_{ymax}^{i,j} \in (0,1)$ to the ${ymax}^{i,j}$ variable. Each of the weight variables are generated using unconditional Gaussian geostatistical simulation just like the base parameters. (There was no spatial correlation between the $r_{\alpha}^{i,j}$ and $r_{\beta}^{i,j}$ data, between $r_{\alpha}^{i,j}$ and $r_{ymax}^{i,j}$ data, or between $r_{\beta}^{i,j}$ and $r_{ymax}^{i,j}$.) Six new covariates were created with the weights and the original covariates $\alpha^{i,j}$, $\beta^{i,j}$ and $ymax^{i,j}$. These were 
+$\alpha_{1}^{i,j} = r_{\alpha}^{i,j} \alpha^{i,j}$, $\alpha_{2}^{i,j} = (1- r_{\alpha}^{i,j}) \alpha^{i,j}$,
+$\beta_{1}^{i,j} = r_{\beta}^{i,j} \beta^{i,j}$, $\beta_{2}^{i,j} = (1- r_{\beta}^{i,j}) \beta^{i,j}$,
+$ymax_{1}^{i,j} = r_{ymax}^{i,j} ymax^{i,j}$, and $ymax_{2}^{i,j} = (1- r_{ymax}^{i,j}) ymax^{i,j}$. The codes used to implement the abovementioned parameter splitting is available at https://github.com/tmieno2/ML_VRA.git.
+
