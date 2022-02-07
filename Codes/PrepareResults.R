@@ -16,6 +16,7 @@ library(data.table)
 library(tidyverse)
 
 # --- figure making --- #
+library(ggbrace)
 library(RColorBrewer)
 library(patchwork)
 library(ggplot2)
@@ -33,23 +34,24 @@ library(modelsummary)
 library(latex2exp)
 
 
-## ----figure_setup, cache = F----
+
+## ---------------------------------------------------------------------------------------------
 theme_update(
   axis.title.x =
     element_text(
-      size = 12, angle = 0, hjust = .5, vjust = -0.3, face = "plain"
+      size = 12, angle = 0, hjust = .5, vjust = -0.3, face = "plain", family = "Cambria"
     ),
   axis.title.y =
     element_text(
-      size = 12, angle = 90, hjust = .5, vjust = .9, face = "plain"
+      size = 12, angle = 90, hjust = .5, vjust = .9, face = "plain", family = "Cambria"
     ),
   axis.text.x =
     element_text(
-      size = 10, angle = 0, hjust = .5, vjust = 1.5, face = "plain"
+      size = 10, angle = 0, hjust = .5, vjust = 1.5, face = "plain", family = "Cambria"
     ),
   axis.text.y =
     element_text(
-      size = 10, angle = 0, hjust = 1, vjust = 0, face = "plain"
+      size = 10, angle = 0, hjust = 1, vjust = 0, face = "plain", family = "Cambria"
     ),
   axis.ticks =
     element_line(
@@ -59,11 +61,11 @@ theme_update(
   #--- legend ---#
   legend.text =
     element_text(
-      size = 10, angle = 0, hjust = 0, vjust = 0, face = "plain"
+      size = 10, angle = 0, hjust = 0, vjust = 0, face = "plain", family = "Cambria"
     ),
   legend.title =
     element_text(
-      size = 10, angle = 0, hjust = 0, vjust = 0, face = "plain"
+      size = 10, angle = 0, hjust = 0, vjust = 0, face = "plain", family = "Cambria"
     ),
   legend.key.size = unit(0.5, "cm"),
   #--- strip (for faceting) ---#
@@ -80,7 +82,13 @@ theme_update(
 )
 
 
-## ----setup, warning=FALSE, message=FALSE, cache= FALSE----
+set_flextable_defaults(
+  font.family = "Cambria"
+  )
+
+
+## ----setup, warning=FALSE, message=FALSE, cache= FALSE----------------------------------------
+
 # field <- readRDS("Shared/Data/for_Simulations/field_padding.rds") %>%
 #     filter(padding==1)%>%
 #     dplyr::select(unique_cell_id)
@@ -134,7 +142,7 @@ variogram_tb <-
   hline_bottom(part = "all") %>%
   hline_top(part = "header") %>%
   footnote(
-    value = as_paragraph("NOTE: About ymax, the units of of Mean, Nugget, and Sill are kg."),
+    value = as_paragraph("NOTE: About ymax, the units of Mean, Nugget, and Sill are kg."),
     ref_symbols = NA
   ) %>%
   autofit()
@@ -142,18 +150,7 @@ variogram_tb <-
 
 ## ----field-map-visualization, dependson = "setup"----
 
-# == plot-level field without padding area ==##
-vis_field_plot <-
-  ggplot(field_plot_sf) +
-  geom_sf(fill = NA) +
-  theme_void() +
-  labs(caption = "Bottom Title") +
-  theme(plot.title = element_text(hjust = 0.5))
-
-
-
-### ==== Example map of plot and subplots and cells ====####
-# == Preparation ==##
+# === Preparation === #
 ex_plot <- field_plot_sf[224, ]
 ex_subplots <- field_subplot_sf[ex_plot, , op = st_within]
 
@@ -161,103 +158,90 @@ ex_one_subplot <- ex_subplots[1, ]
 ex_cells <- field_cell_sf[ex_one_subplot, , op = st_within]
 
 
-#-- (1) plot-level field map (base: vis_field_withoutPadding) --#
-library(latex2exp)
+one_subplot <- ex_subplots[3,]
 
+
+
+#-- (1) plot-level field map  --#
 plot <-
   ggplot() +
   geom_sf(data = field_plot_sf) +
   geom_sf(data = ex_plot, fill = "green", size = 1) +
-  # coord_sf(expand = F) +
+  coord_sf(expand = FALSE) +
   theme_void() +
   ggtitle(TeX("$12 \\times 32$ plots")) +
   theme(plot.title = element_text(hjust = 0.5))
 
-
 grob_plot <- ggplotGrob(plot)
 
-# #-- (2) create a map of subplots in a plot --##
-subplots_inPlot <- ggplot() +
+#-- (2) create a map of subplots in a plot --##
+subplots_inPlot <- 
+  ggplot() +
   geom_sf(data = ex_plot, fill = "green") +
   geom_sf(data = ex_subplots, fill = NA, size = 1) +
+  geom_sf(data = ex_subplots[2,], fill = "skyblue", size = 1) +
+  coord_sf(expand = FALSE) +
   theme_void() +
   ggtitle(TeX("$4 \\times 1$ subplots")) +
   theme(plot.title = element_text(hjust = 0.5))
 
 grob_subplots_inPlot <- ggplotGrob(subplots_inPlot)
 
-# #-- (3) create a map of cells in a subplot --#
+#-- (3) create a map of cells in a subplot --#
 cells_inSubplot <-
   ggplot() +
   geom_sf(data = ex_one_subplot, fill = "green", size = 1) +
   geom_sf(data = ex_cells, fill = NA) +
+  geom_sf(data = ex_cells[2,], fill = "skyblue", size = 1) +
+  coord_sf(expand = FALSE) +
   theme_void() +
   ggtitle(TeX("$6 \\times 6$ cells")) +
-  theme(
-    plot.title = element_text(hjust = 0.5, margin = margin(0, 0, 10, 0))
+    theme(
+    plot.title = element_text(hjust = 0.5)
   )
 
 grob_cells_inSubplot <- ggplotGrob(cells_inSubplot)
 
-# #-- (4)put them on the same map --#
-g_inset <- ggplot() +
-  coord_equal(xlim = c(0, 1), ylim = c(0, 1), expand = FALSE)
-
-map_all_together <-
+#-- (4)put them on the same map --#
+field_structure <-
+  ggplot() +
+  coord_equal(xlim = c(0, 1), ylim = c(0, 1), expand = FALSE)+
   # /*----------------------------------*/
   #' ##  base maps
   # /*----------------------------------*/
-  g_inset +
   # --- plot level --- #
   annotation_custom(grob_plot,
-    xmin = 0, xmax = 0.4, ymin = 0, ymax = 1
-  ) +
+    xmin = 0, xmax = 0.4, ymin = 0, ymax = 1) +
   # --- subplot level --- #
   annotation_custom(grob_subplots_inPlot,
-    xmin = 0.57, xmax = 0.67, ymin = 0.3, ymax = 0.8
-  ) + # hight is 5
+    xmin = 0.565, xmax = 0.665, ymin = 0.35, ymax = 0.7) + 
   # --- cell level --- #
   annotation_custom(grob_cells_inSubplot,
-    xmin = 0.8, xmax = 1, ymin = 0.5, ymax = 0.7
-  ) +
-  # xmin = 0.75, xmax = 1, ymin = 0.45, ymax = 0.7) +
-  # /*----------------------------------*/
-  #' ## add line segments
-  # /*----------------------------------*/
-  # --- plot-subplot (above) --- #
-  # geom_segment(aes(x = 0.386,  xend = 0.55, y = 0.547, yend = 0.73),
-  geom_segment(aes(x = 0.387, xend = 0.57, y = 0.534, yend = 0.717),
-    lineend = "round", color = "grey",
-    size = 1.5
-  ) +
-  # --- plot-subplot (below) --- #
-  # geom_segment(aes(x = 0.386, xend = 0.55, y = 0.5, yend = 0.37),
-  geom_segment(aes(x = 0.387, xend = 0.57, y = 0.485, yend = 0.352),
-    # data = arrowA,
-    lineend = "round", color = "grey",
-    size = 1.5
-  ) +
-  # --- subplot-cell (above) --- #
-  # geom_segment(aes(x = 0.65, xend = 0.805, y = 0.64, yend = 0.692),
-  geom_segment(aes(x = 0.671, xend = 0.82, y = 0.626, yend = 0.661),
-    # data = arrowA,
-    lineend = "round", color = "grey",
-    size = 1.5
-  ) +
-  # --- subplot-cell (below) --- #
-  geom_segment(aes(x = 0.671, xend = 0.82, y = 0.532, yend = 0.506),
-    # data = arrowA,
-    lineend = "round", color = "grey",
-    size = 1.5
-  ) +
-  theme_void()
-
-#     theme(plot.margin=unit(c(0,0,0,0),"mm"))
-
-file <- here("GitControlled/Writing/field_structure.png")
-ggsave(file)
-knitr::plot_crop(file)
-dev.off()
+    xmin = 0.8, xmax = 0.8+0.2, ymin = 0.382, ymax = 0.382 +0.2) +
+  #/*----------------------------------*/
+  #' ## Add braces
+  #/*----------------------------------*/
+  # --- between plot and subplot --- #
+  geom_brace(aes(c(0.43,0.43+0.1), c(0.353, 0.661)), color ="red", rotate = 270, inherit.data=F) +
+  # --- between subplot and cell --- #
+  geom_brace(aes(c(0.68, 0.68 + 0.1), c(0.381, 0.549)), color ="red", rotate = 270, inherit.data=F) +
+  #/*----------------------------------*/
+  #' ## add annotations
+  #/*----------------------------------*/
+  # --- annotation for plot --- #
+  geom_segment(aes(x = 0.42, xend = 0.393, y = 0.60, yend = 0.515),
+    arrow = arrow(length = unit(0.1, "cm")), size=0.5) +
+  annotate("text", x = 0.42 + 0.015, y = 0.60 + 0.015, label = "plot") +
+  # --- annotation for subplot --- #
+  geom_segment(aes(x = 0.7, xend = 0.64, y = 0.37, yend = 0.45),
+    arrow = arrow(length = unit(0.1, "cm")), size=0.5) +
+  annotate("text", x = 0.7 + 0.035, y = 0.37 - 0.01, label = "subplot") +
+  # --- annotation for cell --- #
+  geom_segment(aes(x = 0.89, xend = 0.86, y = 0.349, yend = 0.394),
+    arrow = arrow(length = unit(0.1, "cm")), size=0.5) +
+  annotate("text", x = 0.89 + 0.015, y = 0.349 - 0.01, label = "cell") +
+  # coord_sf(expand = FALSE) +
+  theme_void() 
 
 
 ## ---- dependson = "setup"----
@@ -715,30 +699,31 @@ figure_te <-
   )
 
 
-## ----------------------
+## ---- cache = TRUE----------------------------------------------------------------------------
 # /*=================================================*/
-#' # Sample CT figure (cach)
+#' # Sample CT figure 
 # /*=================================================*/
+
+library(causalTree)
+library(rattle)
 
 data_sf <- st_read(here("Shared/Data/snider_high_res.gpkg")) %>%
-  na.omit() %>%
-  dplyr::rename(tgtn = NPlan, tgts = SRPlan)
+    na.omit() %>%
+    dplyr::rename(tgtn=NPlan,tgts=SRPlan)
 
 data_dt <- data.table(data_sf) %>%
-  setnames(names(.), tolower(names(.)))
+    setnames(names(.),tolower(names(.)))
 
-tgts_ls <- data_dt[, tgts] %>%
-  unique() %>%
-  sort()
+tgts_ls <- data_dt[,tgts] %>% unique() %>% sort
 
 ctree_data <- copy(data_dt) %>%
-  .[tgts %in% tgts_ls[1:2], ] %>%
-  .[, treat := ifelse(tgts == tgts_ls[2], 1, 0)] %>%
+  .[tgts %in% tgts_ls[1:2],] %>%
+  .[,treat:=ifelse(tgts==tgts_ls[2],1,0)] %>%
   #--- Corn Yield: 1 bu/acre ->  62.77 kg/ha---#
-  .[, yield := yield * 62.77]
+  .[,yield:= yield*62.77]
 
 tree <- causalTree(
-  yield ~ slope + ecs,
+  yield ~ slope+ecs,
   data = ctree_data,
   treatment = ctree_data$treat,
   split.Rule = "CT",
@@ -752,6 +737,6 @@ tree <- causalTree(
   propensity = 0.5
 )
 
-opcp <- tree$cptable[, 1][which.min(tree$cptable[, 4])]
+opcp <- tree$cptable[,1][which.min(tree$cptable[,4])]
 opfit <- prune(tree, opcp)
 

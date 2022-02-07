@@ -137,9 +137,8 @@ Monte Carlo simulations were conducted for nitrogen experiments for corn product
 
 The simulated field was created based on an actual 51-ha Illinois field on which the Data-Intensive Farm Management (DIFM) project [@bullock2019] has run multiple OFPEs. Figure \@ref(fig:field-map) illustrates that simulated trials consisted of $384$ 18.3 m $\times$ 73.2 m "plots," each of which was assigned an N fertilizer application rate. Each plot was made up of four (4-rows $\times$ 1-column) 18.3 m $\times$ 18.3 m "subplots," which were unit of analysis used in subsequent statistical analysis. Each subplot contained of a 6-rows $\times$ 6-columns grid of thirty-six 3.05 m $\times$ 3.05 m "cells." All field characteristics and yield data were generated at the cell level.
 
-```{r field-map, out.width="50%", fig.cap = "Partitioning of field into plots, subplots and cells"}
-# knitr::include_graphics("./GitControlled/Writing/field_structure.png")
-readPNG(here("GitControlled/Writing/field_structure.png")) %>% grid.raster()
+```{r field-map, fig.width=8, fig.height=8, fig.cap = "Partitioning of field into plots, subplots and cells"}
+field_structure
 ```
 
 ### Cell-specific Yield Functions and True Economically Optimal N Rates
@@ -327,6 +326,7 @@ This research was supported by a USDA-NIFA-AFRI Food Security Program Coordinate
 \newpage
 
 # Supplementary Appendix {-}
+
 
 ```{r, child = "appendix.Rmd"}
 ```
