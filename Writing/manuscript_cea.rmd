@@ -292,7 +292,7 @@ report_summary_res_CNN_RF_BRF
 
 <br>
 
-Virtually all the previous studies have used yield prediction accuracy to rank and select models. This is understandable, since whereas yield can be "ground-truthed" the true causal impact of a treatment cannot be determined from real-world data, making it impossible to cross-validate EONR. 
+Virtually all the previous studies have used yield prediction accuracy to rank and select models. This is understandable, since whereas yield can be "ground-truthed" the true causal impact of a treatment cannot be determined from real-world data, making it impossible to cross-validate EONR prediction. 
 However, the simulation results reported here show clearly that using a model's yield prediction accuracy as a model selection criterion is not well justified if the ultimate objective is accurate estimation of site-specific EONRs. 
 
 # Limitations and Future Studies
@@ -310,7 +310,6 @@ Finally, a natural and fruitful extension of the reported research would be to t
 ML methods are appealing tools that can potentially improve site-specific input rate management by capturing heterogeneous treatment effects introduced by complex non-linear and multidimensional interactions of soil and field characteristics. Many kinds of prediction-oriented ML methods have been used for this purpose. We have introduced the use of CF, a relatively new method, which, unlike prediction-oriented ML methods, focuses on the identification of heterogeneous causal effects of treatment.
 
 We examined the use of CF-base for site-specific input management recommendations. Using Monte Carlo simulations under various modeling scenarios, we compared the CF estimations of site-specific EONRs to those of the prediction-oriented ML methods RF, BRF, and CNN. CF-base consistently outperformed the other methods across all the modeling scenarios in terms of EONR prediction and profit generation. We also showed that the model's yield prediction accuracy was uncorrelated with its EONR prediction accuracy, implying that yield prediction accuracy should not be used as a model selection criterion if the ultimate goal of the experiment is to create a site-specific EOIR map.
-
 
 
 # Acknowledgement
