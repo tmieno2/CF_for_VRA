@@ -169,8 +169,9 @@ The right panel of Figure \@ref(fig:fig-nExp-yield) shows an example of observed
 
 ```{r fig-nExp-yield, fig.width=7, fig.height=6, fig.cap = "An example of experimental design of N and generated yield at the subplot resolution"}
 
-(field_Ndesign + ggtitle("(a) Trial Design")) |
-  (vis_yield_subplot + ggtitle("(b) Simulated Yield Level"))
+# (field_Ndesign + ggtitle("(a) Trial Design")) |
+#   (vis_yield_subplot + ggtitle("(b) Simulated Yield Level"))
+field_Ndesign | vis_yield_subplot
 ```
 
 ## Modeling Scenarios
@@ -229,7 +230,6 @@ Table \@ref(tab:table-optN-subplot-wide) shows the mean RMSE of the EONR estimat
 
 ```{r table-optN-subplot-wide, tab.cap = "Mean RMSE of EONR (kg/ha) estimation and profit-deficit ($/ha) by ML methods and modeling scenarios"}
 report_table_optN
-# knit_print(report_table_optN)
 ```
 
 <br>
@@ -256,7 +256,7 @@ Figure \@ref(fig:plot-tre) illustrates the underlying cause of CF-base's superio
 figure_te
 ```
 
-`r ftext('NOTE: The red line in the figures denotes the 1-to-1 line to show the ideal relationship between true and estimated treatment effects.', fp_text(font.size = 9))`
+`r ftext('NOTE: The red line in the figures denotes the 1-to-1 line to show the ideal relationship between true and estimated treatment effects.', fp_text(font.size = 9, font.family = "Times New Roman"))`
 
 
 ## The relationship between yield and EONR prediction performances.
@@ -267,7 +267,7 @@ For RF, BRF and CNN, Figure \@ref(fig:plot-y-optN) plots the RMSE values of EONR
 fig_y_optN
 ```
 
-`r ftext('NOTE: The red line in the figures denotes the best-fit line to explain the relationship between the RMSEs of EONR prediction and yield prediction.', fp_text(font.size = 9))`
+`r ftext('NOTE: The red line in the figures denotes the best-fit line to explain the relationship between the RMSEs of EONR prediction and yield prediction.', fp_text(font.size = 9, font.family = "Times New Roman"))`
 
 <br>
 

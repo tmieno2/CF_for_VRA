@@ -32,7 +32,7 @@ The simplified notation of this equation, where $c_i$ is dropped, is \@ref(eq:eq
 
 <span style = "color: blue;"> Shun, number the equations </span>
 
-# Appendix C: Parameter generation 
+# Appendix C: Parameter generation
 
 ## Base parameters $\alpha$, $\beta$, and $ymax$ {#par-gen}
 Parameters $\alpha_{i,j}$, $\beta_{i,j}$, $ymax_{i,j}$, and $\varepsilon_{i,j}$ were modeled as spatially autocorrelated using unconditional Gaussian geostatistical simulation based on the spherical variogram model. The `gstat` package (version 2.0.6 [@gstat1; @gstat2]) in R was used for this purpose 
@@ -47,7 +47,7 @@ variogram_tb
 
 ```{r fig-parameters, fig.width=7, fig.height=9, fig.cap = "An Illustrative Example of Spatial Distributions of Field Characteristics", cache = TRUE}
 
-field_alpha + field_beta + field_ymax + field_m_error + vis_optN_cell + plot_layout(ncol = 2)
+field_alpha + field_beta + field_ymax + field_m_error + field_optN + plot_layout(ncol = 2)
 ```
 
 ## Splitting the base parameters {#split-pars}
