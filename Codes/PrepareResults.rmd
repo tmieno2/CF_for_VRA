@@ -676,7 +676,7 @@ piLoss_density <-
 
 ```
 
-# Treatment effect comparison (CF-base vs RF vs BRF)
+# Treatment effect comparison
 
 ```{r}
 #### === The original code for this figure is in "1_3_CompTeEstimation.R" ===####
@@ -687,11 +687,12 @@ figure_te <-
   .[, Method := case_when(
     Method == "RF" ~ "RF",
     Method == "BRF" ~ "BRF",
+    Method == "CNN" ~ "CNN",
     Method == "CF_base" ~ "CF-base"
   )] %>%
-  .[, Method := factor(Method, levels = c("RF", "BRF", "CF-base"))] %>%
+  .[, Method := factor(Method, levels = c("RF", "BRF", "CNN", "CF-base"))] %>%
   ggplot() +
-  geom_point(aes(x = true_tau_base, y = tau_base), size = 0.5) +
+  geom_point(aes(x = true_te_base, y = te_base), size = 0.5) +
   geom_abline(aes(intercept = 0, slope = 1), color = "red", show.legend = TRUE) +
   facet_grid(Treatment ~ Method) +
   guides(

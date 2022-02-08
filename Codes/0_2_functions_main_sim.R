@@ -55,8 +55,7 @@ sim_par <- function(i, reg_data, test_data, N_levels) {
       )
     )%>%
     unnest(., cols= "opt_N_data")%>%
-    data.table()%>%
-    setnames("unique_cell_id", "unique_subplot_id")
+    data.table()
 
   return(results_data)
      
@@ -113,7 +112,7 @@ get_opt_N <- function(reg_data, test_data, var_ls, rates_ls, Method) {
   } 
 
   # === arrange order of columns === #  
-  report_data <- opt_N_data[,.(unique_cell_id, type, opt_N_hat, pred_yield, sim, yield, opt_N)]
+  report_data <- opt_N_data[,.(unique_subplot_id, type, opt_N_hat, pred_yield, sim, yield, opt_N)]
 
   return(report_data)
 }
@@ -212,7 +211,7 @@ get_changes_gradual_base <- function(N_index, data_base, var_ls, rates_ls, cf_re
   }
 
   return_data <- data.table(
-    unique_cell_id = data_base$unique_cell_id,
+    unique_subplot_id = data_base$unique_subplot_id,
     type = data_base$type,
     yield_dif = tau_data, # yield diff shows the treatment effects
     N_plus = rates_ls[N_index] - rates_ls[1],
@@ -243,10 +242,10 @@ get_pi_dif_base <- function(test_data, cf_results, var_ls, rates_ls) {
   rbindlist() %>%
   # === estimate EONR === #
   .[, pi_change := pCorn * yield_dif - pN * N_plus] %>%
-  .[, .SD[pi_change == max(pi_change), ], by = .(unique_cell_id, type)] %>%
-  .[, .(unique_cell_id, type, N)] %>%
+  .[, .SD[pi_change == max(pi_change), ], by = .(unique_subplot_id, type)] %>%
+  .[, .(unique_subplot_id, type, N)] %>%
   setnames("N", "opt_N_hat") %>%
-  .[test_data[,.(type, sim, yield, opt_N, unique_cell_id)], on = c("unique_cell_id", "type")] %>%
+  .[test_data[,.(type, sim, yield, opt_N, unique_subplot_id)], on = c("unique_subplot_id", "type")] %>%
   .[, pred_yield := NA]
 
   return(pi_dif_data)
@@ -325,7 +324,7 @@ RF_BRF_analysis <- function(test_data, f_results, var_ls, N_levels) {
   
   result <- 
     test_data %>%
-    .[,c("sim", "unique_cell_id", "type","aa_n", var_ls, "opt_N", "yield"), with=FALSE] %>%
+    .[,c("sim", "unique_subplot_id", "type","aa_n", var_ls, "opt_N", "yield"), with=FALSE] %>%
     # === Yield Prediction === #
     .[, pred_yield := predict(f_results, newdata = .[, c("aa_n", var_ls), with = FALSE])] %>%
     # === EONR estimation === #
@@ -333,9 +332,9 @@ RF_BRF_analysis <- function(test_data, f_results, var_ls, N_levels) {
     .[, rate := rep(N_seq, nrow(.) / length(N_seq))] %>%
     .[, yield_hat := predict(f_results, newdata = .[, c("rate", var_ls), with = FALSE])] %>%
     .[, pi_hat := pCorn * yield_hat - pN * rate]%>%
-    .[, .SD[pi_hat == max(pi_hat), ], by = .(unique_cell_id, type)] %>%
+    .[, .SD[pi_hat == max(pi_hat), ], by = .(unique_subplot_id, type)] %>%
     setnames("rate", "opt_N_hat") %>%
-    .[, .(unique_cell_id, type, opt_N_hat, pred_yield, sim, yield, opt_N)]
+    .[, .(unique_subplot_id, type, opt_N_hat, pred_yield, sim, yield, opt_N)]
 
   return(result)
 }
@@ -356,7 +355,7 @@ RF_BRF_analysis <- function(test_data, f_results, var_ls, N_levels) {
 #' # Treatment effect comparison (CF-base vs RF vs BRF)
 # /*================================================================*/
 
-get_te_dt <- function(test_data, var_ls, rates_ls, Method) {
+get_te_dt <- function(reg_data, test_data, var_ls, rates_ls, Method) {
 
     ### === CF_base ===###
   if (Method == "CF_base") {
@@ -427,7 +426,7 @@ CF_base_calculate_te <- function(test_data, cf_results, var_ls, rates_ls) {
   rbindlist() %>%
   setnames("N", "rate") %>%
   setnames("yield_dif", "te_base") %>%
-  .[,.(unique_cell_id, rate, te_base)]
+  .[,.(unique_subplot_id, rate, te_base)]
 
   return(te_data)
 }
@@ -441,14 +440,14 @@ RF_BRF_calculate_te <- function(test_data, f_results, var_ls, N_levels) {
   # test_data = test_data_sample; f_results = temp_BRF
   # var_ls = c("alpha","beta","ymax"); N_levels = N_levels 
 
-  te_data <- test_data[, c("unique_cell_id", var_ls, "aa_n", "opt_N", "yield", "X", "Y"), with = FALSE] %>%
+  te_data <- test_data[, c("unique_subplot_id", var_ls, "aa_n", "opt_N", "yield", "X", "Y"), with = FALSE] %>%
     .[rep(1:nrow(.), each = length(N_levels)), ] %>%
     .[, rate := rep(N_levels, nrow(.) / length(N_levels))] %>%
     .[, yield_hat := predict(f_results, newdata = .[, c("rate", var_ls), with = FALSE])] %>%
     #--- Treatment effect calculation ---#
-    .[, yield_base := .SD[1, yield_hat], by = .(unique_cell_id)] %>%
+    .[, yield_base := .SD[rate==min(rate), yield_hat], by = .(unique_subplot_id)] %>%
     .[, te_base := yield_hat - yield_base] %>%
-    .[, .(unique_cell_id, rate, te_base)]
+    .[, .(unique_subplot_id, rate, te_base)]
 
   return(te_data)
 }

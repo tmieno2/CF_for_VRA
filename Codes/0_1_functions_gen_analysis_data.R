@@ -662,7 +662,7 @@ prepare_data_for_sim <- function(reg_raw_data, test_raw_data){
     X = mean(X),
     Y = mean(Y)
   ), by = .(subplot_id, strip_id)]%>%
-  .[,unique_cell_id:=paste0(strip_id,"_",subplot_id)]%>%
+  .[,unique_subplot_id:=paste0(strip_id,"_",subplot_id)]%>%
   .[, `:=`(
     strip_id = NULL,
     subplot_id = NULL
@@ -689,7 +689,7 @@ prepare_data_for_sim <- function(reg_raw_data, test_raw_data){
     X = mean(X),
     Y = mean(Y)
   ), by = .(subplot_id, strip_id)]%>%
-  .[,unique_cell_id:=paste0(strip_id,"_",subplot_id)]%>%
+  .[,unique_subplot_id:=paste0(strip_id,"_",subplot_id)]%>%
   .[, `:=`(
     strip_id = NULL,
     subplot_id = NULL
