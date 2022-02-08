@@ -13,7 +13,7 @@ library(parallel)
 
 #--- source functions ---#
 setwd("~/Dropbox/ResearchProject/ML_VRA")
-source("./GitControlled/Codes/0_3_functions_main_sim.R")
+source("./GitControlled/Codes/0_2_functions_main_sim.R")
 
 # /*----------------------------------*/
 #' ## Datasets
