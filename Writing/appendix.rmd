@@ -53,8 +53,8 @@ field_alpha + field_beta + field_ymax + field_m_error + field_optN + plot_layout
 ## Splitting the base parameters {#split-pars}
 
 For scenarios "aabbyy" and "aabbyytt", each of the base parameters $\alpha$, $\beta$, and $ymax$ are splitted into two part in a spatially correlated manner. Speficiallu, for each cell $(i,j)$, we assigned one of a set of spatially autocorrelated weights $r^{\alpha}_{i,j} \in (0,1)$ to the $\alpha$ variable, another set of spatially autocorrelated weights $r^{\beta}_{i,j} \in (0,1)$ to the $\beta$ variable, and another set of spatially autocorrelated weights $r^{ymax}_{i,j} \in (0,1)$ to the ${ymax}_{i,j}$ variable. Each of the weight variables are generated using unconditional Gaussian geostatistical simulation just like the base parameters. (There was no spatial correlation between the $r^{\alpha}_{i,j}$ and $r^{\beta}_{i,j}$ data, between $r^{\alpha}_{i,j}$ and $r^{ymax}_{i,j}$ data, or between $r^{\beta}_{i,j}$ and $r^{ymax}_{i,j}$.) Six new covariates were created with the weights and the original covariates $\alpha_{i,j}$, $\beta_{i,j}$ and $ymax_{i,j}$. These were 
-$\alpha^{1}_{i,j} = r^{\alpha}_{i,j} \alpha_{i,j}$, $\alpha^{2}_{i,j} = (1- r^{\alpha}_{i,j}) \alpha_{i,j}$,
-$\beta^{1}_{i,j} = r^{\beta}_{i,j} \beta_{i,j}$, $\beta^{2}_{i,j} = (1- r^{\beta}_{i,j}) \beta_{i,j}$,
-$ymax^{1}_{i,j} = r^{ymax}_{i,j} ymax_{i,j}$, and $ymax^{2}_{i,j} = (1- r^{ymax}_{i,j}) ymax_{i,j}$. The codes used to implement the abovementioned parameter splitting is available at https://github.com/tmieno2/ML_VRA.git.
+$\alpha^{1}_{i,j} = r^{\alpha}_{i,j} \cdot \alpha_{i,j}$, $\alpha^{2}_{i,j} = (1- r^{\alpha}_{i,j}) \cdot \alpha_{i,j}$,
+$\beta^{1}_{i,j} = r^{\beta}_{i,j} \cdot\beta_{i,j}$, $\beta^{2}_{i,j} = (1- r^{\beta}_{i,j}) \cdot\beta_{i,j}$,
+$ymax^{1}_{i,j} = r^{ymax}_{i,j} \cdot ymax_{i,j}$, and $ymax^{2}_{i,j} = (1- r^{ymax}_{i,j}) \cdot ymax_{i,j}$. The codes used to implement the abovementioned parameter splitting is available at https://github.com/tmieno2/ML_VRA.git.
 
 <span style = "color: blue;"> Shun, provide the link to Mandeley data and cite it </span>

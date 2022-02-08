@@ -263,7 +263,7 @@ figure_te
 
 For RF, BRF and CNN, Figure \@ref(fig:plot-y-optN) plots the RMSE values of EONR estimation against the RMSE values of yield prediction, and the red lines show the best-fit line describing the relationship between them. For all the models the regression line was almost flat, showing little if any correlation between the two measures. In other words, the quality of a model's yield predictions provided little if any information about the quality of its EONR predictions. 
 
-```{r plot-y-optN, fig.width=7, fig.height=7, fig.cap = "The relationship in the performance between EONR estimation and yield prediction by ML methods and modeling scenarios"}
+```{r plot-y-optN, fig.width=7, fig.height=7.5, fig.cap = "The relationship in the performance between EONR estimation and yield prediction by ML method and modeling scenario"}
 fig_y_optN
 ```
 

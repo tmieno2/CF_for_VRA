@@ -430,16 +430,18 @@ fig_y_optN <-
   facet_grid(Model ~ Method) +
   # geom_smooth(method='lm', se=FALSE,  aes(colour="Regression line"), size=1) +
   # scale_colour_manual(values= "red") +
-  geom_smooth(method = "lm", se = FALSE, color = "red", size = 1) +
+  geom_smooth(method = "lm", se = FALSE, color = "red", size = 0.7) +
   stat_regline_equation(
-    label.x = 2150, label.y = 85,
-    aes(label = ..rr.label..)
+    label.x = 2050, label.y = 90,
+    aes(label = ..rr.label..),
+    size = 3
   ) +
   guides(
     fill = guide_legend(keywidth = 1, keyheight = 1),
     linetype = guide_legend(keywidth = 3, keyheight = 1),
     colour = guide_legend(keywidth = 3, keyheight = 1)
   ) +
+  ylim(NA, 95) +
   labs(y = " RMSE of EONR Estimation (kg/ha)") +
   labs(x = " RMSE of Yield Prediction (kg/ha)") +
   theme_few() +

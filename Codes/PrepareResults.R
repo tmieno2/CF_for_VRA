@@ -1,4 +1,4 @@
-## ----set-up, cache = F------------------------------------------------------------------------
+## ----set-up, cache = F-------
 library(knitr)
 library(here)
 
@@ -9,7 +9,7 @@ knitr::opts_chunk$set(
   cache = FALSE
 )
 
-## ----packages, cache = FALSE, include = FALSE-------------------------------------------------
+## ----packages, cache = FALSE, include = FALSE----
 # === packages ===#
 # --- data wrangling--- #
 library(sf)
@@ -37,7 +37,7 @@ library(modelsummary)
 library(latex2exp)
 
 
-## ---------------------------------------------------------------------------------------------
+## ----------------------------
 theme_figure <- 
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -73,7 +73,7 @@ set_flextable_defaults(
   )
 
 
-## ----setup, warning=FALSE, message=FALSE, cache= FALSE----------------------------------------
+## ----setup, warning=FALSE, message=FALSE, cache= FALSE----
 # field <- readRDS("Shared/Data/for_Simulations/field_padding.rds") %>%
 #     filter(padding==1)%>%
 #     dplyr::select(unique_cell_id)
@@ -94,7 +94,7 @@ field_cell_sf <-
   readRDS()
 
 
-## ---------------------------------------------------------------------------------------------
+## ----------------------------
 
 
 
@@ -135,7 +135,7 @@ variogram_tb <-
   autofit()
 
 
-## ----field-map-visualization, dependson = "setup"---------------------------------------------
+## ----field-map-visualization, dependson = "setup"----
 
 # === Preparation === #
 ex_plot <- field_plot_sf[224, ]
@@ -233,7 +233,7 @@ field_structure <-
   theme_void()
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"----
 field_Ndesign <-
   ggplot() +
   geom_sf(
@@ -247,7 +247,7 @@ field_Ndesign <-
   theme_figure
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"----
 # === subplot-level === #
 vis_yield_subplot <-
   ggplot(field_subplot_sf) +
@@ -258,11 +258,11 @@ vis_yield_subplot <-
   theme_figure
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"----
 
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"----
 # === alpha map === #
 field_alpha <-
   ggplot(field_cell_sf) +
@@ -312,7 +312,7 @@ field_optN <-
   theme_figure
 
 
-## ----source-results, message=FALSE, warning=FALSE, cache= FALSE-------------------------------
+## ----source-results, message=FALSE, warning=FALSE, cache= FALSE----
 
 # ===================================
 # Forest results
@@ -341,7 +341,7 @@ res_allML <-
   .[, Model := factor(Model, levels = c("aby", "abytt", "aabbyy", "aabbyytt"))]
 
 
-## ---- dependson = "source-results"------------------------------------------------------------
+## ---- dependson = "source-results"----
 
 rmse_y_all <-
   copy(res_allML) %>%
@@ -379,7 +379,7 @@ report_table_y <-
   autofit()
 
 
-## ---------------------------------------------------------------------------------------------
+## ----------------------------
 fig_y_optN <-
   rmse_y_all[Method %in% c("RF", "BRF", "CNN")] %>%
   ggplot(aes(x = rmse_y, y = rmse_optN)) +
@@ -387,16 +387,18 @@ fig_y_optN <-
   facet_grid(Model ~ Method) +
   # geom_smooth(method='lm', se=FALSE,  aes(colour="Regression line"), size=1) +
   # scale_colour_manual(values= "red") +
-  geom_smooth(method = "lm", se = FALSE, color = "red", size = 1) +
+  geom_smooth(method = "lm", se = FALSE, color = "red", size = 0.7) +
   stat_regline_equation(
-    label.x = 2150, label.y = 85,
-    aes(label = ..rr.label..)
+    label.x = 2050, label.y = 90,
+    aes(label = ..rr.label..),
+    size = 3
   ) +
   guides(
     fill = guide_legend(keywidth = 1, keyheight = 1),
     linetype = guide_legend(keywidth = 3, keyheight = 1),
     colour = guide_legend(keywidth = 3, keyheight = 1)
   ) +
+  ylim(NA, 95) +
   labs(y = " RMSE of EONR Estimation (kg/ha)") +
   labs(x = " RMSE of Yield Prediction (kg/ha)") +
   theme_few() +
@@ -413,7 +415,7 @@ fig_y_optN <-
 # dfabline <- data.frame(x = 0:3500, y=0:3500)
 
 
-## ---- dependson = "source-results"------------------------------------------------------------
+## ---- dependson = "source-results"----
 
 prepare_count_tab <-
   rmse_y_all %>%
@@ -487,7 +489,7 @@ report_summary_res_CNN_RF_BRF <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---- dependson = "source-results"------------------------------------------------------------
+## ---- dependson = "source-results"----
 
 # === Distribution of RMSE of EONR estimates === #
 plot_dis_optN <-
@@ -591,7 +593,7 @@ report_table_optN <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---------------------------------------------------------------------------------------------
+## ----------------------------
 piLoss_density <-
   copy(res_allML) %>%
   .[, Method := case_when(
@@ -622,7 +624,7 @@ piLoss_density <-
 
 
 
-## ---------------------------------------------------------------------------------------------
+## ----------------------------
 #### === The original code for this figure is in "1_3_CompTeEstimation.R" ===####
 
 figure_te <-
@@ -656,7 +658,7 @@ figure_te <-
   theme_figure
 
 
-## ---- cache = TRUE----------------------------------------------------------------------------
+## ---- cache = TRUE-----------
 # /*=================================================*/
 #' # Sample CT figure 
 # /*=================================================*/
@@ -702,7 +704,7 @@ opfit <- prune(tree, opcp)
 
 
 
-## ---------------------------------------------------------------------------------------------
+## ----------------------------
 # source("./GitControlled/Codes/0_1_functions_gen_analysis_data.R")
 
 
