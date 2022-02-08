@@ -194,7 +194,7 @@ CNN leaves room for researchers to determine its architecture. We used a slightl
 Let $\mathbf{\Omega_{i}}$ denote a list of subplot-level explanatory variables (soil/field characteristics). Further, let $\hat{g}_m(N,\mathbf{\Omega})$ denote an estimated yield response function, estimated by model $m$ ($m$ = RF, BRF, or CNN). Then, yield at $i$ from model $m$ is $\hat{g}_m(N,\mathbf{\Omega_{i}})$. The site-specific EONR for each model can then be found by solving the following profit maximization problem for all $i$ for each of the models:
 
 \begin{equation}
-\hat{N}^{opt}_{i} = \operatorname*{argmax}_{N}(p \hat{g}_m(N, \mathbf{\Omega_{i}}) - w N), (\#eq:eqn8)
+\hat{N}^{opt}_{i} = \operatorname*{argmax}_{N}(p \cdot\hat{g}_m(N, \mathbf{\Omega_{i}}) - w \cdot N), (\#eq:eqn8)
 \end{equation}
 
 where $p$ and $w$ are the prices of corn and N.
