@@ -23,10 +23,10 @@ sim_par <- function(i, reg_data, test_data, N_levels) {
 
   ## == all the combinations of variables ==##
   var_ls_variations <- list(
-    c("alpha", "beta", "ymax"),
-    c("alpha", "beta", "ymax", "theta_1", "theta_2"),
-    c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2"),
-    c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2", "theta_1", "theta_2")
+    c("alpha", "beta", "ymax")
+    # c("alpha", "beta", "ymax", "theta_1", "theta_2")
+    # c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2"),
+    # c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2", "theta_1", "theta_2")
   )
 
   #--- all the cases to consider ---#
@@ -157,7 +157,7 @@ CF_run <- function(data, rates, var_ls) {
     Y.hat = Y_hat,
     W.hat = W_hat,
     honesty = TRUE,
-    num.trees = 4000,
+    num.trees = 2000,
     num.threads = 1,
     tune.parameters = "all"
     # tune.parameters=c("sample.fraction", "mtry", "honesty.fraction", "honesty.prune.leaves", "alpha", "imbalance.penalty")
@@ -276,7 +276,7 @@ BRF_run <- function(reg_data, var_ls) {
     X = X,
     Y = Y,
     honesty = TRUE,
-    num.trees = 4000, 
+    num.trees = 2000, 
     num.threads=1,
     tune.parameters = "all"
   )
@@ -295,7 +295,7 @@ BRF_run <- function(reg_data, var_ls) {
 RF_run <- function(reg_data, var_ls) {
 
   # === Preparation === #
-  X <- reg_data[, c("aa_n", var_ls), with = FALSE] # (5/25)changed from "rate" to "as_app_N"
+  X <- reg_data[, c("aa_n", var_ls), with = FALSE] 
   Y <- reg_data[, yield]
 
   # === causal forest analysis ===#
@@ -303,7 +303,7 @@ RF_run <- function(reg_data, var_ls) {
     X = X,
     Y = Y,
     honesty = TRUE,
-    num.trees = 4000, 
+    num.trees = 2000, 
     num.threads=1,
     tune.parameters = "all"
   )
