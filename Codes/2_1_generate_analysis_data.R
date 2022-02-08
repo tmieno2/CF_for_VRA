@@ -14,19 +14,19 @@ library(parallel)
 
 
 #--- source functions ---#
-source(here("GitControlled/Codes/0_2_function_gen_analysis_data.R"))
+source(here("GitControlled/Codes/0_1_functions_gen_analysis_data.R"))
 
 # /*----------------------------------*/
 #' ## Datasets
 # /*----------------------------------*/
-# field <- readRDS(here("Shared/Data/for_Simulations/field_padding.rds"))
-# coef_data <- readRDS(here("Shared/Data/for_Simulations/coefficients_sprange_400.rds")))
+coef_data <- readRDS(here("Shared/Data/for_Simulations/coefficients_sprange_400.rds")))
+field <- readRDS(here("/Shared/Data/for_Simulations/field_padding.rds"))
 
 # === prices ===#
 pCorn <- price_table[2, pCorn]
 pN <- price_table[2, pN]
 
-field <- readRDS("./Shared/Data/for_Simulations/field_padding.rds")
+
 
 # /*=================================================*/
 #' # Generate raw dataset (cell-level)
@@ -74,4 +74,7 @@ test_data <- sapply(sim_data,"[",2)%>%rbindlist()
 
 saveRDS(reg_data, here("Shared/Data/for_Simulations/reg_data.rds"))
 saveRDS(test_data, here("Shared/Data/for_Simulations/test_data.rds"))
+
+
+
 

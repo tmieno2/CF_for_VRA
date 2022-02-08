@@ -9,6 +9,7 @@ library(here)
 library(data.table)
 library(tidyverse)
 library(ggthemes)
+library(future.apply)
 
 
 #/*----------------------------------*/
@@ -16,12 +17,13 @@ library(ggthemes)
 #/*----------------------------------*/
 
 #--- source functions ---#
-source(here("GitControlled/Codes/0_3_functions_main_sim.R"))
+source(here("GitControlled/Codes/0_1_functions_gen_analysis_data.R"))
+source(here("GitControlled/Codes/0_2_functions_main_sim.R"))
 
 
-#--- load the data ---#  
+#--- load data ---#  
 reg_data_all <- readRDS(here("Shared", "Data", "for_Simulations", "reg_data.rds"))
-test_data_all <- readRDS(here("Shared", "Data", "for_Simulations", "test_agg_data.rds"))
+test_data_all <- readRDS(here("Shared", "Data", "for_Simulations", "test_data.rds"))
 
 
 #--- pick a single simulation round ---#
@@ -30,8 +32,25 @@ reg_data_sample <- reg_data_all[sim==x & padding==1,]
 test_data_sample <- test_data_all[sim==x & padding==1,]
 N_levels <- reg_data_sample$rate%>%unique()%>%sort()
 
+subplots_infiled <- reg_data_sample[,unique_subplot_id] %>% unique()
 
-#--- all the cases to be considered ---#
+
+# --- true treatment effect data set --- #
+true_te_dt <- 
+	test_data_sample %>%
+	.[,.(sim, unique_subplot_id, alpha, beta, ymax)]%>%
+	.[rep(1:nrow(.), each = length(N_levels)), ] %>%
+  	.[, rate := rep(N_levels, nrow(.) / length(N_levels))] %>%
+  	.[, det_yield := gen_yield_MB(ymax, alpha, beta, rate)] %>%
+	.[, yield_base := .SD[rate==min(rate), det_yield], by = .(unique_subplot_id)] %>%
+  	.[, true_te_base := det_yield - yield_base] %>%
+  	.[, .(sim, unique_subplot_id, rate, true_te_base)]
+
+
+# /*================================================================*/
+#' # (1) Treatment Effect Calculation by CF-base, RF, BRF
+# /*================================================================*/
+# === all the cases to be considered === #
 te_var_ls_variations <- list(
     c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2", "theta_1", "theta_2")
     )
@@ -43,55 +62,69 @@ te_case_data <- expand.grid(
   tibble()
 
 
-# /*================================================================*/
-#' # Treatment Effect Calculation (CF-base vs RF vs BRF)
-# /*================================================================*/
-
 # === set up for parallel computations === #
 plan(multicore, workers = availableCores()-2)
 options(future.globals.maxSize= 850*1024^2)
 set.seed(1378)
 
-te_dt_allML <- te_case_data %>%
+
+# === treatment effect calculation === #
+forest_te_dt <- 
+	te_case_data %>%
 	mutate(
 		te_data = future_lapply(
 			seq_len(nrow(.)),
 			function(x) {
-				 get_te_dt(
-            test_data = test_data_sample,
-            var_ls = .$var_ls[[x]],
-            rates_ls = N_levels,
-            Method = .$Method[[x]]
-          )
-        },
-      future.seed = TRUE
-    )
-  )%>%
-  unnest(., cols= "te_data")%>%
-  data.table()%>%
-  setnames("unique_cell_id", "unique_subplot_id") %>%
-  .[, Method := factor(Method, levels = c("RF", "BRF", "CF_base"))] %>%
-  .[,!c("var_ls")]
+				get_te_dt(
+				reg_data = reg_data_sample,
+            	test_data = test_data_sample,
+            	var_ls = .$var_ls[[x]],
+            	rates_ls = N_levels,
+            	Method = .$Method[[x]]
+            	)
+			}, future.seed = TRUE
+    	)
+  	)%>%
+  	unnest(., cols= "te_data")%>%
+  	data.table()%>%
+  	.[, Method := factor(Method, levels = c("RF", "BRF", "CF_base"))] %>%
+  	.[,!c("var_ls")]
 
 
 
 # /*================================================================*/
-#' # Treatment Effect Comparison (CF-base vs RF vs BRF)
+#' # (2) Treatment Effect Calculation by CNN
 # /*================================================================*/
-true_te_dt <- 
-	test_data_sample %>%
-	.[,.(sim, unique_cell_id, alpha, beta, ymax)]%>%
-	.[rep(1:nrow(.), each = length(N_levels)), ] %>%
-  .[, rate := rep(N_levels, nrow(.) / length(N_levels))] %>%
-  .[, det_yield := gen_yield_MB(ymax, alpha, beta, rate)] %>%
-	.[, yield_base := .SD[rate==min(rate), det_yield], by = .(unique_cell_id)] %>%
-  .[, true_te_base := det_yield - yield_base] %>%
-  .[, .(sim, unique_cell_id, rate, true_te_base)] %>%
-  setnames("unique_cell_id", "unique_subplot_id")
+
+# === load CNN results (case: aabbyytt) === #
+res_cnn <- 
+	fread(here("Shared/Results/CNN_rawRes_onEval/0_alldata_model4.csv"))%>%
+	setnames("pred", "yield_hat")%>%
+	.[sim==1, rate %in% N_levels, .(id, rate, yield_hat, sim)] %>%
+	.[, c("subplot_id", "strip_id") := tstrsplit(id, "_", fixed=TRUE)] %>%
+  	.[,unique_subplot_id := paste0(strip_id,"_",subplot_id)] %>%
+  	.[unique_subplot_id %in% subplots_infiled, ] %>%
+  	.[,Method := "CNN"] %>%
+  	.[,.(Method, unique_subplot_id, rate, yield_hat)]
+
+
+cnn_te_dt <- 
+	copy(res_cnn) %>%
+	 .[, yield_base := .SD[rate==min(rate), yield_hat], by = .(unique_subplot_id)] %>%
+    .[, te_base := yield_hat - yield_base] %>%
+    .[, .(Method, unique_subplot_id, rate, te_base)]
 
 
 
-te_comp_dt <- left_join(te_dt_allML, true_te_dt, by=c("unique_subplot_id", "rate"))%>%
+
+# /*=================================================*/
+#' # Merge the results
+# /*=================================================*/
+
+
+te_comp_dt <- 
+	rbind(forest_te_dt, cnn_te_dt) %>%
+	true_te_dt[., on = c("unique_subplot_id", "rate")] %>%
 	.[rate != N_levels[1],]%>%
 	.[, Treatment := case_when(
 		rate == N_levels[2] ~ "N1-N2",
@@ -102,13 +135,12 @@ te_comp_dt <- left_join(te_dt_allML, true_te_dt, by=c("unique_subplot_id", "rate
 	
 
 
-saveRDS(te_comp_dt, here("Shared/Results_journal/dt_TEcomparison.rds"))
+saveRDS(te_comp_dt, here("Shared/Results/for_writing/dt_TEcomparison.rds"))
 
 
-
-# /*================================================================*/
-#' # Visualization
-# /*================================================================*/
+#/*----------------------------------*/
+#' ## Visualization
+#/*----------------------------------*/
 
 ggplot(te_comp_dt)+
 	geom_point(aes(x=true_te_base, y=te_base), size=0.5)+
@@ -117,13 +149,5 @@ ggplot(te_comp_dt)+
 	labs(y = "Estimated Treatment Effect")+
     labs(x = "True Treatment Effect")+
     theme_few()
-
-
-
-
-
-
-
-
 
 

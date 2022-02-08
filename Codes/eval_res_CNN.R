@@ -40,9 +40,6 @@ nonpadding_id <- testing_v1$id%>%unique()
 
 
 ##== for comparison: CF, BRF, RF resutls ==##
-# res_forest <- readRDS(here("Shared", "Results", "SimRes_sp_400.rds"))
-
-
 
 #=== load the CNN results Ver1===#
 aby_source_v1 <- read_csv(here("Shared", "Results", "alldata_model1.csv"))%>%
