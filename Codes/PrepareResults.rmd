@@ -668,8 +668,7 @@ piLoss_density <-
   geom_density(aes(x = Mean, fill = Method), alpha = 0.7) +
   # scale_fill_viridis(discrete = TRUE, alpha=0.5) +
   # scale_fill_viridis_d()+
-  labs(x = expression(paste(hat(pi)["loss"], " ($/ha)"))) +
-  # labs(x = TeX("$\\hat{pi}_{loss}$ (\\$/ha)")) +
+  labs(x = expression(paste(hat(pi)["def"], " ($/ha)"))) +
   facet_wrap(~Model, ncol = 1) +
   theme_dist
 
