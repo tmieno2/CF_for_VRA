@@ -1,4 +1,4 @@
-# /*===== Run on RGUI =====*/
+# /*===== Run on R GUI =====*/
 
 #/*----------------------------------*/
 #' ## Preparation
@@ -8,11 +8,9 @@ library(grf)
 library(data.table)
 library(tidyverse)
 library(future.apply)
-library(parallel)
 
-
-#--- source functions ---#
-setwd("~/Dropbox/ResearchProject/ML_VRA")
+# === Source Functions === #
+setwd("~/Dropbox/ResearchProject/CF_for_VRA")
 source("./GitControlled/Codes/0_2_functions_main_sim.R")
 
 # /*----------------------------------*/
@@ -25,52 +23,51 @@ pN <- price_table[2, pN]
 reg_data_all <- readRDS("./Shared/Data/for_Simulations/reg_data.rds")
 test_data_all <- readRDS("./Shared/Data/for_Simulations/test_data.rds")
 
-
 # x=1
 # train_dt <- reg_data_all[sim==x&padding==1,]
 # test_dt <- test_data_all[sim==x&padding==1,]
 # N_levels <- reg_data_all[sim==x,]$rate%>%unique()%>%sort()
 
-
-
 # /*=================================================*/
-#' # Simulation 
+#' # Simulation by scenarios
 # /*=================================================*/
+# + run a 1000 simulations by individual scenarios
+# + the 1000 simulation results will be saved per each scenario
 
 # === set up for parallel computations === #
 plan(multicore, workers = availableCores()-2)
 options(future.globals.maxSize= 850*1024^2)
-set.seed(1378)
+
+# --- modeling scenario --- #
+var_ls_variations <- list(
+    c("alpha", "beta", "ymax"),
+    c("alpha", "beta", "ymax", "theta_1", "theta_2"),
+    c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2"),
+    c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2", "theta_1", "theta_2")
+  )
 
 # --- Number of iterations --- #
 B=1000
 
-# === run simulation === #
-sim_results <- lapply(
-	  1:B, function(x) {
-	    sim_par(
-	      i = x,
-	      reg_data = reg_data_all[sim==x&padding==1,],
-	      test_data = test_data_all[sim==x&padding==1,],
-	      N_levels = reg_data_all[sim==x,]$rate%>%unique()%>%sort()
-	    )
-	  }
-	) %>%
-	rbindlist()%>%
-	rowwise() %>%
-	mutate(var_ls_name = paste0(var_ls, collapse = "_")) %>%
-	data.table()%>%
-	.[, Method := factor(Method, levels = c("RF", "BRF", "CF_base"))] %>%
-	.[, Model := factor(var_ls_name)] %>%
-	.[, Model := case_when(
-    	Model == "alpha_beta_ymax" ~ "aby",
-    	Model == "alpha_beta_ymax_theta_1_theta_2" ~ "abytt",
-    	Model == "alpha1_alpha2_beta1_beta2_ymax1_ymax2" ~ "aabbyy",
-    	Model == "alpha1_alpha2_beta1_beta2_ymax1_ymax2_theta_1_theta_2" ~ "aabbyytt"
-  	)] %>%
-  	.[,!c("var_ls", "var_ls_name")]
+# === start simulation === #
+for (var in var_ls_variations){
+		# var = c("alpha", "beta", "ymax")
+		set.seed(1378)
+		# --- for each modeling scenario run: --- #
+		sim_results <- lapply(1:B, 
+			function(x){
+				sim_par(
+					i = x,
+					var_ls = var,
+					reg_data = reg_data_all[sim==x&padding==1,],
+	      			test_data = test_data_all[sim==x&padding==1,],
+	      			N_levels = reg_data_all[sim==x,]$rate%>%unique()%>%sort()
+	      		)
+			}
+		) %>%
+		rbindlist()
 
-# 3:45 - 
+		saveRDS(sim_results, paste0("./Shared/Results/Forest_rawRes/forest_SimRes_", paste0(var, collapse = "_"), ".rds"))
+}
 
-### === this includes the results on training data sets as well === ###
-saveRDS(sim_results, "./Shared/Results_journal/SimRes_all.rds")
+
