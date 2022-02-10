@@ -21,57 +21,76 @@ library(tidyverse)
 library(ggpubr)
 library(here)
 
+# === Source Functions === #
 source(here("GitControlled/Codes/0_1_functions_gen_analysis_data.R"))
 source(here("GitControlled/Codes/0_2_functions_main_sim.R"))
 
-# === prices ===#
+# === Prices ===#
 pCorn <- price_table[2, pCorn]
 pN <- price_table[2, pN]
 
 
-# === Load Training and Testing data sets for evaluation === #
-reg_data_all <- readRDS("./Shared/Data/for_Simulations/reg_data.rds")
-test_data_all <- readRDS("./Shared/Data/for_Simulations/test_data.rds")
-
-source_dt <- 
-    bind_rows(reg_data_all, test_data_all, .id = "type") %>%
-    .[padding==1, .(sim, type, unique_subplot_id, alpha, beta, ymax)] %>%
-    .[,type := case_when(type == "1" ~ "train", type == "2" ~ "test")]
-
-subplots_infiled <- source_dt[,unique_subplot_id] %>% unique()
-
-# ==========================================================================
-# Results of RF, BRF and CF
-# ==========================================================================
-
-# === All Results === #
-forest_simRes_all <- 
-    readRDS(here("Shared/Results_journal/SimRes_all.rds")) %>%
-    .[, Model := factor(Model, levels = c("aby", "abytt", "aabbyy", "aabbyytt"))]%>%
-    .[, Method := factor(Method, levels = c("RF", "BRF", "CF_base"))] 
-
-# === function for RMSE calculation === #
+# === Function for RMSE Calculation === #
 rmse_general <-function(preds,actual){ 
   sqrt(mean((actual - preds)^2))
 }
 
+# === Load Training and Testing Data Sets for Evaluation === #
+reg_data_all <- readRDS(here("Shared/Data/for_Simulations/reg_data.rds"))
+test_data_all <- readRDS(here("Shared/Data/for_Simulations/test_data.rds"))
+
+source_dt <- 
+    bind_rows(reg_data_all, test_data_all, .id = "type") %>%
+    .[padding==1, .(sim, type, unique_subplot_id, alpha, beta, ymax, rate, yield, opt_N)] %>%
+    .[,type := case_when(type == "1" ~ "train", type == "2" ~ "test")]
+
+subplots_infiled <- source_dt[,unique_subplot_id] %>% unique()
+
+
+# ==========================================================================
+# 1. Results of RF, BRF and CF
+# ==========================================================================
 
 # /*=================================================*/
-#' # RMSE of EONRs and Profit Loss calculation
+#' # Load and organize the Forest results
 # /*=================================================*/
-pi_loss_dt <- source_dt %>%
+# === Load Forest Results === #
+ls_res_forest <- 
+    list.files(
+        path = here("Shared/Results/Forest_rawRes"), 
+        full.names = TRUE
+    ) %>%
+    gtools::mixedsort(decreasing = TRUE)
+
+
+forest_simRes_all <- 
+    lapply(ls_res_forest, readRDS) %>%
+    rbindlist(., idcol = "Model") %>%
+    .[,Model := case_when(
+        Model == 1 ~ "aby",
+        Model == 2 ~ "abytt",
+        Model == 3 ~ "aabbyy",
+        Model == 4 ~ "aabbyytt"
+        )] %>%
+    .[, Model := factor(Model, levels = c("aby", "abytt", "aabbyy", "aabbyytt"))]%>%
+    .[, Method := factor(Method, levels = c("RF", "BRF", "CF_base"))] %>%
+    .[, .(type, sim, Model, Method, unique_subplot_id, pred_yield, opt_N_hat, yield, opt_N)]
+
+
+# /*=================================================*/
+#' # RMSE of EONRs and Profit-deficits calculation
+# /*=================================================*/
+forest_optN_piLoss <- 
+    source_dt[, !c("rate", "yield", "opt_N")] %>%
     forest_simRes_all[, on=c("sim", "type", "unique_subplot_id")] %>%
     .[,`:=`(
         max_pi = pCorn*gen_yield_MB(ymax, alpha, beta, opt_N) - pN*opt_N,
         pi =  pCorn*gen_yield_MB(ymax, alpha, beta, opt_N_hat) - pN*opt_N_hat)] %>%
     .[, pi_loss := max_pi - pi]
 
-
-# /*---------------------------------*/
-#' ## (1) Summarize by simulation round
-# /*---------------------------------*/
-rmse_pi_loss_bySim <- 
-    pi_loss_dt %>%
+# === Summarize by Simulation Round === #
+forest_summary_bySim <- 
+    forest_optN_piLoss %>%
     .[,.(
         rmse_optN = rmse_general(opt_N_hat, opt_N),
         pi_loss = mean(pi_loss),
@@ -79,23 +98,20 @@ rmse_pi_loss_bySim <-
     ), by= .(sim, type, Method, Model)]
 
 
-# /*---------------------------------*/
-#' ## (2) Summarize by methods and models
-# /*---------------------------------*/
-rmse_pi_loss_bySim %>%
+# === Summarize by Method and Model === #
+forest_summary_bySim %>%
     .[, .(
         mean_rmse_optN = mean(rmse_optN),
         mean_pi_loss = mean(pi_loss),
         mean_rmse_y = mean(rmse_y)
         ), by=.(type, Method, Model)] %>%
-    .[order(type)]
-
+    .[order(type, Method)]
 
 
 
 
 # ==========================================================================
-# Results of CNN
+# 2.  Results of CNN
 # ==========================================================================
 
 # /*=================================================*/
@@ -103,139 +119,142 @@ rmse_pi_loss_bySim %>%
 # /*=================================================*/
 
 # === Load CNN results === #
-# --- CNN results on the evaluation data sets --- #
-ls_res_cnn_onTrain <- 
+# --- CNN results on the training data sets --- #
+res_cnn_onTrain <-
     list.files(
         path = here("Shared/Results/CNN_rawRes_onTrain"), 
-        pattern = "0_*.",
         full.names = TRUE
-    )
-
-res_cnn_onTrain <- 
-    lapply(ls_res_cnn_onTrain, fread) %>%
-    rbindlist(idcol = "Model") %>%
-    .[,Model := case_when(
-        Model == 1 ~ "aby",
-        Model == 2 ~ "abytt",
-        Model == 3 ~ "aabbyy",
-        Model == 4 ~ "aabbyytt"
-        )] %>%
+    ) %>% 
+    lapply(., fread) %>%
+    rbindlist(., idcol = "Model") %>%
     .[, type := "train"]
 
-
 # --- CNN results on the evaluation data sets --- #
-ls_res_cnn_onEval <- 
+res_cnn_onEval <- 
     list.files(
         path = here("Shared/Results/CNN_rawRes_onEval"),
-        pattern="0_*.",
         full.names=TRUE
-    )
-
-res_cnn_onEval <- 
-    lapply(ls_res_cnn_onEval, fread) %>%
-    rbindlist(idcol = "Model") %>%
-    .[,Model := case_when(
-        Model == 1 ~ "aby",
-        Model == 2 ~ "abytt",
-        Model == 3 ~ "aabbyy",
-        Model == 4 ~ "aabbyytt"
-        )] %>%
+    ) %>%
+    lapply(., fread) %>%
+    rbindlist(.,idcol = "Model") %>%
     .[, type := "test"]
 
 
 # === Combine to one data set=== #
-cnn_simRes_all <- rbind(res_cnn_onTrain, res_cnn_onEval) %>%
-  .[, c("subplot_id", "strip_id") := tstrsplit(id, "_", fixed=TRUE)] %>%
-  .[,unique_subplot_id := paste0(strip_id,"_",subplot_id)]%>%
-  .[unique_subplot_id %in% subplots_infiled,]%>%
-  setnames("pred", "yield_hat")%>%
-  .[,.(sim, unique_subplot_id, rate, yield_hat, Model)]%>%
-  .[, Model:=factor(Model, levels = c("aby", "abytt", "aabbyy", "aabbyytt"))]%>%
-  .[, Method:="CNN"]
+cnn_simRes_all <- 
+    rbind(res_cnn_onTrain, res_cnn_onEval) %>%
+    .[,Model := case_when(
+        Model == 1 ~ "aby",
+        Model == 2 ~ "abytt",
+        Model == 3 ~ "aabbyy",
+        Model == 4 ~ "aabbyytt"
+    )] %>%
+    .[, Model:=factor(Model, levels = c("aby", "abytt", "aabbyy", "aabbyytt"))] %>%
+    setnames("pred", "pred_yield") %>%
+    # --- creation of unique_subplot_id--- #    
+    .[, c("subplot_id", "strip_id") := tstrsplit(id, "_", fixed=TRUE)] %>%
+    .[,unique_subplot_id := paste0(strip_id,"_",subplot_id)] %>%
+    .[unique_subplot_id %in% subplots_infiled,]
 
 
 
-# /*----------------------------------*/
-#' ## Evaluate optN estimation
-# /*----------------------------------*/
-###=== get slope of the yield response function ===###
-# slope_v1 <- copy(cnn_simRes_all)%>%
-#   .[, .(slope = coef(lm(yield_hat~rate))["rate"]), by= .(id, sim, var_case)]
+# /*=================================================*/
+#' # Estimate EONR 
+# /*=================================================*/
 
-# all_var_case <- c("aby", "abytt", "aabbyy", "aabbyytt")
+#/*----------------------------------*/
+#' ## Visualize CNN's site-specific yield response function
+#/*----------------------------------*/
+# Confirm that the predicted yield response functions are always linear
+cnn_simRes_temp <- 
+    cnn_simRes_all %>%
+    .[type=="test" & sim==1 & unique_subplot_id %in% subplots_infiled[1:100],]
 
-# cal_slope <- function(case){
-#     # case="aby"
-#     demo <- copy(cnn_simRes_all)%>%
-#     .[var_case==case, ]%>%
-#     .[, .(slope = coef(lm(yield_hat~rate))["rate"]), by= .(unique_subplot_id, sim, var_case)]%>%
-#     .[order(sim)]
+ggplot(cnn_simRes_temp, aes(x=rate, y=pred_yield, colour=factor(unique_subplot_id))) +
+    geom_point(size = 0.7) +
+    geom_smooth(method=lm, se=FALSE, size=0.3) +
+    facet_wrap(~Model, ncol = 2) +
+    theme(
+        legend.title = element_blank(),
+        legend.position = "none"
+    )
 
-# }
 
-# slope_all <- mclapply(all_var_case, cal_slope, mc.cores=detectCores()-2)%>%
-#     rbindlist()
+#/*----------------------------------*/
+#' ## EONR estimation
+#/*----------------------------------*/
+# ' Description: 
+#' + CNN's yield response function is always linear
+#' + In this case, solving profit maximizing problem is equivalent to 
+#' doing the following things
+#' (1) for each subplot, get the slope coefficient (i.e., slope)
+#' (2) Check the sign of slope - w/p (w is N price, and p is corn price)
+#' + if slope - w/p > 0, the EONR for the subplot is the maximum of the experimental N rate
+#' + otherwise, the EONR is the minimum of the experimental N rate
 
-# saveRDS(slope_all, here("CNN_Results", "cnn_response_slope_all.rds"))å
 
-slope_all <- readRDS(here("Shared", "Results", "cnn_response_slope_all.rds"))
+# === Get Slope of the Yield Response Function === #
+all_var_case <- c("aby", "abytt", "aabbyy", "aabbyytt")
 
+cal_slope <- function(case){
+    # case="aby"
+    tmep <- cnn_simRes_all%>%
+    .[Model == case, ]%>%
+    .[, .(slope = coef(lm(pred_yield~rate))["rate"]), by= .(type, Model, sim, unique_subplot_id)]
+}
+
+slope_dt <- mclapply(all_var_case, cal_slope, mc.cores=detectCores()-2)%>%
+    rbindlist()
+
+# saveRDS(slope_dt, here("Shared/Results/CNN_EONR_anlaysis/cnn_response_slope_all.rds"))
+
+# === EONR Estimation === #
+slope_dt <- readRDS(here("Shared/Results/CNN_EONR_anlaysis/cnn_response_slope_all.rds"))
 pCorn <- price_table[2, pCorn]
 pN <- price_table[2, pN]
-
 pN_pC_ratio <- pN/pCorn
 
-
-CNN_opt_N_eval <- copy(slope_all)%>%
-    setnames(c("id", "var_case"), c("unique_subplot_id", "Model")) %>%
-    cnn_simRes_all[.,on=c("sim", "unique_subplot_id", "Model")]%>%
+cnn_optN_dt <- 
+    slope_dt %>%
+    cnn_simRes_all[., on = c("type", "Model", "sim", "unique_subplot_id")] %>%
     .[, opt_N_hat :=
-        lapply(.SD, function(x) ifelse(slope<pN_pC_ratio, min(rate), max(rate)))
-            , by=.(unique_subplot_id, sim, Model)]%>%
-    .[rate==opt_N_hat,]%>%
-    .[test_agg_dt[,.(sim, unique_subplot_id, alpha, beta, ymax, opt_N)], on=c("sim", "unique_subplot_id")]
+        lapply(.SD, function(x) ifelse(slope > pN_pC_ratio, max(rate), min(rate)))
+            , by=.(type, Model, sim, unique_subplot_id)]
 
 
-CNN_pi_loss_dt <- CNN_opt_N_eval %>%
+# /*=================================================*/
+#' # RMSE of EONRs and Profit-deficits Calculation
+# /*=================================================*/
+cnn_optN_piLoss <- 
+    source_dt %>%
+    cnn_optN_dt[, on = c("type", "sim", "unique_subplot_id", "rate"), nomatch = NULL] %>%    
     .[,`:=`(
         max_pi = pCorn*gen_yield_MB(ymax, alpha, beta, opt_N) - pN*opt_N,
         pi =  pCorn*gen_yield_MB(ymax, alpha, beta, opt_N_hat) - pN*opt_N_hat)] %>%
     .[, pi_loss := max_pi - pi]
 
 
-
-subplot_area <- conv_unit(60*60, "ft2", "hectare")
-
-CNN_rmse_pi_loss_bySim <- CNN_pi_loss_dt[,c(
-    rmse_optN = rmse_general(opt_N_hat, opt_N),
-    as.list(summary(pi_loss)),
-    sd_pi_loss = sd(pi_loss),
-    cumulative_pi_loss = sum(pi_loss*subplot_area)
-    ), by= .(sim, Method, Model)]
-
-
-
-# /*----------------------------------*/
-#' ## Evaluate yield prediction
-# /*----------------------------------*/
-CNN_rmse_y <- test_agg_dt[,.(unique_subplot_id, sim, yield, rate)]%>%
-    cnn_simRes_all[., on = c("sim", "unique_subplot_id","rate")]%>%
+# === Summarize by Simulation Round === #
+cnn_summry_bySim <- 
+    cnn_optN_piLoss %>%
     .[,.(
-        # r2_y = summary(lm(yield ~ yield_hat))$r.squared,
-        rmse_y = rmse_general(yield_hat, yield)
-        ), by=.(sim, Model, Method)]
+        rmse_optN = rmse_general(opt_N_hat, opt_N),
+        pi_loss = mean(pi_loss),
+        rmse_y = rmse_general(pred_yield, yield)
+    ), by= .(sim, type, Model)]
 
 
-report_CNN <- CNN_rmse_y[CNN_rmse_pi_loss_bySim, on=c("sim", "Model", "Method")]
+saveRDS(cnn_rmse_bySim, here("Shared/Results/cnn_summry_bySim.rds"))
 
-saveRDS(report_CNN, here("Shared", "Results", "SimRes_CNN_RMSE.rds"))
+# === Check Summary of the CNN Results === #
+cnn_summry_bySim %>%
+    .[, .(
+        mean_rmse_optN = mean(rmse_optN),
+        mean_pi_loss = mean(pi_loss),
+        mean_rmse_y = mean(rmse_y)
+        ), by=.(type, Model)] %>%
+    .[order(type)]
 
-
-r2_CNN%>%
-  .[,.(
-    rmse_y = mean(rmse_y),
-    rmse_optN =mean(rmse_optN)
-    ), by = .(Model, Method)]
 
 
 

@@ -9,48 +9,40 @@ price_table <- data.table(
 )
 
 
+
 # /*=================================================*/
 #' # Run main simulations
 # /*=================================================*/
-sim_par <- function(i, reg_data, test_data, N_levels) {
+sim_par <- function(i, var_ls, reg_data, test_data, N_levels) {
   print(paste0("working on ", i, " th iteration."))
-  # for example
+  # i = 1; var_ls = c("alpha", "beta", "ymax")
   # reg_data = train_dt; test_data = test_dt; N_levels = N_levels
 
   # /*----------------------------------*/
   #' ## run ML analyses
   # /*----------------------------------*/
 
-  ## == all the combinations of variables ==##
-  var_ls_variations <- list(
-    c("alpha", "beta", "ymax")
-    # c("alpha", "beta", "ymax", "theta_1", "theta_2")
-    # c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2"),
-    # c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2", "theta_1", "theta_2")
-  )
-
   #--- all the cases to consider ---#
-  case_data <- expand.grid(
-    var_ls = var_ls_variations,
-    Method = c("CF_base", "BRF", "RF")    
-  ) %>%
-  tibble()
+  case_data <- 
+    tibble(
+      Method = c("CF_base", "BRF", "RF")    
+    )
 
-
-  results_data <- case_data %>%
-    mutate(
-      opt_N_data = future_lapply(
-        seq_len(nrow(.)),
-        function(x) {
-          ### === apply various methods to get optimal N ===###
-          get_opt_N(
-            reg_data = reg_data,
-            test_data = test_data,
-            var_ls = .$var_ls[[x]],
-            rates_ls = N_levels,
-            Method = .$Method[[x]]
-          )
-        },
+  results_data <- 
+    case_data %>%
+      mutate(
+        opt_N_data = future_lapply(
+          seq_len(nrow(.)),
+          function(x) {
+            ### === apply various methods to get optimal N ===###
+            get_opt_N(
+              reg_data = reg_data,
+              test_data = test_data,
+              var_ls = var_ls,
+              rates_ls = N_levels,
+              Method = .$Method[[x]]
+            )
+          },
         future.seed = TRUE
       )
     )%>%
@@ -60,7 +52,6 @@ sim_par <- function(i, reg_data, test_data, N_levels) {
   return(results_data)
      
 }
-
 
 
 
@@ -159,7 +150,6 @@ CF_run <- function(data, rates, var_ls) {
     num.trees = 2000,
     num.threads = 1,
     tune.parameters = "all"
-    # tune.parameters=c("sample.fraction", "mtry", "honesty.fraction", "honesty.prune.leaves", "alpha", "imbalance.penalty")
   )
 
   return(tau_forest_temp)
@@ -276,7 +266,7 @@ BRF_run <- function(reg_data, var_ls) {
     Y = Y,
     honesty = TRUE,
     num.trees = 2000, 
-    num.threads=1,
+    num.threads = 1,
     tune.parameters = "all"
   )
 
@@ -303,7 +293,7 @@ RF_run <- function(reg_data, var_ls) {
     Y = Y,
     honesty = TRUE,
     num.trees = 2000, 
-    num.threads=1,
+    num.threads = 1,
     tune.parameters = "all"
   )
 

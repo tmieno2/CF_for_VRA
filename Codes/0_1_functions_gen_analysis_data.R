@@ -333,6 +333,19 @@ gen_cluster <- function(data, num_levels, dim) {
   return(data)
 }
 
+# /*=================================================*/
+#' # Make grids within a subplot for base_field 
+# /*=================================================*/
+make_grid_within_subplot <- function(field_base, cell){
+  # cell="2_1"
+  temp_cell <- field_base%>%filter(unique_cell_id==cell)
+  res <- st_make_grid(st_boundary(temp_cell),  n = c(6, 1))%>%
+    st_as_sf()%>%
+    mutate(unique_cell_id=cell, cell_in_cell.id=seq(from=1,to=6))
+
+  return(res)
+} 
+
 
 # /*=================================================*/
 #' # Assign rates to the trial design data
