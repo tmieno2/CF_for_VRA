@@ -1,0 +1,29 @@
+ Mendeley Data:
+   ✔ create bib file for Mendeley data @done (09-02-22 22:32)
+   □ create simulation flow chart 
+   ✔ modify codes to be uploaded to Mendeley Data @done (10-02-22 13:58)
+     ✔ 0_1_functions_gen_analysis_data.R @done (09-02-22 22:37)
+     ✔ 0_2_functions_main_sim.R @done (09-02-22 22:37)
+     ✔ 1_1_generate_field.R @done (08-02-22 18:04)
+     ✔ 1_2_generate_coefficients.R @done (09-02-22 23:08)
+     ✔ 2_1_generate_analysis_data.R @done (09-02-22 23:15)
+     ✔ 2_2_main_sim.R @done (09-02-22 23:22)
+     ✔ 3_1_SimDataAnalysis.R @done (09-02-22 23:27)
+     ✔ 3_2_CompTeEstimation.R @done (09-02-22 23:34)
+     □ PrepareResults.rmd
+   ✔ add README file @done (12-02-22 14:30)
+     + Explain the step of the simulations
+     + NOTE: this README file is a draft
+
+
+Final Check:
+  □ Make sure the url of Mendeley data work (pasted in the manuscript, appendix, and response to reviewer1)
+    + I think I need to publish the data before we re-submit to the journal
+  □ Make sure the link to the CF_for_VRA repository work.
+  □ Does the figure 
+  □ All the title of figures and tables are lowercase other than first letter
+  □ Shun put table and figure numbers here [response to reviewer1]
+  □ Shun, number the equations [appendix]
+  □ Correct figure numbers in appendix
+  □ Check whether all the equation is numbered correctly. [manuscript and appendix]
+  □ 
