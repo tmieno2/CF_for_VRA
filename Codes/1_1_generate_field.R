@@ -15,8 +15,8 @@ library(parallel)
 library(mapedit)
 
 
-#--- source functions ---#
-source(here("Gitcontrolled", "Codes", "0_1_functions_gen_analysis_data.R"))
+# === Load Functions === #
+source(here("Codes", "0_1_functions_gen_analysis_data.R"))
 
 # ==========================================================================
 #  1. Field Data
@@ -34,7 +34,7 @@ field_boundary <- ffy %>%
   st_bbox() %>%
   st_as_sfc() %>%
   st_as_sf()
-  
+
 
 # /*=================================================*/
 #' # 1. Base Field 
@@ -184,7 +184,7 @@ field_grid_within_subplot <-
   mapedit:::combine_list_of_sf()
 
 # --- Merge with field_expd --- #
-field_padding <- 
+analysis_field <- 
   left_join(
     field_grid_within_subplot, st_drop_geometry(field_expd), by="unique_cell_id")%>%
     cbind(., st_coordinates(st_centroid(.)))%>%
@@ -195,7 +195,7 @@ field_padding <-
 
 # ggplot()+
 #   geom_sf(data=field_base, fill="green", size=0, alpha=0.6) +
-#   geom_sf(data=field_padding, fill=NA)
+#   geom_sf(data=analysis_field, fill=NA)
 
 # /*========================================*/
 #' 4. Create "padding" indicator
@@ -204,14 +204,14 @@ field_padding <-
 base_bdary <- st_union(field_base)
 
 padding_idx <- 
-  field_padding %>%
+  analysis_field %>%
   st_centroid() %>%
   dplyr::select(unique_cell_id) %>%
   mutate(padding = ifelse(st_within(., base_bdary, sparse=FALSE), 1, 0))%>%
   st_drop_geometry()%>%
   data.table()
 
-res_field_padding <- left_join(field_padding, padding_idx, by="unique_cell_id")
+analysis_field <- left_join(analysis_field, padding_idx, by="unique_cell_id")
 
 
-saveRDS(res_field_padding, here("Shared/Data/for_Simulations/field_padding.rds"))
+saveRDS(analysis_field, here("Data/for_Simulations/analysis_field.rds"))

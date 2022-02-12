@@ -98,7 +98,7 @@ forest_te_dt <-
 
 # === load CNN results (case: aabbyytt) === #
 res_cnn <- 
-	fread(here("Shared/Results/CNN_rawRes_onEval/0_alldata_model4.csv"))%>%
+	fread(here("Shared/Results/CNN_rawRes_onEval/alldata_model4.csv"))%>%
 	setnames("pred", "yield_hat")%>%
 	.[sim==1, rate %in% N_levels, .(id, rate, yield_hat, sim)] %>%
 	.[, c("subplot_id", "strip_id") := tstrsplit(id, "_", fixed=TRUE)] %>%

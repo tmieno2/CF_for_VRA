@@ -3,17 +3,17 @@ title: "Reply to Reviewer #1"
 output:
   bookdown::word_document2:
     number_sections: no
-    reference_docx: word_template_format.docx
+    reference_docx: ../word_template_format.docx
 ---
 
-Thank you so much for your comments. By addressing them, we believe the manuscript is improved significantly. You can find our replies to your comments. Your comments are in bold, and out replies are in a regular font.
+Thank you so much for your comments. By addressing them, we believe the manuscript is improved significantly. Below you will find your comments in bold and our replies in a regular font.
 
 <br>
 
 **1. The first point of the highlight describes the advantages of the CF model over other machine learning methods. The advantages of the CF model are not suitable for the highlight of this study. Therefore, I suggest that the authors revise the first point of the highlight.**
 
 <span style="color:blue">  
-Yes, we agree with your point, and we have decided to simply drop it from our highlights.
+We agree with your point, and we have dropped the discussion of the advantages of the CF model from our highlights.
 </span>
 
 <br>
@@ -23,9 +23,11 @@ Yes, we agree with your point, and we have decided to simply drop it from our hi
 
 <br>
 
-We do see a redundancy of expalining how CF can be used to identify site-specific input recommendations. It was explained twice in 2.2 and 3.2.2, while 2.2 is intended for a more general case than 3.2.2 that is specific to our simulations. Therefore, we decided to take out 2.2. We also renamed 2.1 to "Estimating EOIR and Treatment Effects."
+We do see a redundancy in our explanation of how CF can be used to identify site-specific input recommendations. It was explained twice, once each in subsections 2.2 and 3.2.2. We have deletedthe explanation in 2.2 and also changed the heading in 2.1 to "Estimating EOIR and Treatment Effects."
 
-We have moved an example of causal tree (previously in seciton 2.3), but decide to keep the explanation of how CF works. The core objective of the paper is to test the CF against existing ML methods in predicting EOIR and economic performance of resulting site-specific input use recommendations. To this core objective, ML simulation is our core method. For this reason, in our Materials and Methods section, we would like to avoid the explanation of how CF works just like we do not give too much explanations to any of RF, BRF, and CNN, which are well-established and mostly understood already by the readers of this journal. However, since this article is the first to apply CF in the field of agronomy, let alone site-specific input management, we believe that it is worthwhile to present how it works in detail and what conditions are necessary for it to work well. Now, if we place such description inside the Materials and Method section, it will break the flow of explaning how MC simulations work, temporarily distracting readers from how MC simulations are conducted to the details of how CF works. Insted, we believe that it is better to first give readers knowledge on how CF works and the potential advantages over the existing predition-oriented ML methods as essential knowledge before we move onto how our MC simulations are conducted in the Materials and Method section, in which we would like to focus on how MC simulations are conducted. Therefore, we kept 2.3 and 2.4 (in the previous round) in the current manuscript.
+We have moved an example of a causal tree (previously in seciton 2.3), but have kept the explanation of how CF works. The core objective of the paper is to test the CF against existing ML methods in predicting EOIR and economic performance of resulting site-specific input use recommendations. 
+
+ML simulation is the core method we use to pursue this core objective. For this reason the Materials and Methods section features no explanation of how CF works. We also provide little explanation of RF, BRF, and CNN methods, which are well-established and familiar to many readers of this journal. However, since this article is the first to apply CF in the field of agronomy, let alone site-specific input management, we believe that it is worthwhile to present in detail how it works and the conditions necessary for it to work well. We believe that if we placed such a description of how CF works inside the Materials and Method section, it will unnecessarily distract the reader by breaking the flow of the explanation of the MC simulation procedures. We feel that the narrative will flow better if it first informs readers about the potential advantages of CF over existing prediction-oriented ML methods before moving into a description of the MC simulations in the Materials and Method section. Therefore, we have kept in the current manuscript the discussion located in subsection 2.3 and 2.4 of the original manuscript.
 </span>
 
 <br>
@@ -35,13 +37,13 @@ We have moved an example of causal tree (previously in seciton 2.3), but decide 
 <span style="color:blue">  
 In rereponse to this comments, we made several changes. 
 
-First, we consolidated 3.1.2 and 3.1.3 in the previous round into a single subsubsection called "Cell-specific Yield Functions and True Economically Optimal N Rates." In doing so, we dropped detailed explanation of the conceptual framework behind the yield response functions based on cell-leve characteristics, $c_i$, and moved it to the supplemnentary appendix (Appendix B). We also removed our detailed description of how parameters and error term were generated and moved it to Appendix C along with relevant tables and figures (spefically table x and figures x, y, z) <span style = "color: blue;"> Shun put table and figure numbers here </span>.
+First, in the new manuscript we consolidated the original manuscript's 3.1.2 and 3.1.3 into a single subsubsection called "Cell-specific Yield Functions and True Economically Optimal N Rates." In doing so, we moved to the supplementary appendix (Appendix B) the detailed explanation of the conceptual framework behind the yield response functions based on cell-level characteristics, $c_i$. In addition, we moved to Appendix C our detailed discussion of parameters and error term generation, which included a number of tables and figures. <span style = "color: blue;"> Shun put table and figure numbers here </span>.
 
-Second, we consolidated 3.1.4 and 3.1.5 in the previous round into a single subsubsection called "Trial Design and Yield Data Generation for Modeling." In doing so, we cut some texts and combined figure x and y in the previous round into a single figure (figure x in the current manuscript).
+Second, we consolidated subsection 3.1.4 and 3.1.5 of the original manuscript into a single subsubsection called "Trial Design and Yield Data Generation for Modeling." In doing so, we removed some text and combined the original manuscript's figures x and y in the single figure z in the current manuscript. 
 
-Third, we removed detailed description of how some parameters are splitted into two parts and moved it to the Appendix.
+Third, we moved to an appendix the previous manuscript’s detailed description of parameter splitting.
 
-In MC simulation studies, we believe that presenting how data is generated in detail is crucial because the results are dependent on how data is generated. It is much like any emprical studies using real experiment data provides lots of details about the experiemnts. We take reproducibility seriously and we believe that the details we peovided in our current manuscript is appropriate and it is hard for us to further slim down the section. Moreover, we believe we no longer have any redundancy in this section. 
+We believe that the detailed presentation of data generation is crucial in our reporting of MC procedures, as it would be in the report of any empirical study using real experiment data provides. In both cases, results are highly dependent procedures. We believe further slimming of the description would hinder anyone attempting to reproduce our results. That said, we have worked hard to remove redundancies in this section of the manuscript. 
 </span>
 
 <br>
@@ -49,7 +51,7 @@ In MC simulation studies, we believe that presenting how data is generated in de
 **4. What is the unit of the topographical slope？ (line 131)**
 
 <span style="color:blue">  
-It is degree. The unit is now provided in the description of the figure in Appendix A. Please not that this example is just for illustrating how CF works.
+It is degree. The unit is now provided in the description of the figure in Appendix A. Please note that the purpose of the example is simply to illustrate how CF works.
 </span>
 
 <br>
@@ -57,7 +59,7 @@ It is degree. The unit is now provided in the description of the figure in Appen
 **5. There are 3 numbers in each small frame of Figure 1, please describe the meaning of each number in detail in the figure caption. (line 137)**
 
 <span style="color:blue">  
-Explanations for those numbers are added as a footnote to the figure. The figure is now in the appendix and called Figure A.1. 
+Explanations for those numbers are added as a footnote to the figure. The figure is now in an appendix and called Figure A.1. 
 </span>
 
 <br>
@@ -65,7 +67,7 @@ Explanations for those numbers are added as a footnote to the figure. The figure
 **6. Some formulas in the manuscript are not numbered (lines 116, 120, 268, 291, 371, 389).**
 
 <span style="color:blue">  
-All the formulas are now numbered. <span style = "color: blue;"> Shun, make sure this happens right before you submit. </span>
+All the formulas are now numbered.
 </span>
 
 <br>
@@ -73,13 +75,9 @@ All the formulas are now numbered. <span style = "color: blue;"> Shun, make sure
 **7. What are the exact number and proportion of test set training sets? (line 192)**
 
 <span style="color:blue">  
-We aplogogize that we are not clear on this respect. 
+We apologize for not making this cleaner in the original manuscript. The training data set and test data set were completely separate in our analysis. For a given simulation round, the training data set from another round acted as a "test" dataset. These data sets were created independently and with different underlying field parameters $\alpha$, $\beta$, and $ymax$. Training data sets, however, were split into several parts for cross-validation in determining a round's optimal values of its hyperparameters. In addition, we added the following paragraph section 3.3.3 to make this point clear. 
 
-Trainign dataset and test dataset are completely separate. For a given simulation round, the training dataset in another round of simulation acts as a "test" dataset. These datasets are created independently from one another and are different in the underdyling field parameters $\alphe$, $\beta$, and $ymax$. Therefor, in MC simulations, the dataset in a given simulation serves as a train dataset, and served as a test data for another simulation round. The train dataset, however, was split into several parts when cross-validation was performed in determing the optimal hyperparameters within a given simulation round.
-
-We added the following paragraph to section <span style = "color: blue;"> Shun section number here </span> to make this point clear.
-
-"For evaluation of yield and EONR predictions, a dataset from a different simulation round was used as the test dataset. For example, for simulation number 1, train dataset from simulation number 2 was used as the test dataset. This process works because the train datasets were generated by the same data generating process, yet have different underlying field parameters ($\alpha$, $\beta$, $ymax$). Furtehr, each of the "train" datasets are generated independet of one another. Thefore, for a particular simulation round, the dataset in any of the other simualtion rounds can serve as a valid test dataset. This practice avoid creating another set of 1000 simulations fields unnecessarily."
+"For evaluation of yield and EONR predictions, a data set from a different simulation round was used as the test data set. For example, for simulation number 1, the training data set from simulation number 2 was used as the test data set. This process works because the training data sets were generated by the same data generating process, yet have different underlying field parameters ($\alpha$, $\beta$, $ymax$). Further, all training data sets were generated independently, so for any particular simulation round, the data set from any other round could serve as a valid test data set. This practice made the creation of one thousand additional simulations fields unnecessary."
 </span>
 
 <br>
@@ -87,11 +85,7 @@ We added the following paragraph to section <span style = "color: blue;"> Shun s
 **8. I can't open the code link (https://github.com/tmieno2/ML_VRA.git, lines 199 and 249) with my browsers (chrome, edge, and Firefox). Please upload the code to the public research data repositories (Zenodo, Mendeley Data, figshare, Harvard Dataverse, etc.), not GitHub. Please generate a separate DOI for your code and cite it.**
 
 <span style="color:blue">  
-The simulation codes and the data were also shared on Mendeley Data (<span style = "color: blue;"> Shun, provide the link here </span>) according to the Editor's suggestion for the ease of access. The link is also provided <span style = "color: blue;"> Shun, be speficic about where it is </span>. 
-
-<span style = "color: blue;"> Shun, make sure you cite the code and data. </span>
-
-We realized that the github repository was private and that was why you were not able to access it. We made a public github repository named CF_for_VRA ([here](https://github.com/tmieno2/CF_for_VRA)).
+We have followed the Editor's suggestion by sharing the simulation codes and the data on Mendeley Data (https://data.mendeley.com/datasets/y7cdhzww6w/draft?a=2e33b309-ca5c-49bc-95ce-9b3920d5544a) to increase the accessibility. The name of the data set is "Codes and Data Causal Forest Approach for Site-specific Input Management via On-farm Precision Experimentation", and two folders are included in this data set: "Codes" and  "Data". The "Code" folder contains all the simulation codes, and the "Data" folder contains a boundary polygon data of a field which is necessary to create field data for this study. Please read README.md for the steps to reproduce. In addition, we created a public github repository named CF_for_VRA ([here](https://github.com/tmieno2/CF_for_VRA))
 </span>
 
 <br>
@@ -99,7 +93,7 @@ We realized that the github repository was private and that was why you were not
 **9. Please convert the length units of the manuscript to international length units. (line 207)**
 
 <span style="color:blue">  
-All the lenth units were converted to meter (m)
+Done
 </span>
 
 <br>
@@ -107,7 +101,7 @@ All the lenth units were converted to meter (m)
 **10. Please add the number of rows and columns to the plots, subplots, and cells schematics in Figure 2. (line 209)**
 
 <span style="color:blue">  
-The number of rows and columns of plots, subplots, and cells schematics are now indicated Figure 2.
+Done. Please see Figure 2. 
 </span>
 
 <br>
@@ -115,7 +109,7 @@ The number of rows and columns of plots, subplots, and cells schematics are now 
 **11. The titles of sections 3.2.1 and 3.2.2 do not provide useful information to the readers, please revise the titles. (lines 342 and 373)**
 
 <span style="color:blue">  
-We realized that section 3.1 also had a uninformative title. Therefore, we changed it to "Training Models and Estimating Site-specific EONRs". Further, the title of sections 3.2.1 and 3.2.2 were changed to "Estimation of site-specific EONRs by RF, BRF, and CNN" and "Estimation of site-specific EONRs by CF", respectively. 
+We changed the title of 3.2 to "Training Models and Estimating Site-specific EONRs", and the title of 3.2.1 and 3.2.2 to "Training and Estimation of Site-specific EONRs by RF, BRF, and CNN" and "Training and Estimation of Site-specific EONRs by CF".
 </span>
 
 <br>
@@ -123,7 +117,7 @@ We realized that section 3.1 also had a uninformative title. Therefore, we chang
 **12. The titles of 4.1 and 4.2 are confusing, please revise. (lines 410 and 457)**
 
 <span style="color:blue">  
-The title of 4.1 was changed to "Comparison of EONR estimation accuracy" to reflect its contents. The title of section 4.2 was changed to "The relationship between yield and EONR prediction performances". They acurrately reflect what they describe.
+To better reflect the contents of 4.1, we changed its title to "Comparison of EONR Estimation Accuracy." We changed the title of 4.2 to "The Relationship between Yield and EONR Prediction Performances." Both new headings provide more accurate descriptions of their subsection's contents.
 </span>
 
 <br>
@@ -132,7 +126,7 @@ The title of 4.1 was changed to "Comparison of EONR estimation accuracy" to refl
 
 <span style="color:blue">  
 
-As explained in section 4.1, CNN failed to predict site-specific EONR because the estimated yield response function were always linear (please see the Table 1). Therefore, we thought that visualizing the CNN results are not insightful. However, we have decided to include CNN results to Figures 8, 9, and 10 in the previous version. The figures are now Figures 3, 4, and 5. 
+As explained in section 4.1, CNN failed to predict site-specific EONR because the estimated yield response function were always linear (Table 1). Therefore, we thought that visualizing the CNN results would not provide much insight. However, we have decided to include CNN results in Figures 8, 9, and 10 of the previous manuscript. which are Figures 3, 4, and 5 of the revised manuiscript.
 
 </span>
 
@@ -149,7 +143,7 @@ Shun is running simulations on training dataset and will report the results.
 **15. Please add a separate section for research gaps or uncertainties. Are there any prerequisite assumptions for using the CF model?**
 
 <span style="color:blue">  
-We added a new section called "Limitations and Future Studies" before the Conclustion section. One of the important assumptions that needs to be satisfied for CF to provides consistent estimation of treatment effects is that the treatment (N rates here) is uncorrelated with unobservable characteristics. Other assumtions are relatively minor. Note that, this is not just for CF, but also for RF, BRF, and CNN. Whenever the variable of interest (N rates here), their estiamtion of its impact on the dependent variable is biased in general. Fortunatley, in OFPE settings, we can randomize or patternize the input rates in a way that the input rates are uncorrelated to the unobserved variables. Therefore, the violation of this assumption is not as much of a concener as in a setting where observational data is used. We discuss these in the "Trial Design and Yield Data Generation for Modeling" section. 
+We have added a section called “Limitations and Future Studies” before the Conclusion section of the revised manuscript. One of the important conditions for CF to provide consistent estimation of treatment effects is that the treatment (N rates here) is uncorrelated with unobservable characteristics. Other assumptions are relatively minor. Note that, this is not just for CF, but also for RF, BRF, and CNN. Whenever the variable of interest (N rates here), their estimation of its impact on the dependent variable is biased in general. Fortunately, in OFPE settings we can randomize or geographically pattern input rates to make them uncorrelated with unobserved variables. Therefore, the violation of this assumption is not as much of a concern as in a setting where observational data is used. We discuss these in the “Trial Design and Yield Data Generation for Modeling” section. 
 </span>
 
 <br>
@@ -157,6 +151,6 @@ We added a new section called "Limitations and Future Studies" before the Conclu
 **16. Please revise the conclusion. Most of the content is discussing the uncertainty of the study. Please move the statement about uncertainty to a separate uncertainty section.**
 
 <span style="color:blue">  
-We moved the descriptions of the limitations (uncertainty) of the study to a separate section as mentioned earlier in our reply to your comment 14.
+As mentioned earlier in our reply to your comment 14, in the revised manuscript we have moved the descriptions of the limitations (uncertainty) of the study to a separate section. 
 </span>
 
