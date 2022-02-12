@@ -1,6 +1,6 @@
-# /*=================================================*/
-#' # Preparation
-# /*=================================================*/
+#/*----------------------------------*/
+#' ## Preparation
+#/*----------------------------------*/
 library(here)
 library(tmap)
 library(sp)
@@ -13,60 +13,34 @@ library(data.table)
 library(tidyverse)
 library(gstat)
 
+# === Load Functions === #
+source(here("GitControlled/Codes/0_1_functions_gen_analysis_data.R"))
 
-
-#--- source functions ---#
-source(here("Codes", "functions.R"))
-
-# /*----------------------------------*/
-#' ## Field data
-# /*----------------------------------*/
-
-field_padding <- readRDS(here("Data", "CNN_Simulations", "field_padding.rds"))
-
+# === Load Field data === #
+field <- readRDS(here("Shared/Data/analysis_field.rds"))
 
 # /*=================================================*/
-#' # Generate coefficients
+#' # Unconditional Gaussian geostatistical Simulation
 # /*=================================================*/
-xy <- dplyr::select(field_padding, unique_cell_id) %>%
+# === Set up === #
+# --- Geographical locations of Cells --- #
+xy <- dplyr::select(field, unique_cell_id) %>%
   cbind(., st_coordinates(st_centroid(.))) %>%
   st_drop_geometry() %>%
   data.table()
 
-gen_coefs <- function(mean, psill, range, coef_name, nsim, xy) {
-  
-  g_N <- gstat(
-    formula = z ~ 1,
-    locations = ~ X + Y,
-    dummy = T,
-    beta = mean,
-    model = vgm(
-      psill = psill,
-      range = range,
-      nugget = 0,
-      model = "Sph" # changed from "Exp", "Sph"
-
-    ),
-    nmax = 50 # number of nearest observations
-  )
-
-  b_sim <- predict(g_N, newdata = xy, nsim = nsim) %>%
-    data.table()%>%
-    melt(id.vars = c("X", "Y")) %>%
-    # data.table() %>%
-    setnames(c("variable", "value"), c("sim", coef_name)) %>%
-    .[, sim := as.numeric(gsub("sim", "", sim))] %>%
-    xy[., on = c("X", "Y")] %>%
-    .[, c("unique_cell_id", "sim", coef_name), with = FALSE]
-
-  return(b_sim)
-}
-
-
+# --- Range (m) --- #
 sp_range <- 400
+
+# --- Number of iterations --- #
 B <- 1000
 
-#--- ymax ---#
+
+#/*--------------------------------------------------------*/
+#' ## Generate raw coefficients
+#/*--------------------------------------------------------*/
+
+# === ymax === #
 ymax <- gen_coefs(
   mean = 12000,
   psill = 2000000,
@@ -76,7 +50,7 @@ ymax <- gen_coefs(
   xy = xy
 )
 
-#--- alpha ---#
+# === alpha === #
 alpha <- gen_coefs(
   mean = -0.5,
   psill = 0.02,
@@ -86,9 +60,7 @@ alpha <- gen_coefs(
   xy = xy
 )
 
-
-
-#--- beta ---#
+# === raw beta === #
 beta <- gen_coefs(
   mean = 0,
   psill = 1,
@@ -102,10 +74,8 @@ beta <- gen_coefs(
   .[, beta := pnorm(beta_raw, mean = mean_beta, sd = sd_beta)] %>%
   .[, beta := (beta * 1.8 - 2.8) * 0.01]
 
-
-
-#--- m_error ---#
-#=== error psill ===#
+# === m_error === #
+# --- error psill --- #
 #' roughly,
 #' 0.002 means 500 sd,
 #' 0.015 means 1300 sd,
@@ -119,6 +89,7 @@ m_error <- gen_coefs(
   xy = xy
 )
 
+# === split_ratio === #
 split_ratio <- gen_coefs(
   mean = 0.5,
   psill = 0.005,
@@ -128,7 +99,7 @@ split_ratio <- gen_coefs(
   xy = xy
 )
 
-#-- This error term is used to correlate m_error with beta --#
+# === This error term is used to correlate m_error with beta === #
 mu_1 <- gen_coefs(
   mean = 0,
   psill = 1,
@@ -138,7 +109,7 @@ mu_1 <- gen_coefs(
   xy = xy
 )
 
-#-- This error term is used for theta_1 --#
+# === This error term is used for theta_1 === #
 mu_2 <- gen_coefs(
   mean = 0,
   psill = 1,
@@ -148,7 +119,7 @@ mu_2 <- gen_coefs(
   xy = xy
 )
 
-#-- This error term is used for theta_2 --#
+# === This error term is used for theta_2 === #
 mu_3 <- gen_coefs(
   mean = 0,
   psill = 1,
@@ -159,13 +130,7 @@ mu_3 <- gen_coefs(
 )
 
 
-  
-
-# summary(split_ratio[,split_ratio])
-# hist(split_ratio[,split_ratio])
-
-
-## Put these coef data together ##
+# === Merge these coef data together === #
 coef_data <- ymax[alpha, on = c("sim", "unique_cell_id")] %>%
   beta[., on = c("sim", "unique_cell_id")] %>%
   m_error[., on = c("sim", "unique_cell_id")] %>%
@@ -186,36 +151,10 @@ coef_data <- ymax[alpha, on = c("sim", "unique_cell_id")] %>%
   )]
 
 
-# ggplot(left_join(field%>%select(unique_cell_id), coef_data[sim==2], by='unique_cell_id'))+
-#   geom_sf(aes(fill=alpha1),lwd = 0)
+#/*------------------------------------------------------*/
+#' ## Generate errors (make m_error correlated with beta) 
+#/*------------------------------------------------------*/
 
-# ggplot(left_join(field%>%select(unique_cell_id), coef_data[sim==2], by='unique_cell_id'))+
-#   geom_sf(aes(fill=alpha2),lwd = 0)
-
-# ggplot(left_join(field%>%select(unique_cell_id), coef_data[sim==2], by='unique_cell_id'))+
-#   geom_sf(aes(fill=alpha),lwd = 0)
-
-
-
-# /*=================================================*/
-#' # Generate errors (make m_error correlated with beta)
-# /*=================================================*/
-
-##== This is the original code ==##
-# coef_data[, beta_norm := (beta - mean(beta))/sd(beta)] %>% 
-#   .[, m_error_raw := 0.6 * beta_norm + sqrt(1 - 0.6 ^ 2) * rnorm(nrow(.))] %>% 
-#   .[, m_error := m_error_raw * sd(m_error_uncorrelated)] %>% 
-#   ##== create irrelevant coefficints but are correlated with beta==##
-#   .[, theta_1 := 0.6 * beta_norm + sqrt(1 - 0.6 ^ 2) * rnorm(nrow(.))] %>% 
-#   .[, theta_2 := 0.8 * beta_norm + sqrt(1 - 0.6 ^ 2) * rnorm(nrow(.))] %>%
-#   .[, `:=`(
-#     beta_norm = NULL,
-#     m_error_raw = NULL,
-#     m_error_uncorrelated = NULL
-#   )]
-
-
-##== This is the modified code ==##
 coef_data[, beta_norm := (beta - mean(beta))/sd(beta)] %>% 
   .[, mu1_norm := (mu_1 - mean(mu_1))/sd(mu_1)]%>%
   .[, mu2_norm := (mu_2 - mean(mu_2))/sd(mu_2)]%>%
@@ -238,18 +177,6 @@ coef_data[, beta_norm := (beta - mean(beta))/sd(beta)] %>%
     # m_error_uncorrelated = NULL
   )]
 
-
-coef_data[,.(beta, theta_1, theta_2, m_error)]%>%cor()
-
-
-saveRDS(coef_data, here("Data", "CNN_Simulations", paste0('coefficients_sprange_',sp_range,'.rds')))
-
-
-
-
-
-
-
-
+saveRDS(coef_data, here("Shared/Data/for_Simulations", paste0('coefficients_sprange_',sp_range,'.rds')))
 
 

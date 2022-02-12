@@ -1,4 +1,4 @@
-## ----set-up, cache = F-------
+## ----set-up, cache = F------------------------------------------------------------------------
 library(knitr)
 library(here)
 
@@ -9,7 +9,7 @@ knitr::opts_chunk$set(
   cache = FALSE
 )
 
-## ----packages, cache = FALSE, include = FALSE----
+## ----packages, cache = FALSE, include = FALSE-------------------------------------------------
 # === packages ===#
 # --- data wrangling--- #
 library(sf)
@@ -37,7 +37,7 @@ library(modelsummary)
 library(latex2exp)
 
 
-## ----------------------------
+## ---------------------------------------------------------------------------------------------
 theme_figure <- 
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -60,24 +60,12 @@ theme_dist <-
     text  = element_text(family = "Times New Roman")
     )
 
-  # theme(    
-  #   strip.text.x = element_text(size = 12, face = "bold"),
-  #   legend.title = element_text(size = 12, face = "bold"),
-  #   legend.text = element_text(size = 12, face = "bold"),
-  #   legend.position = "bottom",
-  #   text  = element_text(family = "Times New Roman")
-  # )
-
 set_flextable_defaults(
   font.family = "Times New Roman"
   )
 
 
-## ----setup, warning=FALSE, message=FALSE, cache= FALSE----
-# field <- readRDS("Shared/Data/for_Simulations/field_padding.rds") %>%
-#     filter(padding==1)%>%
-#     dplyr::select(unique_cell_id)
-
+## ----setup, warning=FALSE, message=FALSE, cache= FALSE----------------------------------------
 # === plot-level field data set  === #
 field_plot_sf <-
   here("Shared/Results/for_writing/sample_field_plot_sf.rds") %>%
@@ -94,7 +82,7 @@ field_cell_sf <-
   readRDS()
 
 
-## ----------------------------
+## ---------------------------------------------------------------------------------------------
 
 
 
@@ -135,7 +123,7 @@ variogram_tb <-
   autofit()
 
 
-## ----field-map-visualization, dependson = "setup"----
+## ----field-map-visualization, dependson = "setup"---------------------------------------------
 
 # === Preparation === #
 ex_plot <- field_plot_sf[224, ]
@@ -147,8 +135,6 @@ ex_cells <- field_cell_sf[ex_one_subplot, , op = st_within]
 
 one_subplot <- ex_subplots[3,]
 
-
-
 #-- (1) plot-level field map  --#
 
 
@@ -157,8 +143,8 @@ plot <-
   geom_sf(data = field_plot_sf) +
   geom_sf(data = ex_plot, fill = "green", size = 1) +
   coord_sf(expand = FALSE) +
+  # theme_void() +
   ggtitle("12 \u00D7 12 subplots") +
-  # ggtitle(TeX("$12 \\times 32$ plots")) +
   theme_figure
 
 
@@ -171,8 +157,7 @@ subplots_inPlot <-
   geom_sf(data = ex_subplots, fill = NA, size = 1) +
   geom_sf(data = ex_subplots[2,], fill = "skyblue", size = 1) +
   coord_sf(expand = FALSE) +
-  theme_void() +
-  # ggtitle(TeX("$4 \\times 1$ subplots")) +
+  # theme_void() +
   ggtitle("4 \u00D7 1 subplots") +
   theme_figure
 
@@ -185,8 +170,7 @@ cells_inSubplot <-
   geom_sf(data = ex_cells, fill = NA) +
   geom_sf(data = ex_cells[2,], fill = "skyblue", size = 1) +
   coord_sf(expand = FALSE) +
-  theme_void() +
-  # ggtitle(TeX("$6 \\times 6$ cells")) +
+  # theme_void() +
   ggtitle("6 \u00D7 6 cells") +
   theme_figure
 
@@ -212,28 +196,28 @@ field_structure <-
   #' ## Add braces
   #/*----------------------------------*/
   # --- between plot and subplot --- #
-  geom_brace(aes(c(0.43,0.43+0.1), c(0.353, 0.661)), color ="red", rotate = 270, inherit.data=F) +
+  geom_brace(aes(c(0.43,0.43+0.1), c(0.372-0.004, 0.645+0.013)), color ="red", rotate = 270, inherit.data=F) +
   # --- between subplot and cell --- #
-  geom_brace(aes(c(0.68, 0.68 + 0.1), c(0.381, 0.549)), color ="red", rotate = 270, inherit.data=F) +
+  geom_brace(aes(c(0.68, 0.68 + 0.1), c(0.401-0.002, 0.529 +0.011)), color ="red", rotate = 270, inherit.data=F) +
   #/*----------------------------------*/
   #' ## add annotations
   #/*----------------------------------*/
   # --- annotation for plot --- #
   geom_segment(aes(x = 0.42, xend = 0.383, y = 0.60, yend = 0.52),
     arrow = arrow(length = unit(0.1, "cm")), size=0.5) +
-  annotate("text", x = 0.42 + 0.015, y = 0.60 + 0.015, label = "plot", family="Times New Roman") +
+  annotate("text", x = 0.42 + 0.015, y = 0.60 + 0.02, label = "plot", family="Times New Roman") +
   # --- annotation for subplot --- #
   geom_segment(aes(x = 0.7, xend = 0.64, y = 0.37, yend = 0.45),
     arrow = arrow(length = unit(0.1, "cm")), size=0.5) +
   annotate("text", x = 0.7 + 0.035, y = 0.37 - 0.01, label = "subplot", , family="Times New Roman") +
   # --- annotation for cell --- #
-  geom_segment(aes(x = 0.89, xend = 0.86, y = 0.349, yend = 0.394),
+  geom_segment(aes(x = 0.9, xend = 0.87, y = 0.365, yend = 0.41),
     arrow = arrow(length = unit(0.1, "cm")), size=0.5) +
-  annotate("text", x = 0.89 + 0.015, y = 0.349 - 0.01, label = "cell", , family="Times New Roman") +
+  annotate("text", x = 0.9 + 0.02, y = 0.365 - 0.005, label = "cell", , family="Times New Roman") +
   theme_void()
 
 
-## ---- dependson = "setup"----
+## ---- dependson = "setup"---------------------------------------------------------------------
 field_Ndesign <-
   ggplot() +
   geom_sf(
@@ -247,7 +231,7 @@ field_Ndesign <-
   theme_figure
 
 
-## ---- dependson = "setup"----
+## ---- dependson = "setup"---------------------------------------------------------------------
 # === subplot-level === #
 vis_yield_subplot <-
   ggplot(field_subplot_sf) +
@@ -258,11 +242,11 @@ vis_yield_subplot <-
   theme_figure
 
 
-## ---- dependson = "setup"----
+## ---- dependson = "setup"---------------------------------------------------------------------
 
 
 
-## ---- dependson = "setup"----
+## ---- dependson = "setup"---------------------------------------------------------------------
 # === alpha map === #
 field_alpha <-
   ggplot(field_cell_sf) +
@@ -312,7 +296,7 @@ field_optN <-
   theme_figure
 
 
-## ----source-results, message=FALSE, warning=FALSE, cache= FALSE----
+## ----source-results, message=FALSE, warning=FALSE, cache= FALSE-------------------------------
 
 # ===================================
 # Forest results
@@ -341,7 +325,7 @@ res_allML <-
   .[, Model := factor(Model, levels = c("aby", "abytt", "aabbyy", "aabbyytt"))]
 
 
-## ---- dependson = "source-results"----
+## ---- dependson = "source-results"------------------------------------------------------------
 
 rmse_y_all <-
   copy(res_allML) %>%
@@ -379,7 +363,7 @@ report_table_y <-
   autofit()
 
 
-## ----------------------------
+## ---------------------------------------------------------------------------------------------
 fig_y_optN <-
   rmse_y_all[Method %in% c("RF", "BRF", "CNN")] %>%
   ggplot(aes(x = rmse_y, y = rmse_optN)) +
@@ -415,7 +399,7 @@ fig_y_optN <-
 # dfabline <- data.frame(x = 0:3500, y=0:3500)
 
 
-## ---- dependson = "source-results"----
+## ---- dependson = "source-results"------------------------------------------------------------
 
 prepare_count_tab <-
   rmse_y_all %>%
@@ -489,7 +473,7 @@ report_summary_res_CNN_RF_BRF <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---- dependson = "source-results"----
+## ---- dependson = "source-results"------------------------------------------------------------
 
 # === Distribution of RMSE of EONR estimates === #
 plot_dis_optN <-
@@ -593,7 +577,7 @@ report_table_optN <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ----------------------------
+## ---------------------------------------------------------------------------------------------
 piLoss_density <-
   copy(res_allML) %>%
   .[, Method := case_when(
@@ -616,15 +600,14 @@ piLoss_density <-
   geom_density(aes(x = Mean, fill = Method), alpha = 0.7) +
   # scale_fill_viridis(discrete = TRUE, alpha=0.5) +
   # scale_fill_viridis_d()+
-  labs(x = expression(paste(hat(pi)["loss"], " ($/ha)"))) +
-  # labs(x = TeX("$\\hat{pi}_{loss}$ (\\$/ha)")) +
+  labs(x = expression(paste(hat(pi)["def"], " ($/ha)"))) +
   facet_wrap(~Model, ncol = 1) +
   theme_dist
 
 
 
 
-## ----------------------------
+## ---------------------------------------------------------------------------------------------
 #### === The original code for this figure is in "1_3_CompTeEstimation.R" ===####
 
 figure_te <-
@@ -659,7 +642,7 @@ figure_te <-
   theme_figure
 
 
-## ---- cache = TRUE-----------
+## ---- cache = TRUE----------------------------------------------------------------------------
 # /*=================================================*/
 #' # Sample CT figure 
 # /*=================================================*/
@@ -703,82 +686,4 @@ tree <- causalTree(
 opcp <- tree$cptable[, 1][which.min(tree$cptable[, 4])]
 opfit <- prune(tree, opcp)
 
-
-
-## ----------------------------
-# source("./GitControlled/Codes/0_1_functions_gen_analysis_data.R")
-
-
-# pCorn <- price_table[2, pCorn]
-# pN <- price_table[2, pN]
-
-
-# /*=================================================*/
-#' # Field Data Sets
-# /*=================================================*/
-
-#/*----------------------------------*/
-#' ## (1) cell-level data set 
-#/*----------------------------------*/
-# + NOTE: I needed to do the following things, because the existing raw data does not have m_error
-# field <- readRDS(here("Shared/Data/for_Simulations/field_padding.rds"))
-
-# coef_data <- readRDS(here("Shared/Data/for_Simulations/coefficients_sprange_400.rds"))
-
-# x=1
-# coef_data_m <- coef_data[sim == x, ]
-# coef_data_t <- coef_data[sim == ifelse(x + 1 >= max(sim), 1, x + 1), ]
-
-
-# sample_dt_cell <- prepare_raw_data(x, field=field, coef_data_m=coef_data_m, coef_data_t=coef_data_t, app_error="no") %>%
-#   .$reg_raw_data
-
-# field_cell_sf <- 
-#   left_join(dplyr::select(field, unique_cell_id), sample_dt_cell, by="unique_cell_id")%>%
-#     na.omit() %>%
-#     mutate(plot_id = ceiling(subplot_id/4)) %>%
-#     filter(padding==1)
-   
-# saveRDS(field_cell_sf, here("Shared/Results/for_writing/sample_field_cell_sf.rds"))
-
-
-#/*----------------------------------*/
-#' ## (2) subplot-level field without padding area 
-#/*----------------------------------*/
-
-# field_subplot_sf <- 
-#   field_cell_sf %>%
-#   group_by(subplot_id, strip_id) %>%
-#   summarise(
-#     sim = mean(sim),
-#       yield = mean(yield),
-#       opt_N = mean(opt_N),
-#       rate = mean(rate),
-#       aa_n = mean(aa_n), 
-#       alpha = mean(alpha),
-#       beta = mean(beta),
-#       ymax = mean(ymax),
-#       alpha1 = mean(alpha1),
-#       alpha2 = mean(alpha2),
-#       beta1 = mean(beta1),
-#       beta2 = mean(beta2),
-#       ymax1 = mean(ymax1),
-#       ymax2 = mean(ymax2),
-#       theta_1 = mean(theta_1),
-#       theta_2 = mean(theta_2)
-#   ) %>%
-#   mutate(unique_subplot_id = paste0(strip_id,"_",subplot_id))%>%
-#   dplyr::select(!c(strip_id, subplot_id))
-
-# saveRDS(field_subplot_sf, here("Shared/Results/for_writing/sample_field_subplot_sf.rds"))
-
-
-#/*----------------------------------*/
-#' ## (3) plot-level dataset without padding area  
-#/*----------------------------------*/
-# field_plot_sf <- field_cell_sf%>%
-#     group_by(plot_id, strip_id, rate)%>%
-#     summarise()
-
-# saveRDS(field_plot_sf, here("Shared/Results/for_writing/sample_field_plot_sf.rds"))
 

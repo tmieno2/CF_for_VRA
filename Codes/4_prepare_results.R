@@ -14,7 +14,7 @@ field_cell_dt <- data.table(field_cell_sf)
 #' ## (1) cell-level data set
 # /*----------------------------------*/
 # + NOTE: I needed to do the following things, because the existing raw data does not have m_error
-field <- readRDS(here("Shared/Data/for_Simulations/field_padding.rds"))
+field <- readRDS(here("Shared/Data/for_Simulations/analysis_field.rds"))
 
 coef_data <- readRDS(here("Shared/Data/for_Simulations/coefficients_sprange_400.rds"))
 
