@@ -210,8 +210,6 @@ slope_dt <- mclapply(all_var_case, cal_slope, mc.cores=detectCores()-2)%>%
 
 # === EONR Estimation === #
 slope_dt <- readRDS(here("Shared/Results/CNN_EONR_anlaysis/cnn_response_slope_all.rds"))
-pCorn <- price_table[2, pCorn]
-pN <- price_table[2, pN]
 pN_pC_ratio <- pN/pCorn
 
 cnn_optN_dt <- 

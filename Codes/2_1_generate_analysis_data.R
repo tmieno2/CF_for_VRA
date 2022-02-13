@@ -1,6 +1,6 @@
-# /*=================================================*/
-#' # Preparation
-# /*=================================================*/
+#/*----------------------------------*/
+#' ## Preparation
+#/*----------------------------------*/
 library(here)
 library(mgcv)
 library(ggplot2)
@@ -12,27 +12,22 @@ library(tidyverse)
 library(future.apply)
 library(parallel)
 
-
-#--- source functions ---#
+# === Load Functions === #
 source(here("GitControlled/Codes/0_1_functions_gen_analysis_data.R"))
 
-# /*----------------------------------*/
-#' ## Datasets
-# /*----------------------------------*/
+# === Load coef Data sets === #
 coef_data <- readRDS(here("Shared/Data/for_Simulations/coefficients_sprange_400.rds")))
-field <- readRDS(here("/Shared/Data/for_Simulations/field_padding.rds"))
+field <- readRDS(here("/Shared/Data/for_Simulations/analysis_field.rds"))
 
-# === prices ===#
+# === Prices ===#
 pCorn <- price_table[2, pCorn]
 pN <- price_table[2, pN]
 
 
 
 # /*=================================================*/
-#' # Generate raw dataset (cell-level)
+#' # Generate Cell-level Data sets 
 # /*=================================================*/
-
-##== Generate Cell-Level Field Data ==##
 raw_data <- lapply(
 	1:1000, function(x) {
 		prepare_raw_data(
@@ -45,12 +40,10 @@ raw_data <- lapply(
 	}
 )
 
-# saveRDS(raw_data, here("Shared/Data/for_Simulations/raw_reg_test_data.rds"))
+
 reg_raw_data <- sapply(raw_data,"[",1)%>%rbindlist()
 test_raw_data <- sapply(raw_data,"[",1)%>%rbindlist()
 
-# saveRDS(reg_raw_data, here("Shared/Data/for_Simulations/reg_raw_data.rds"))
-# saveRDS(test_raw_data, here("Shared/Data/for_Simulations/test_raw_data.rds"))
 
 # /*=================================================*/
 #' # Generate analysis dataset (subplot-level)

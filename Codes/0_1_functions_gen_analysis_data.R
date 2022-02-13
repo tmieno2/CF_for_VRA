@@ -491,6 +491,40 @@ assign_rates <- function(data_sf, rates_ls, pattern = "fixed-latin-square", merg
 }
 
 
+#/*----------------------------------*/
+#' ## Unconditional Gaussian geostatistical Simulation  
+#/*----------------------------------*/
+
+gen_coefs <- function(mean, psill, range, coef_name, nsim, xy) {
+  
+  g_N <- gstat(
+    formula = z ~ 1,
+    locations = ~ X + Y,
+    dummy = T,
+    beta = mean,
+    model = vgm(
+      psill = psill,
+      range = range,
+      nugget = 0,
+      model = "Sph" # changed from "Exp", "Sph"
+
+    ),
+    nmax = 50 # number of nearest observations
+  )
+
+  b_sim <- predict(g_N, newdata = xy, nsim = nsim) %>%
+    data.table()%>%
+    melt(id.vars = c("X", "Y")) %>%
+    # data.table() %>%
+    setnames(c("variable", "value"), c("sim", coef_name)) %>%
+    .[, sim := as.numeric(gsub("sim", "", sim))] %>%
+    xy[., on = c("X", "Y")] %>%
+    .[, c("unique_cell_id", "sim", coef_name), with = FALSE]
+
+  return(b_sim)
+}
+
+
 # /*----------------------------------*/
 #' ## generate yield
 # /*----------------------------------*/

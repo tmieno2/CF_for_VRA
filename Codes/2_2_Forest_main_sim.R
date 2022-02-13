@@ -31,7 +31,7 @@ test_data_all <- readRDS("./Shared/Data/for_Simulations/test_data.rds")
 # /*=================================================*/
 #' # Simulation by scenarios
 # /*=================================================*/
-# + run a 1000 simulations by individual scenarios
+# + run 1000 simulations by individual scenarios
 # + the 1000 simulation results will be saved per each scenario
 
 # === set up for parallel computations === #
