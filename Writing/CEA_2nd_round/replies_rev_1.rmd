@@ -43,7 +43,7 @@ Second, we consolidated subsection 3.1.4 and 3.1.5 of the original manuscript in
 
 Third, we moved to an appendix the previous manuscript’s detailed description of parameter splitting.
 
-We believe that the detailed presentation of data generation is crucial in our reporting of MC procedures, as it would be in the report of any empirical study using real experiment data provides. In both cases, results are highly dependent procedures. We believe further slimming of the description would hinder anyone attempting to reproduce our results. That said, we have worked hard to remove redundancies in this section of the manuscript. 
+We believe that the detailed presentation of data generation is crucial in our reporting of MC procedures, as it would be in the report of any empirical study using real experiment data provides. In both cases, results are dependent procedures. We believe further slimming of the description would hinder anyone attempting to reproduce our results. That said, we have worked hard to remove redundancies in this section of the manuscript. 
 </span>
 
 <br>
@@ -85,7 +85,7 @@ We apologize for not making this cleaner in the original manuscript. The trainin
 **8. I can't open the code link (https://github.com/tmieno2/ML_VRA.git, lines 199 and 249) with my browsers (chrome, edge, and Firefox). Please upload the code to the public research data repositories (Zenodo, Mendeley Data, figshare, Harvard Dataverse, etc.), not GitHub. Please generate a separate DOI for your code and cite it.**
 
 <span style="color:blue">  
-We have followed the Editor's suggestion by sharing the simulation codes and the data on Mendeley Data (https://data.mendeley.com/datasets/y7cdhzww6w/draft?a=2e33b309-ca5c-49bc-95ce-9b3920d5544a) to increase the accessibility. The name of the data set is "Codes and Data Causal Forest Approach for Site-specific Input Management via On-farm Precision Experimentation", and two folders are included in this data set: "Codes" and  "Data". The "Code" folder contains all the simulation codes, and the "Data" folder contains a boundary polygon data of a field which is necessary to create field data for this study. Please read README.md for the steps to reproduce. In addition, we created a public github repository named CF_for_VRA ([here](https://github.com/tmieno2/CF_for_VRA))
+We have followed the Editor's suggestion by sharing the simulation codes and the data on Mendeley Data (https://data.mendeley.com/datasets/y7cdhzww6w/draft?a=2e33b309-ca5c-49bc-95ce-9b3920d5544a) to increase the accessibility. The name of the data set is "Codes and Data Causal Forest Approach for Site-specific Input Management via On-farm Precision Experimentation", and two folders are included in this data set: "Codes" and  "Data". The "Code" folder contains all the simulation codes, and the "Data" folder contains a boundary polygon data of a field which is necessary to create field data for this study. Please read README.md for the steps to reproduce. In addition, we also created a public github repository named CF_for_VRA ([here](https://github.com/tmieno2/CF_for_VRA)).
 </span>
 
 <br>
@@ -143,7 +143,7 @@ Shun is running simulations on training dataset and will report the results.
 **15. Please add a separate section for research gaps or uncertainties. Are there any prerequisite assumptions for using the CF model?**
 
 <span style="color:blue">  
-We have added a section called “Limitations and Future Studies” before the Conclusion section of the revised manuscript. One of the important conditions for CF to provide consistent estimation of treatment effects is that the treatment (N rates here) is uncorrelated with unobservable characteristics. Other assumptions are relatively minor. Note that, this is not just for CF, but also for RF, BRF, and CNN. Whenever the variable of interest (N rates here), their estimation of its impact on the dependent variable is biased in general. Fortunately, in OFPE settings we can randomize or geographically pattern input rates to make them uncorrelated with unobserved variables. Therefore, the violation of this assumption is not as much of a concern as in a setting where observational data is used. We discuss these in the “Trial Design and Yield Data Generation for Modeling” section. 
+We have added a section called “Limitations and Future Studies” before the Conclusion section of the revised manuscript. One of the important conditions for CF to provide consistent estimation of treatment effects is that the treatment (N rates here) is uncorrelated with unobservable characteristics. Other assumptions are relatively minor. Note that, this is not just for CF, but also for RF, BRF, and CNN. Whenever the variable of interest (N rates here) is correlated with the unobservables (error term), their estimation of its impact on the dependent variable is biased in general. Fortunately, in OFPE settings we can randomize or geographically pattern input rates to make them uncorrelated with unobserved variables. Therefore, the violation of this assumption is not as much of a concern as in a setting where observational data is used. We discuss these in the “Trial Design and Yield Data Generation for Modeling” section. 
 </span>
 
 <br>

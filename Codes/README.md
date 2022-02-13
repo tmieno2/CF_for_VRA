@@ -1,13 +1,13 @@
 # **Codes and Data for: Causal Forest Approach for Site-specific Input Management via On-farm Precision Experimentation**
 
 ## General Information
-+ Principal Investigator Contact Information
++ Corresponding Author Contact Information
 	* Name: Shunkei Kakimoto
 	* Institution: Department of Agricultural Economics, University of Nebraska-Lincoln
 	* Address: 102 Filley Hall 1625 Arbor Drive Lincoln, NE 68583, USA, 
 	* E-mail: skakimoto3@hunskers.unl.edu
 
-+ Co-investigator Contact Information
++ Co-authors Contact Information
 	* Name: Taro Mieno
 	* Institution: Department of Agricultural Economics, University of Nebraska-Lincoln
 	* Address: Lincoln, NE 68583, USA
@@ -26,17 +26,16 @@
 
 ## DATA & FILE OVERVIEW
 
-We present here the R and Python codes and data for analysis presented in: "Causal Forest Approach for Site-specific Input Management via On-farm Precision Experimentation". 
-
+This dataset includes the R and Python codes and data for analysis presented in: "Causal Forest Approach for Site-specific Input Management via On-farm Precision Experimentation". 
 
 ### List of Files:
 Data folder:
-+ field_boundary.rds
-	* Description: A polygon boundary data of an actual field, which is necessary in generating a field polygon in 1_1_generate_field.R. 
++ **field_boundary.rds**
+	* Description: A polygon boundary data of a field, which is used to generate a field polygon in **1_1_generate_field.R**. 
 
 Code folder:
 + **0\_1\_functions\_gen\_analysis\_data.R**
-	* Description: This code file contains functions to be generate field characteristics (e.g., $alpha$, $beta$, $ymax$, etc.) and yield data sets.
+	* Description: This code file contains functions to generate field characteristics (e.g., $alpha$, $beta$, $ymax$, etc.) and yield datasets.
 
 + **0\_2\_functions\_main\_sim.R**
 	* Description: This code file contains functions to conduct Random Forest (RF), Boosted Random Forest (BRF), and Causal Forest (CF) analysis to predict yields and EONRs site-specifically.
@@ -46,7 +45,7 @@ Code folder:
 	* Final output: `analysis_field.rds`
 
 + **1\_2\_generate\_coefficients.R**
-	* Description: This code file generates one thousand field characteristic (e.g., $alpah$, $beta$, $ymax$,..., etc.) data sets using unconditional Gaussian geostatistical simulation based on the spherical variogram model.
+	* Description: This code file generates field characteristics (e.g., $alpah$, $beta$, $ymax$,..., etc.) data using unconditional Gaussian geostatistical simulation based on the spherical variogram model.
 	* Final output: `coef\_data.rds`
 
 + **2\_1\_generate\_analysis\_data.R**
@@ -60,16 +59,16 @@ Code folder:
 	* Output Data: `forest_SimRes_alpha_beta_ymax.rds`, `forest_SimRes_alpha_beta_ymax_theta_1_theta_2.rds`, `forest_SimRes_alpha1_alpha2_beta1_beta2_ymax1_ymax2.rds`, `forest_SimRes_alpha1_alpha2_beta1_beta2_ymax1_ymax2_theta_1_theta_2.rds`
 		
 + **2\_3\_CNN\_main\_sim\_aabbyytt.py**	
-	* Description: This code file conducts one thousand simulation of yield prediction using Convolutional (CNN) by modeling scenarios. Depending on which modeling scenario is used, you need to arrange the input data and architecture.
+	* Description: This code file conducts one thousand simulation of yield prediction using Convolutional Neural Network (CNN) by modeling scenario. Depending on which modeling scenario is used, you need to arrange the input data and architecture.
 	* Output Data: `output_..._.csv` 
-		- NOTE: `...` contains the simulation number. So, after that you need to merge all the individual simulation results into one data set and save it as `.csv` file with the unique file name. 
+		- NOTE: `...` refers to the simulation number. 
 
 + **3\_1\_SimDataAnalysis.R**
-	* Description: This code file calculates RMSE of predicted EONRs and yields by ML methods and Modeling scenario. 
+	* Description: This code file calculates RMSE of predicted EONRs and yields by ML method and Modeling scenario. 
 	* Output Data: 
 
 + **3\_2\_CompTeEstimation.R**
-	* Description: This code file estimates treatment effect by treatment types and ML methods under the "aabbyytt" scenario in one of the one thousand simulations rounds. The output data is used to create Figure 5: "True treatment effects vs estimated treatment effects (scenario: aabbyytt)"
+	* Description: This code file estimates treatment effect by treatment type and ML method under the "aabbyytt" scenario in one of the one thousand simulations rounds. The output data is used to create Figure 5: "True treatment effects vs estimated treatment effects (scenario: aabbyytt)"
 	* Output Data: `dt_TEcomparison.rds`
 
 + **4\_prepare\_results.R**
@@ -81,7 +80,7 @@ Code folder:
 
 ### Steps to reproduce
 + Before you start, create a new R project in a folder including "Data" and "Codes" folders. 
-+ The simulation series starts from the code **1\_1\_generate_field.R** in a order of the number assigned in front of each file name. By following these file numbers, you can reproduce the simulations.
++ The simulation series starts from the code **1\_1\_generate_field.R** in the order of the number assigned in front of the file names. By running the files in sequence, you can reproduce the simulations results, tables, and figures presented in the article.
 
 
 
