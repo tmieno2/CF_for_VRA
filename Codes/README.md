@@ -4,7 +4,7 @@
 + Corresponding Author Contact Information
 	* Name: Shunkei Kakimoto
 	* Institution: Department of Agricultural Economics, University of Nebraska-Lincoln
-	* Address: 102 Filley Hall 1625 Arbor Drive Lincoln, NE 68583, USA, 
+	* Address: 102 Filley Hall 1625 Arbor Drive Lincoln, NE 68583, USA 
 	* E-mail: skakimoto3@hunskers.unl.edu
 
 + Co-authors Contact Information
@@ -56,20 +56,20 @@ Code folder:
 
 + **2\_2\_Forest\_main\_sim.R**
 	* Description: This code file conducts one thousand simulation of RF, BRF and CF analysis to predict yields (only for RF and BRF) and EONRs site-specifically. 
-	* Output Data: `forest_SimRes_alpha_beta_ymax.rds`, `forest_SimRes_alpha_beta_ymax_theta_1_theta_2.rds`, `forest_SimRes_alpha1_alpha2_beta1_beta2_ymax1_ymax2.rds`, `forest_SimRes_alpha1_alpha2_beta1_beta2_ymax1_ymax2_theta_1_theta_2.rds`
+	* Final output: `forest_SimRes_alpha_beta_ymax.rds`, `forest_SimRes_alpha_beta_ymax_theta_1_theta_2.rds`, `forest_SimRes_alpha1_alpha2_beta1_beta2_ymax1_ymax2.rds`, `forest_SimRes_alpha1_alpha2_beta1_beta2_ymax1_ymax2_theta_1_theta_2.rds`
 		
 + **2\_3\_CNN\_main\_sim\_aabbyytt.py**	
 	* Description: This code file conducts one thousand simulation of yield prediction using Convolutional Neural Network (CNN) by modeling scenario. Depending on which modeling scenario is used, you need to arrange the input data and architecture.
-	* Output Data: `output_..._.csv` 
+	* Final output: `output_..._.csv` 
 		- NOTE: `...` refers to the simulation number. 
 
 + **3\_1\_SimDataAnalysis.R**
-	* Description: This code file calculates RMSE of predicted EONRs and yields by ML method and Modeling scenario. 
-	* Output Data: 
+	* Description: This code file calculates RMSE of predicted EONRs and yields by ML method and modeling scenario. 
+	* Final output: 
 
 + **3\_2\_CompTeEstimation.R**
 	* Description: This code file estimates treatment effect by treatment type and ML method under the "aabbyytt" scenario in one of the one thousand simulations rounds. The output data is used to create Figure 5: "True treatment effects vs estimated treatment effects (scenario: aabbyytt)"
-	* Output Data: `dt_TEcomparison.rds`
+	* Final output: `dt_TEcomparison.rds`
 
 + **4\_prepare\_results.R**
 	* Description: This code file prepares data to be used in showing the field maps. 
@@ -78,7 +78,7 @@ Code folder:
 	* Description: This code file creates all the figures and tables which will be used in the manuscript. 
 
 
-### Steps to reproduce
+### Steps to Reproduce
 + Before you start, create a new R project in a folder including "Data" and "Codes" folders. 
 + The simulation series starts from the code **1\_1\_generate_field.R** in the order of the number assigned in front of the file names. By running the files in sequence, you can reproduce the simulations results, tables, and figures presented in the article.
 

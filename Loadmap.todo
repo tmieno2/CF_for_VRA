@@ -10,15 +10,22 @@
      ✔ 2_2_main_sim.R @done (09-02-22 23:22)
      ✔ 3_1_SimDataAnalysis.R @done (09-02-22 23:27)
      ✔ 3_2_CompTeEstimation.R @done (09-02-22 23:34)
-     □ PrepareResults.rmd
+     ✔ PrepareResults.rmd @done (13-02-22 23:35)
    ✔ add README file @done (12-02-22 14:30)
      + Explain the step of the simulations
      + NOTE: this README file is a draft
 
 
+To do:
+  ✔ replace with the new results @done (14-02-22 01:22)
+  ✔ add training accuracy results to supplementary @done (14-02-22 01:22)
+  ✔ we changed the number of trees to 2000, change the corresponding parts mentioning about it. @done (14-02-22 01:22)  
+
 Final Check:
+  □ I found that `snider_high_res.gpkg` is necessary to create an example figure of a causal tree
   □ Make sure the url of Mendeley data work (pasted in the manuscript, appendix, and response to reviewer1)
     + I think I need to publish the data before we re-submit to the journal
+
   □ Make sure the link to the CF_for_VRA repository work.
   □ Does the figure 
   □ All the title of figures and tables are lowercase other than first letter
@@ -27,3 +34,7 @@ Final Check:
   □ Correct figure numbers in appendix
   □ Check whether all the equation is numbered correctly. [manuscript and appendix]
   □ 
+
+
+  □ Need to be modified: L356-357 "the site-specific yield response functions identified by CNN were linear, and **all with the same slope**"
+    + they don't have exactly the same slope. Oh, you mean, slope were the same across the modeling scenarios.

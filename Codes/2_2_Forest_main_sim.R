@@ -51,23 +51,23 @@ B=1000
 
 # === start simulation === #
 for (var in var_ls_variations){
-		# var = c("alpha", "beta", "ymax")
-		set.seed(1378)
-		# --- for each modeling scenario run: --- #
-		sim_results <- lapply(1:B, 
-			function(x){
-				sim_par(
-					i = x,
-					var_ls = var,
-					reg_data = reg_data_all[sim==x&padding==1,],
-	      			test_data = test_data_all[sim==x&padding==1,],
-	      			N_levels = reg_data_all[sim==x,]$rate%>%unique()%>%sort()
-	      		)
-			}
-		) %>%
-		rbindlist()
+	# var = c("alpha", "beta", "ymax")
+	set.seed(1378)
+	# --- for each modeling scenario run: --- #
+	sim_results <- lapply(1:B, 
+		function(x){
+			sim_par(
+				i = x,
+				var_ls = var,
+				reg_data = reg_data_all[sim==x&padding==1,],
+	      		test_data = test_data_all[sim==x&padding==1,],
+	      		N_levels = reg_data_all[sim==x,]$rate%>%unique()%>%sort()
+	      	)
+		}
+	) %>%
+	rbindlist()
 
-		saveRDS(sim_results, paste0("./Shared/Results/Forest_rawRes/forest_SimRes_", paste0(var, collapse = "_"), ".rds"))
+	saveRDS(sim_results, paste0("./Shared/Results/Forest_rawRes/forest_SimRes_", paste0(var, collapse = "_"), ".rds"))
 }
 
 
