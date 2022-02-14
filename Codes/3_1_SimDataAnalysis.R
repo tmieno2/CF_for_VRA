@@ -97,6 +97,7 @@ forest_summary_bySim <-
         rmse_y = rmse_general(pred_yield, yield)
     ), by= .(sim, type, Method, Model)]
 
+saveRDS(forest_summary_bySim, here("Shared/Results/for_writing/forest_summry_bySim.rds"))
 
 # === Summarize by Method and Model === #
 forest_summary_bySim %>%
@@ -106,7 +107,6 @@ forest_summary_bySim %>%
         mean_rmse_y = mean(rmse_y)
         ), by=.(type, Method, Model)] %>%
     .[order(type, Method)]
-
 
 
 
@@ -219,7 +219,6 @@ cnn_optN_dt <-
         lapply(.SD, function(x) ifelse(slope > pN_pC_ratio, max(rate), min(rate)))
             , by=.(type, Model, sim, unique_subplot_id)]
 
-
 # /*=================================================*/
 #' # RMSE of EONRs and Profit-deficits Calculation
 # /*=================================================*/
@@ -239,10 +238,11 @@ cnn_summry_bySim <-
         rmse_optN = rmse_general(opt_N_hat, opt_N),
         pi_loss = mean(pi_loss),
         rmse_y = rmse_general(pred_yield, yield)
-    ), by= .(sim, type, Model)]
+    ), by= .(sim, type, Model)] %>%
+    .[, Method := "CNN"] %>%
+    .[,.(sim, type, Method, Model, rmse_optN, pi_loss, rmse_y)]
 
-
-saveRDS(cnn_rmse_bySim, here("Shared/Results/cnn_summry_bySim.rds"))
+saveRDS(cnn_summry_bySim, here("Shared/Results/for_writing/cnn_summry_bySim.rds"))
 
 # === Check Summary of the CNN Results === #
 cnn_summry_bySim %>%
@@ -255,11 +255,16 @@ cnn_summry_bySim %>%
 
 
 
+# ==========================================================================
+# Merge Forest results and CNN results
+# ==========================================================================
+# === Merge === #
+allML_summary_bySim <-
+  rbind(forest_summary_bySim, cnn_summry_bySim) %>%
+  .[, Method := factor(Method, levels = c("RF", "BRF", "CNN", "CF_base"))] %>%
+  .[, Model := factor(Model, levels = c("aby", "abytt", "aabbyy", "aabbyytt"))]
 
-
-
-
-
+saveRDS(allML_summary_bySim, here("Shared/Results/for_writing/allML_summary_bySim.rds"))
 
 
 
