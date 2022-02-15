@@ -1,9 +1,12 @@
-# Appendix A: Causal Tree Example {#ctree-ex}
+<!-- NOTE: Erase the extra Figure, Table and section numbers manually-->
 
-Figure \@ref(fig:ct-ex) shows an example of CT where the treatment is an increase in seed rate from $27,000$ seeds/ha (control) to $31,000$ seeds/ha (treated) with apparent electrical conductivity ($\textit{ecs}$)($dS/m$) and topographical $\textit{slope}$ ($degree$) as variables to explain the heterogeneity of the impact of the treatment impact.  
+## Appendix A: Causal Tree Example {-}
 
-```{r ct-ex, fig.width=5, fig.height=5, fig.align="center", fig.cap = "An illustrative example of a causal tree"}
-fancyRpartPlot(opfit, sub = "")
+Figure A.1 shows an example of CT where the treatment is an increase in seed rate from $27,000$ seeds/ha (control) to $31,000$ seeds/ha (treated) with apparent electrical conductivity ($\textit{ecs}$)($dS/m$) and topographical $\textit{slope}$ ($degree$) as variables to explain the heterogeneity of the impact of the treatment impact.  
+
+```{r ct-ex, fig.width=5, fig.height=5, fig.align="center", fig.cap = "Figure A.1: An illustrative example of a causal tree"}
+par(family="Times")
+fancyRpartPlot(opfit, sub="")
 ```
 
 `r ftext('NOTE: The first number in each node indicates the predicted treatment effects (in kg/ha). The number and the percentage of observations belonging to the node are shown below that.', fp_text(font.size = 9, font.family = "Times New Roman"))`
@@ -11,13 +14,13 @@ fancyRpartPlot(opfit, sub = "")
 
 In the first node, all the samples ($1024$ observations) belong to the node, and the causal effect of the treatment was calculated as the difference in the mean yield of the treated and control groups, which turned out to be $593$ kg/ha in this example. The first data split criterion is whether the $\textit{ecs}$ value is greater or less than $25$. The observations with $\textit{ecs}$ greater than or equal to $25$ move to the left node, while those with $\textit{ecs}$ less than $25$ move to the right. For each of the subsamples, the treatment effect is identified as the difference in the mean yields of the treated and control groups within the subsample. The treatment effect for the low-$\textit{ecs}$ observations was $619$ kg/ha, and for the high-$\textit{ecs}$ observations was $982$ kg/ha. This means that for the impact of the increase in seed rate the treatment effect is heterogeneous over space, having a larger positive impact on yield in high-$\textit{ecs}$ areas. Trees are further developed to have more groups of subsamples to allow for more flexible representations of the heterogeneous treatment effects. The estimated heterogeneous treatments effects can then be used to identify site-specific EOIRs. It is noteworth that at no point CF estimates yield "level." 
 
-# Appendix B: Understanding Yield Response Functions Better
+## Appendix B: Understanding Yield Response Functions Better {-}
 
-Another way to writing Eq. \@ref(eq:eqn6) that may help understanding the yield response (Eq. \@ref(eq:eqn6)) better conceptually is as follows:
+Another way to writing Eq. \@ref(eq:eqn3) that may help understanding the yield response Eq. (B.1) better conceptually is as follows:
 
-\begin{equation}
-f(N, \mathbf{c}) = ymax(\mathbf{c})(1-exp(\alpha(\mathbf{c}) + \beta(\mathbf{c}) \cdot N)) + \varepsilon. 
-\end{equation}
+$$
+f(N, \mathbf{c}) = ymax(\mathbf{c})(1-exp(\alpha(\mathbf{c}) + \beta(\mathbf{c}) \cdot N)) + \varepsilon. \qquad \text{(B.1)}
+$$
 
 In this formulation, it is made clear that the base parameters $\alpha$, $\beta$, and $ymax$ are functions of a vector of field characteristics variables $\mathbf{c}=(c_1,\dots,c_K)$, which vary spatially on the field. 
 
@@ -25,33 +28,31 @@ Which of $c_1,\dots,c_K$ has an influence vary by the parameters. For example, $
 
 Each subplot has different values of $\mathbf{c}$, and yield at the subplot level can be written as
 
-\begin{equation}
-f(N_{i}, \mathbf{c}_{i}) = ymax(\mathbf{c}_{i})(1-exp(\alpha(\mathbf{c}_{i}) + \beta(\mathbf{c}_{i})\cdot N_{i})) + \varepsilon_{i}. 
-\end{equation}
+$$
+f(N_{i}, \mathbf{c}_{i}) = ymax(\mathbf{c}_{i})(1-exp(\alpha(\mathbf{c}_{i}) + \beta(\mathbf{c}_{i})\cdot N_{i})) + \varepsilon_{i}. \qquad \text{(B.2)}
+$$
 
-The simplified notation of this equation, where $c_i$ is dropped, is \@ref(eq:eqn6) in section <span style = "color: blue;"> section number here </span>. 
+The simplified notation of this equation, where $c_i$ is dropped, is Eq. \@ref(eq:eqn3) in section 3.1.2. 
 
-<span style = "color: blue;"> Shun, number the equations </span>
+## Appendix C: Parameter Generation {-}
 
-# Appendix C: Parameter Generation
-
-## Base parameters $\alpha$, $\beta$, and $ymax$ {#par-gen}
+### C.1 $\quad$ Base parameters **$\alpha$**, **$\beta$**, and **$ymax$** {-}
 Parameters $\alpha_{i,j}$, $\beta_{i,j}$, $ymax_{i,j}$, and $\varepsilon_{i,j}$ were modeled as spatially autocorrelated using unconditional Gaussian geostatistical simulation based on the spherical variogram model. The `gstat` package (version 2.0.6 [@gstat1; @gstat2]) in R was used for this purpose 
 
-Table \@ref(tab:variogram-parameters) shows the main variogram parameter values used in generating $\alpha_{i,j}$, $\beta_{i,j}$, $ymax_{i,j}$, and $\varepsilon_{i,j}$, which were chosen to generate yields consistent with those observed in experiments conducted by the DIFM project. (Codes used to generate parameter values are publicly accessible as a Mendeley dataset [@Kakimoto2022codes].) The range and nugget of all parameters were assumed to be $400$ m and 0. The means of $ymax$, $\alpha$, $\beta$, and $\varepsilon$ were assumed to be $12,000$ kg/ha, $-0.5$, $0$ and $0$, and their sills were assumed to be $2.0 \times 10^{6}$ kg/ha, $0.02$, $1.0$ and $0.015$. See Figure \@ref(fig:fig-parameters) for an example of the generated parameters. 
+Table C.1.1 shows the main variogram parameter values used in generating $\alpha_{i,j}$, $\beta_{i,j}$, $ymax_{i,j}$, and $\varepsilon_{i,j}$, which were chosen to generate yields consistent with those observed in experiments conducted by the DIFM project. (Codes used to generate parameter values are publicly accessible as a Mendeley dataset [@Kakimoto2022codes].) The range and nugget of all parameters were assumed to be $400$ m and 0. The means of $\alpha$, $\beta$, $ymax$, and $\varepsilon$ were assumed to be $-0.5$, $0$, $12,000$ kg/ha, and $0$, and their sills were assumed to be $0.02$, $1.0$, $2.0 \times 10^{6}$ kg/ha, and $0.015$. See Figure C.1.1 for an example of the generated parameters. 
 
-<span style = "color: blue;"> Shun, combnine all the figures </span>
 
-```{r variogram-parameters, tab.cap = "The parameters for the Variogram models"}
+```{r, tab.cap = "Table C.1.1: The parameters for the variogram models"}
 variogram_tb
 ```
 
-```{r fig-parameters, fig.width=7, fig.height=9, fig.cap = "An Illustrative wxample of spatial distributions of field characteristics", cache = TRUE}
 
+```{r, fig.width=7, fig.height=9, fig.cap = "Figure C.1.1: An illustrative example of spatial distributions of field characteristics", cache = TRUE}
 field_alpha + field_beta + field_ymax + field_m_error + field_optN + plot_layout(ncol = 2)
 ```
 
-## Splitting the Base Parameters {#split-pars}
+
+### C.2 $\quad$ Splitting the Base Parameters {-}
 
 For scenarios "aabbyy" and "aabbyytt," each of the base parameters $\alpha$, $\beta$, and $ymax$ are splitted into two part in a spatially correlated manner. Specifically, for each cell $(i,j)$, we assigned one of a set of spatially autocorrelated weights $r^{\alpha}_{i,j} \in (0,1)$ to the $\alpha$ variable, another set of spatially autocorrelated weights $r^{\beta}_{i,j} \in (0,1)$ to the $\beta$ variable, and another set of spatially autocorrelated weights $r^{ymax}_{i,j} \in (0,1)$ to the ${ymax}_{i,j}$ variable. Each of the weight variables are generated using unconditional Gaussian geostatistical simulation just like the base parameters. (There was no spatial correlation between the $r^{\alpha}_{i,j}$ and $r^{\beta}_{i,j}$ data, between $r^{\alpha}_{i,j}$ and $r^{ymax}_{i,j}$ data, or between $r^{\beta}_{i,j}$ and $r^{ymax}_{i,j}$.) Six new covariates were created with the weights and the original covariates $\alpha_{i,j}$, $\beta_{i,j}$ and $ymax_{i,j}$. These were 
 $\alpha^{1}_{i,j} = r^{\alpha}_{i,j} \cdot \alpha_{i,j}$, $\alpha^{2}_{i,j} = (1- r^{\alpha}_{i,j}) \cdot \alpha_{i,j}$,
@@ -59,21 +60,22 @@ $\beta^{1}_{i,j} = r^{\beta}_{i,j} \cdot\beta_{i,j}$, $\beta^{2}_{i,j} = (1- r^{
 $ymax^{1}_{i,j} = r^{ymax}_{i,j} \cdot ymax_{i,j}$, and $ymax^{2}_{i,j} = (1- r^{ymax}_{i,j}) \cdot ymax_{i,j}$. The codes used to implement the abovementioned parameter splitting are publicly accessible as a Mendeley dataset [@Kakimoto2022codes].
 
 
-# Appendix C: Training Accuracy of the ML methods
+## Appendix D:  Training Accuracy of the ML methods {-}
 
 During the simulations, we evaluated the training accuracy using the same ML models we presented in the Result and Discussion section. 
-Table \@ref(tab:table-optN-train) shows the mean RMSE of the EONR estimation and $\hat{\pi}_{def}$ over the one thousand simulations using the training datasets as testing datasets. Overall, the performances of each ML method did not change between training and testing datasets. Regarding CNN, the identified site-specific yield response functions were perfectly linear as we confirmed in the testing results. 
+Table D.1 shows the mean RMSE of the EONR estimation and $\hat{\pi}_{def}$ over the one thousand simulations using the training datasets as testing datasets. Overall, the performances of each ML method did not change between training and testing datasets. Regarding CNN, the identified site-specific yield response functions were perfectly linear as we confirmed in the test results. 
 
-```{r table-optN-train, tab.cap = "Mean RMSE of EONR (kg/ha) estimation and profit-deficit ($/ha) by ML methods and modeling scenarios on training datasets"}
+```{r table-optN-train, tab.cap = "Table D.1: Mean RMSE of EONR (kg/ha) estimation and profit-deficit ($/ha) by ML method and modeling scenario on training datasets"}
 report_table_optN_train
 ```
 
-Table \@ref(tab:table-y-train) shows the mean RMSE of yield prediction over the one thousand simulations using the training datasets as testing datasets. Interestingly, the performances of the prediction-oriented ML methods in predicting yields were relatively improved compared with the test results. Despite the improvement of prediction-oriented ML methods in yield prediction accuracy, it did not result in the more accurate EONR estimates. This supports our argument that the model’s yield prediction accuracy has little to do with its EONR prediction accuracy.
+Table D.2 shows the mean RMSE of yield prediction over the one thousand simulations using the training datasets as testing datasets. Interestingly, the performances of the prediction-oriented ML methods in predicting yields were relatively improved compared with the test results. Despite the improvement of prediction-oriented ML methods in yield prediction accuracy, it did not result in the more accurate EONR estimates. This also supports our argument that the model’s yield prediction accuracy has little to do with its EONR prediction accuracy.
 
 
-```{r table-y-train, tab.cap = "Mean RMSE of yield prediction (kg/ha) by ML methods and modeling scenarios on training datasets"}
+```{r table-y-train, tab.cap = "Table D.2: Mean RMSE of yield prediction (kg/ha) by ML method and modeling scenario on training datasets"}
 report_table_y_train
 ```
+
 
 
 
