@@ -21,20 +21,33 @@ To do:
   ✔ add training accuracy results to supplementary @done (14-02-22 01:22)
   ✔ we changed the number of trees to 2000, change the corresponding parts mentioning about it. @done (14-02-22 01:22)  
 
-Final Check:
-  □ I found that `snider_high_res.gpkg` is necessary to create an example figure of a causal tree
-  □ Make sure the url of Mendeley data work (pasted in the manuscript, appendix, and response to reviewer1)
-    + I think I need to publish the data before we re-submit to the journal
 
-  □ Make sure the link to the CF_for_VRA repository work.
-  □ Does the figure 
-  □ All the title of figures and tables are lowercase other than first letter
-  □ Shun put table and figure numbers here [response to reviewer1]
-  □ Shun, number the equations [appendix]
-  □ Correct figure numbers in appendix
-  □ Check whether all the equation is numbered correctly. [manuscript and appendix]
-  □ 
-
-
+Check:
+  □ l.105: discrete changes in yields that result from discrete **changes** in the input application rate I
+    + the first "change" should be also italic?
+  □ l.274: For the given modeling scenario, RF and BRF predict yield by using all the ....
+    + CNN should be included?
+  □ l.384: The figure shows points clustered around the red 1-to-1 line, meaning that the estimated treatment effects did not exhibit significant bias. 
+    + change: Except for CNN, the figure shows points clustered around the red 1-to-1 line, meaning that the estimated treatment effects did not exhibit significant bias. 
   □ Need to be modified: L356-357 "the site-specific yield response functions identified by CNN were linear, and **all with the same slope**"
     + they don't have exactly the same slope. Oh, you mean, slope were the same across the modeling scenarios.
+  □ I found that `snider_high_res.gpkg` is necessary to create an example figure of a causal tree
+
+
+Final Check:
+  ✔ Change the cross-reference in the mancuscript (ctree-ex, par-gen, split-pars) @done (14-02-22 17:15)
+  ✔ I want to change the font type of the manuscript to Times New Roman. How can I change? @done (14-02-22 20:48)
+  □ Make sure the url of Mendeley data work (pasted in the manuscript, appendix, and response to reviewer1)
+    + I think I need to publish the data before we re-submit to the journal
+    + I will not be able to edit or delete this version of my dataset....
+    + Don't forget publish the data before you re-submit
+  □ Make sure the link to the CF_for_VRA git repository suggested in reply for reviewer#1 works
+  .
+  □ All the title of figures and tables are lowercase other than first letter
+  □ Shun put table and figure numbers here [response to reviewer1]
+  ✔ Shun, number the equations [appendix] @done (14-02-22 20:55)
+  ✔ Correct figure numbers in appendix @done (14-02-22 20:56)
+  ✔ Check whether all the equation is numbered correctly. [manuscript and appendix] @done (14-02-22 20:56)
+  
+
+

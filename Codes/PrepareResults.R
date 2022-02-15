@@ -117,6 +117,10 @@ variogram_tb <-
     value = as_paragraph("NOTE: Only in ", as_i("ymax"), " are consistent units of measurement used for Mean, Nugget, and Sill ", "(", as_i("kg"),")."),
     ref_symbols = NA
   ) %>%
+  # set_caption(
+  #   caption = "Table C.1: The parameters for the Variogram models",
+  #   style = "Table Caption"
+  # ) %>%
   autofit()
 
 
@@ -141,7 +145,7 @@ plot <-
   geom_sf(data = ex_plot, fill = "green", size = 1) +
   coord_sf(expand = FALSE) +
   # theme_void() +
-  ggtitle("12 \u00D7 12 subplots") +
+  ggtitle("12 \u00D7 32 plots") +
   theme_figure
 
 
@@ -224,7 +228,7 @@ field_Ndesign <-
   ) +
   scale_fill_viridis_d() +
   labs(fill = "Nitrogen rate\n  (kg/ha)") +
-  ggtitle("(a) Trial Design") +
+  ggtitle("(1) Trial Design") +
   theme_figure
 
 
@@ -235,7 +239,7 @@ vis_yield_subplot <-
   geom_sf(aes(fill = yield), size = 0) +
   scale_fill_viridis_c() +
   labs(fill = "Yield Level\n  (kg/ha)") +
-  ggtitle("(b) Simulated Yield Level") +
+  ggtitle("(2) Simulated Yield Level") +
   theme_figure
 
 
@@ -304,7 +308,6 @@ res_y_train <-
 res_y_test <-
   allML_summary_bySim %>%
   .[type == "test" & Method %in% c("RF", "BRF", "CNN")]
-
 
 # ==== Summary Table ====#
 # --- on training data sets--- #
@@ -386,18 +389,7 @@ fig_y_optN <-
   ylim(NA, 95) +
   labs(y = " RMSE of EONR Estimation (kg/ha)") +
   labs(x = " RMSE of Yield Prediction (kg/ha)") +
-  theme_few() +
-  theme(
-    strip.text.x = element_text(size = 12, face = "bold"),
-    strip.text.y = element_text(size = 12, face = "bold"),
-    legend.title = element_blank(),
-    legend.text = element_text(size = 12, face = "bold"),
-    legend.position = "bottom"
-  ) +
-  theme_figure
-
-# print(fig_y_optN, preview = "docx")
-# dfabline <- data.frame(x = 0:3500, y=0:3500)
+  theme_dist
 
 
 ## ---- dependson = "source-results"------------------------------------------------------------
@@ -482,7 +474,7 @@ plot_dis_optN <-
   allML_summary_bySim %>%
   .[type=="test",] %>%
   # .[Method %in% c("RF", "BRF", "CF_base"), ] %>%
-  .[Method == "CF_base", Method := "CF_base"] %>%
+  .[Method == "CF_base", Method := "CF-base"] %>%
   .[, Model := case_when(
     Model == "aby" ~ "Scenario: aby",
     Model == "abytt" ~ "Scenario: abytt",
@@ -634,7 +626,7 @@ piLoss_density <-
   )] %>%
   ggplot() +
   geom_density(aes(x = pi_loss, fill = Method), alpha = 0.7) +
-  labs(x = expression(paste(hat(pi)["def"], " ($/ha)"))) +
+  labs(x = expression(paste(hat(pi)[italic("def")], " ($/ha)"))) +
   facet_wrap(~Model, ncol = 1) +
   theme_dist
 
