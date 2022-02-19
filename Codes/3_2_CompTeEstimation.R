@@ -26,8 +26,8 @@ reg_data_all <- readRDS(here("Shared", "Data", "for_Simulations", "reg_data.rds"
 test_data_all <- readRDS(here("Shared", "Data", "for_Simulations", "test_data.rds"))
 
 
-#--- pick a single simulation round ---#
-x = 1
+#--- pick a single simulation round (276, 555, 806)---#
+x=806
 reg_data_sample <- reg_data_all[sim==x & padding==1,]
 test_data_sample <- test_data_all[sim==x & padding==1,]
 N_levels <- reg_data_sample$rate%>%unique()%>%sort()
@@ -100,7 +100,7 @@ forest_te_dt <-
 res_cnn <- 
 	fread(here("Shared/Results/CNN_rawRes_onEval/alldata_model4.csv"))%>%
 	setnames("pred", "yield_hat")%>%
-	.[sim==1, rate %in% N_levels, .(id, rate, yield_hat, sim)] %>%
+	.[sim==x, rate %in% N_levels, .(id, rate, yield_hat, sim)] %>%
 	.[, c("subplot_id", "strip_id") := tstrsplit(id, "_", fixed=TRUE)] %>%
   	.[,unique_subplot_id := paste0(strip_id,"_",subplot_id)] %>%
   	.[unique_subplot_id %in% subplots_infiled, ] %>%
@@ -115,13 +115,9 @@ cnn_te_dt <-
     .[, .(Method, unique_subplot_id, rate, te_base)]
 
 
-
-
 # /*=================================================*/
 #' # Merge the results
 # /*=================================================*/
-
-
 te_comp_dt <- 
 	rbind(forest_te_dt, cnn_te_dt) %>%
 	true_te_dt[., on = c("unique_subplot_id", "rate")] %>%
@@ -132,10 +128,9 @@ te_comp_dt <-
 		rate == N_levels[4] ~ "N1-N4",
 		rate == N_levels[5] ~ "N1-N5"
 	)]
-	
 
 
-saveRDS(te_comp_dt, here("Shared/Results/for_writing/dt_TEcomparison.rds"))
+# saveRDS(te_comp_dt, here("Shared/Results/for_writing/dt_TEcomparison.rds"))
 
 
 #/*----------------------------------*/

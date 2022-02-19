@@ -31,7 +31,7 @@ Check:
     + change: Except for CNN, the figure shows points clustered around the red 1-to-1 line, meaning that the estimated treatment effects did not exhibit significant bias. 
   □ Need to be modified: L356-357 "the site-specific yield response functions identified by CNN were linear, and **all with the same slope**"
     + they don't have exactly the same slope. Oh, you mean, slope were the same across the modeling scenarios.
-  □ I found that `snider_high_res.gpkg` is necessary to create an example figure of a causal tree
+  ✔ I found that `snider_high_res.gpkg` is necessary to create an example figure of a causal tree @done (15-02-22 09:09)
 
 
 Final Check:
@@ -41,13 +41,20 @@ Final Check:
     + I think I need to publish the data before we re-submit to the journal
     + I will not be able to edit or delete this version of my dataset....
     + Don't forget publish the data before you re-submit
-  □ Make sure the link to the CF_for_VRA git repository suggested in reply for reviewer#1 works
-  .
-  □ All the title of figures and tables are lowercase other than first letter
+of figures and tables are lowercase other than first letter
   □ Shun put table and figure numbers here [response to reviewer1]
   ✔ Shun, number the equations [appendix] @done (14-02-22 20:55)
   ✔ Correct figure numbers in appendix @done (14-02-22 20:56)
   ✔ Check whether all the equation is numbered correctly. [manuscript and appendix] @done (14-02-22 20:56)
+  □ 
   
+  
+Final Final Check:
+  □  addressed reviewer #1
+     □ Do we need to paste the link CF_for_VRA github repository? "Please read README.md for the steps to reproduce. In addition, we also created a public github repository named CF_for_VRA (here)."" 
+  ✔  addressed reviewer #2 @done (19-02-22 14:33)
+  ✔ Delete the redundant figure numbers in appendix. @done (19-02-22 15:06)
+  □ Which is correct?: "Mean RMSE of yield prediction (kg/ha) by ML method and modeling scenario" or "Mean RMSE of yield prediction (kg/ha) by ML methods and modeling scenarios" 
+
 
 

@@ -44,6 +44,7 @@ source_dt <-
     .[padding==1, .(sim, type, unique_subplot_id, alpha, beta, ymax, rate, yield, opt_N)] %>%
     .[,type := case_when(type == "1" ~ "train", type == "2" ~ "test")]
 
+# === Unique_subplot_id in a field === #
 subplots_infiled <- source_dt[,unique_subplot_id] %>% unique()
 
 
@@ -168,7 +169,7 @@ cnn_simRes_all <-
 # Confirm that the predicted yield response functions are always linear
 cnn_simRes_temp <- 
     cnn_simRes_all %>%
-    .[type=="test" & sim==1 & unique_subplot_id %in% subplots_infiled[1:100],]
+    .[type=="test" & Model == "aabbyytt" & sim==296 & unique_subplot_id %in% subplots_infiled[1:100],]
 
 ggplot(cnn_simRes_temp, aes(x=rate, y=pred_yield, colour=factor(unique_subplot_id))) +
     geom_point(size = 0.7) +
@@ -210,6 +211,7 @@ slope_dt <- mclapply(all_var_case, cal_slope, mc.cores=detectCores()-2)%>%
 
 # === EONR Estimation === #
 slope_dt <- readRDS(here("Shared/Results/CNN_EONR_anlaysis/cnn_response_slope_all.rds"))
+
 pN_pC_ratio <- pN/pCorn
 
 cnn_optN_dt <- 
@@ -268,8 +270,12 @@ saveRDS(allML_summary_bySim, here("Shared/Results/for_writing/allML_summary_bySi
 
 
 
+allML_summary_bySim <- readRDS(here("Shared/Results/for_writing/allML_summary_bySim.rds"))
 
 
+allML_summary_bySim %>% 
+    .[type=="test" & Model == "aabbyytt"] %>%
+    .[sim %in% agg_slope_model4$sim]
 
 
 
