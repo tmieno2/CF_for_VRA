@@ -23,7 +23,7 @@ We agree with your point, and we have dropped the discussion of the advantages o
 
 <br>
 
-We do see a redundancy in our explanation of how CF can be used to identify site-specific input recommendations. It was explained twice, once each in subsections 2.2 and 3.2.2. We have deletedthe explanation in 2.2 and also changed the heading in 2.1 to "Estimating EOIR and Treatment Effects."
+We do see a redundancy in our explanation of how CF can be used to identify site-specific input recommendations. It was explained twice, once each in subsections 2.2 and 3.2.2. We have deletedthe explanation in 2.2 and also changed the heading in 2.1 to "EOIR Estimation and Treatment Effects."
 
 We have moved an example of a causal tree (previously in seciton 2.3), but have kept the explanation of how CF works. The core objective of the paper is to test the CF against existing ML methods in predicting EOIR and economic performance of resulting site-specific input use recommendations. 
 
@@ -39,9 +39,9 @@ In rereponse to this comments, we made several changes.
 
 First, in the new manuscript we consolidated the original manuscript's 3.1.2 and 3.1.3 into a single subsubsection called "Cell-specific Yield Functions and True Economically Optimal N Rates." In doing so, we moved to the supplementary appendix (Appendix B) the detailed explanation of the conceptual framework behind the yield response functions based on cell-level characteristics, $c_i$. In addition, we moved to Appendix C our detailed discussion of parameters and error term generation, which included a number of tables and figures (Table C.1.1, Figure C.1.1). 
 
-Second, we consolidated subsection 3.1.4 and 3.1.5 of the original manuscript into a single subsubsection called "Trial Design and Yield Data Generation for Modeling." In doing so, we removed some text and combined the original manuscript's figures x and y in the single figure z in the current manuscript. 
+Second, we consolidated subsection 3.1.4 and 3.1.5 of the original manuscript into a single subsubsection called "Trial Design and Yield Data Generation for Modeling." In doing so, we removed some text and combined the original manuscript's figures 5 and 7 in the single figure 2 in the current manuscript. 
 
-Third, we moved to an appendix the previous manuscript’s detailed description of parameter splitting.
+Third, we moved to Appendix C.2 the previous manuscript’s detailed description of parameter splitting.
 
 We believe that the detailed presentation of data generation is crucial in our reporting of MC procedures, as it would be in the report of any empirical study using real experiment data provides. In both cases, results are dependent procedures. We believe further slimming of the description would hinder anyone attempting to reproduce our results. That said, we have worked hard to remove redundancies in this section of the manuscript. 
 </span>
@@ -93,7 +93,7 @@ We have followed the Editor's suggestion by sharing the simulation codes and the
 **9. Please convert the length units of the manuscript to international length units. (line 207)**
 
 <span style="color:blue">  
-Done
+We modified the length units (line 162) 
 </span>
 
 <br>
@@ -101,7 +101,7 @@ Done
 **10. Please add the number of rows and columns to the plots, subplots, and cells schematics in Figure 2. (line 209)**
 
 <span style="color:blue">  
-Done. Please see Figure 2. 
+We modified the figure. Please see Figure 1. 
 </span>
 
 <br>
@@ -126,7 +126,7 @@ To better reflect the contents of 4.1, we changed its title to "Comparison of EO
 
 <span style="color:blue">  
 
-As explained in section 4.1, CNN failed to predict site-specific EONR because the estimated yield response function were always linear (Table 1). Therefore, we thought that visualizing the CNN results would not provide much insight. However, we have decided to include CNN results in Figures 8, 9, and 10 of the previous manuscript. which are Figures 3, 4, and 5 of the revised manuiscript.
+As explained in section 4.1, CNN failed to predict site-specific EONR because the estimated yield response function were always linear (Table 1). Therefore, we thought that visualizing the CNN results would not provide much insight. However, we have decided to include CNN results in Figures 8, 9, and 10 of the previous manuscript. which are Figures 3, 4, and 5 of the revised manuscript.
 
 </span>
 

@@ -32,6 +32,8 @@ This dataset includes the R and Python codes and data for analysis presented in:
 Data folder:
 + **field_boundary.rds**
 	* Description: A polygon boundary data of a field, which is used to generate a field polygon in **1_1_generate_field.R**. 
++ **ctree_data.rds**
+	* Description: Data to be used in creating an example causal tree in *PrepareResults.rmd*.
 
 Code folder:
 + **0\_1\_functions\_gen\_analysis\_data.R**
@@ -65,7 +67,7 @@ Code folder:
 
 + **3\_1\_SimDataAnalysis.R**
 	* Description: This code file calculates RMSE of predicted EONRs and yields by ML method and modeling scenario. 
-	* Final output: 
+	* Final output: `allML_summary_bySim.rds`
 
 + **3\_2\_CompTeEstimation.R**
 	* Description: This code file estimates treatment effect by treatment type and ML method under the "aabbyytt" scenario in one of the one thousand simulations rounds. The output data is used to create Figure 5: "True treatment effects vs estimated treatment effects (scenario: aabbyytt)"

@@ -1,4 +1,4 @@
-## ----set-up, cache = F------------------------------------------------------------------------
+## ----set-up, cache = F----------------------------------------------------------------------------------------------------------------------------
 library(knitr)
 library(here)
 
@@ -9,7 +9,7 @@ knitr::opts_chunk$set(
   cache = FALSE
 )
 
-## ----packages, cache = FALSE, include = FALSE-------------------------------------------------
+## ----packages, cache = FALSE, include = FALSE-----------------------------------------------------------------------------------------------------
 # === packages ===#
 # --- data wrangling--- #
 library(sf)
@@ -36,7 +36,7 @@ library(officedown)
 library(modelsummary)
 
 
-## ---------------------------------------------------------------------------------------------
+## -------------------------------------------------------------------------------------------------------------------------------------------------
 theme_figure <- 
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -65,7 +65,7 @@ set_flextable_defaults(
   )
 
 
-## ----setup, warning=FALSE, message=FALSE, cache= FALSE----------------------------------------
+## ----setup, warning=FALSE, message=FALSE, cache= FALSE--------------------------------------------------------------------------------------------
 # === plot-level field data set  === #
 field_plot_sf <-
   here("Shared/Results/for_writing/sample_field_plot_sf.rds") %>%
@@ -82,7 +82,7 @@ field_cell_sf <-
   readRDS()
 
 
-## ---------------------------------------------------------------------------------------------
+## -------------------------------------------------------------------------------------------------------------------------------------------------
 variogram_tb <-
   data.frame(
     Parameters = c("alpha_ij", "beta_ij", "ymax_ij", "varepsilon_ij"),
@@ -124,7 +124,7 @@ variogram_tb <-
   autofit()
 
 
-## ----field-map-visualization, dependson = "setup"---------------------------------------------
+## ----field-map-visualization, dependson = "setup"-------------------------------------------------------------------------------------------------
 
 # === Preparation === #
 ex_plot <- field_plot_sf[224, ]
@@ -218,7 +218,7 @@ field_structure <-
   theme_void()
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"-------------------------------------------------------------------------------------------------------------------------
 field_Ndesign <-
   ggplot() +
   geom_sf(
@@ -228,26 +228,26 @@ field_Ndesign <-
   ) +
   scale_fill_viridis_d() +
   labs(fill = "Nitrogen rate\n  (kg/ha)") +
-  ggtitle("(1) Trial Design") +
+  ggtitle("(1) Trial design") +
   theme_figure
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"-------------------------------------------------------------------------------------------------------------------------
 # === subplot-level === #
 vis_yield_subplot <-
   ggplot(field_subplot_sf) +
   geom_sf(aes(fill = yield), size = 0) +
   scale_fill_viridis_c() +
-  labs(fill = "Yield Level\n  (kg/ha)") +
-  ggtitle("(2) Simulated Yield Level") +
+  labs(fill = "Yield level\n  (kg/ha)") +
+  ggtitle("(2) Simulated yield level") +
   theme_figure
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"-------------------------------------------------------------------------------------------------------------------------
 
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"-------------------------------------------------------------------------------------------------------------------------
 # === alpha map === #
 field_alpha <-
   ggplot(field_cell_sf) +
@@ -294,12 +294,12 @@ field_optN <-
   theme_figure
 
 
-## ----source-results, message=FALSE, warning=FALSE, cache= FALSE-------------------------------
+## ----source-results, message=FALSE, warning=FALSE, cache= FALSE-----------------------------------------------------------------------------------
 # === Load Results === #
 allML_summary_bySim <- readRDS(here("Shared/Results/for_writing/allML_summary_bySim.rds"))
 
 
-## ---- dependson = "source-results"------------------------------------------------------------
+## ---- dependson = "source-results"----------------------------------------------------------------------------------------------------------------
 # === Set up === #
 res_y_train <-
   allML_summary_bySim %>%
@@ -368,7 +368,7 @@ report_table_y <-
   autofit()
 
 
-## ---------------------------------------------------------------------------------------------
+## -------------------------------------------------------------------------------------------------------------------------------------------------
 fig_y_optN <-
   res_y_test %>%
   .[Method %in% c("RF", "BRF", "CNN")] %>%
@@ -392,7 +392,7 @@ fig_y_optN <-
   theme_dist
 
 
-## ---- dependson = "source-results"------------------------------------------------------------
+## ---- dependson = "source-results"----------------------------------------------------------------------------------------------------------------
 # === Preparation === #
 prepare_count_tab <-
   res_y_test %>%
@@ -466,7 +466,7 @@ report_summary_res_CNN_RF_BRF <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---- dependson = "source-results"------------------------------------------------------------
+## ---- dependson = "source-results"----------------------------------------------------------------------------------------------------------------
 #/*----------------------------------*/
 #' ## Distribution of RMSE of EONR estimates
 #/*----------------------------------*/
@@ -610,7 +610,7 @@ report_table_optN <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---------------------------------------------------------------------------------------------
+## -------------------------------------------------------------------------------------------------------------------------------------------------
 piLoss_density <-
   allML_summary_bySim %>%
   .[type == "test", ] %>%
@@ -631,7 +631,7 @@ piLoss_density <-
   theme_dist
 
 
-## ---------------------------------------------------------------------------------------------
+## -------------------------------------------------------------------------------------------------------------------------------------------------
 figure_te <-
   here("Shared/Results/for_writing/dt_TEcomparison.rds") %>%
   readRDS() %>%
@@ -650,19 +650,24 @@ figure_te <-
   theme_dist
 
 
-## ---- cache = TRUE----------------------------------------------------------------------------
+## ---- cache = TRUE--------------------------------------------------------------------------------------------------------------------------------
 # /*=================================================*/
 #' # Sample CT figure 
 # /*=================================================*/
 library(causalTree)
 library(rattle)
 
-data_sf <- st_read(here("Shared/Data/snider_high_res.gpkg")) %>%
-  na.omit() %>%
-  dplyr::rename(tgtn = NPlan, tgts = SRPlan)
+# data_sf <- st_read(here("Shared/Data/snider_high_res.gpkg")) %>%
+#   na.omit() %>%
+#   dplyr::rename(tgtn = NPlan, tgts = SRPlan) %>%
 
-data_dt <- data.table(data_sf) %>%
-  setnames(names(.), tolower(names(.)))
+# data_dt <- data.table(data_sf) %>%
+#   setnames(names(.), tolower(names(.))) %>%
+#   .[,.(tgts, yield, slope, ecs)]
+
+# saveRDS(data_dt, here("Shared/Results/for_writing/ctree_data.rds"))
+
+data_dt <- readRDS(here("Shared/Results/for_writing/ctree_data.rds"))
 
 tgts_ls <- data_dt[, tgts] %>%
   unique() %>%
@@ -691,4 +696,5 @@ tree <- causalTree(
 
 opcp <- tree$cptable[, 1][which.min(tree$cptable[, 4])]
 opfit <- prune(tree, opcp)
+# fancyRpartPlot(opfit, sub="")
 
