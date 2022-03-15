@@ -6,7 +6,7 @@ output:
     reference_docx: ../word_template_format.docx
 ---
 
-Thank you so much for your comments. By addressing them, we believe the manuscript is improved significantly. Below you will find your comments in bold and our replies in a regular font.
+Thank you so much for your comments. By addressing them, we believe the manuscript has improved significantly. Below you will find your comments in bold and our replies in regular font.
 
 <br>
 
@@ -37,7 +37,7 @@ ML simulation is the core method we use to pursue this core objective. For this 
 <span style="color:blue">  
 In rereponse to this comments, we made several changes. 
 
-First, in the new manuscript we consolidated the original manuscript's 3.1.2 and 3.1.3 into a single subsubsection called "Cell-specific Yield Functions and True Economically Optimal N Rates." In doing so, we moved to the supplementary appendix (Appendix B) the detailed explanation of the conceptual framework behind the yield response functions based on cell-level characteristics, $c_i$. In addition, we moved to Appendix C our detailed discussion of parameters and error term generation, which included a number of tables and figures (Table C.1.1, Figure C.1.1). 
+First, in the new manuscript we consolidated the original manuscript's 3.1.2 and 3.1.3 into a single subsubsection called "Cell-specific Yield Functions and True Economically Optimal N Rates." In doing so, we moved to the supplementary appendix (Appendix B) the detailed explanation of the conceptual framework behind the yield response functions based on cell-level characteristics, $c_i$. In addition, we moved to Appendix C our detailed discussion of parameters and error term generation, which included a number of tables and figures (Table C.1, Figure C.1). 
 
 Second, we consolidated subsection 3.1.4 and 3.1.5 of the original manuscript into a single subsubsection called "Trial Design and Yield Data Generation for Modeling." In doing so, we removed some text and combined the original manuscript's figures 5 and 7 in the single figure 2 in the current manuscript. 
 
@@ -85,7 +85,7 @@ We apologize for not making this cleaner in the original manuscript. The trainin
 **8. I can't open the code link (https://github.com/tmieno2/ML_VRA.git, lines 199 and 249) with my browsers (chrome, edge, and Firefox). Please upload the code to the public research data repositories (Zenodo, Mendeley Data, figshare, Harvard Dataverse, etc.), not GitHub. Please generate a separate DOI for your code and cite it.**
 
 <span style="color:blue">  
-We have followed the Editor's suggestion by sharing the simulation codes and the data on Mendeley Data (https://data.mendeley.com/datasets/y7cdhzww6w/draft?a=2e33b309-ca5c-49bc-95ce-9b3920d5544a) to increase the accessibility. The name of the data set is "Codes and Data Causal Forest Approach for Site-specific Input Management via On-farm Precision Experimentation", and two folders are included in this data set: "Codes" and  "Data". The "Code" folder contains all the simulation codes, and the "Data" folder contains a boundary polygon data of a field which is necessary to create field data for this study. Please read README.md for the steps to reproduce. In addition, we also created a public github repository named CF_for_VRA ([here](https://github.com/tmieno2/CF_for_VRA)).
+We have followed the Editor's suggestion by sharing the simulation codes and the data on Mendeley Data (https://doi.org/10.17632/y7cdhzww6w.1) to increase the accessibility. The name of the data set is "Codes and Data Causal Forest Approach for Site-specific Input Management via On-farm Precision Experimentation", and two folders are included in this data set: "Codes" and  "Data". The "Code" folder contains all the simulation codes, and the "Data" folder contains a boundary polygon data of a field which is necessary to create field data for this study. Please read README.md for the steps to reproduce. In addition, we also created a public github repository named VRA_with_CF (https://github.com/Shunkei3/VRA_with_CF.git).
 </span>
 
 <br>
@@ -93,7 +93,7 @@ We have followed the Editor's suggestion by sharing the simulation codes and the
 **9. Please convert the length units of the manuscript to international length units. (line 207)**
 
 <span style="color:blue">  
-We modified the length units (line 162) 
+We modified the length units (line 163) 
 </span>
 
 <br>
