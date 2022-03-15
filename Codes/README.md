@@ -2,26 +2,26 @@
 
 ## General Information
 + Corresponding Author Contact Information
-	* Name: Shunkei Kakimoto
-	* Institution: Department of Agricultural Economics, University of Nebraska-Lincoln
-	* Address: 102 Filley Hall 1625 Arbor Drive Lincoln, NE 68583, USA 
-	* E-mail: skakimoto3@hunskers.unl.edu
+	* Shunkei Kakimoto
+		- Institution: Department of Agricultural Economics, University of Nebraska-Lincoln
+		- Address: 102 Filley Hall 1625 Arbor Drive Lincoln, NE 68583, USA 
+		- E-mail: skakimoto3@hunskers.unl.edu
 
 + Co-authors Contact Information
-	* Name: Taro Mieno
-	* Institution: Department of Agricultural Economics, University of Nebraska-Lincoln
-	* Address: Lincoln, NE 68583, USA
-	* E-mail: tmieno2@unl.edu
+	* Taro Mieno
+		- Institution: Department of Agricultural Economics, University of Nebraska-Lincoln
+		- Address: Lincoln, NE 68583, USA
+		- E-mail: tmieno2@unl.edu
 	
-	* Name: Takashi S. T. Tanaka
-	* Institution: Artificial Intelligence Advanced Research Center, Faculty of Applied Biological Sciences, Gifu University
-	* Address: Gifu 501-1193, Japan
-	* E-mail: takashit@gifu-u.ac.jp
+	* Takashi S. T. Tanaka
+		- Institution: Artificial Intelligence Advanced Research Center, Faculty of Applied Biological Sciences, Gifu University
+		- Address: Gifu 501-1193, Japan
+		- E-mail: takashit@gifu-u.ac.jp
 	
-	* Name: David S. Bullock
-	* Institution: Department of Agricultural and Consumer Economics, University of Illinois
-	* Address: Urbana, IL 61801, USA
-	* E-mail: dsbulloc@illinois.edu
+	* David S. Bullock
+		- Institution: Department of Agricultural and Consumer Economics, University of Illinois
+		- Address: Urbana, IL 61801, USA
+		- E-mail: dsbulloc@illinois.edu
 
 
 ## DATA & FILE OVERVIEW
@@ -31,13 +31,13 @@ This dataset includes the R and Python codes and data for analysis presented in:
 ### List of Files:
 Data folder:
 + **field_boundary.rds**
-	* Description: A polygon boundary data of a field, which is used to generate a field polygon in **1_1_generate_field.R**. 
+	* Description: A polygon boundary data of a field, which is used to generate a field polygon in **1\_1\_generate\_field.R**. 
 + **ctree_data.rds**
-	* Description: Data to be used in creating an example causal tree in *PrepareResults.rmd*.
+	* Description: Data to be used in creating an example causal tree in **PrepareResults.rmd**.
 
 Code folder:
 + **0\_1\_functions\_gen\_analysis\_data.R**
-	* Description: This code file contains functions to generate field characteristics (e.g., $alpha$, $beta$, $ymax$, etc.) and yield datasets.
+	* Description: This code file contains functions to generate field characteristics (e.g., *α*, *β*, *ymax*, etc.) and yield datasets.
 
 + **0\_2\_functions\_main\_sim.R**
 	* Description: This code file contains functions to conduct Random Forest (RF), Boosted Random Forest (BRF), and Causal Forest (CF) analysis to predict yields and EONRs site-specifically.
@@ -47,7 +47,7 @@ Code folder:
 	* Final output: `analysis_field.rds`
 
 + **1\_2\_generate\_coefficients.R**
-	* Description: This code file generates field characteristics (e.g., $alpah$, $beta$, $ymax$,..., etc.) data using unconditional Gaussian geostatistical simulation based on the spherical variogram model.
+	* Description: This code file generates field characteristics (e.g., *α*, *β*, *ymax*,..., etc.) data using unconditional Gaussian geostatistical simulation based on the spherical variogram model.
 	* Final output: `coef\_data.rds`
 
 + **2\_1\_generate\_analysis\_data.R**
@@ -74,7 +74,7 @@ Code folder:
 	* Final output: `dt_TEcomparison.rds`
 
 + **4\_prepare\_results.R**
-	* Description: This code file prepares data to be used in showing the field maps. 
+	* Description: This code file prepares data to be used for showing an example of spatial distributions of field characteristics, a trial design, and generated yield. 
 
 + **PrepareResults.rmd**
 	* Description: This code file creates all the figures and tables which will be used in the manuscript. 
@@ -83,11 +83,3 @@ Code folder:
 ### Steps to Reproduce
 + Before you start, create a new R project in a folder including "Data" and "Codes" folders. 
 + The simulation series starts from the code **1\_1\_generate_field.R** in the order of the number assigned in front of the file names. By running the files in sequence, you can reproduce the simulations results, tables, and figures presented in the article.
-
-
-
-
-
-
-
-

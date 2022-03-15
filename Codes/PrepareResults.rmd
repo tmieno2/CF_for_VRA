@@ -748,6 +748,6 @@ tree <- causalTree(
 
 opcp <- tree$cptable[, 1][which.min(tree$cptable[, 4])]
 opfit <- prune(tree, opcp)
-# fancyRpartPlot(opfit, sub="")
+# fancyRpartPlot(opfit, sub="", shadow.col = "")
 ```
 
