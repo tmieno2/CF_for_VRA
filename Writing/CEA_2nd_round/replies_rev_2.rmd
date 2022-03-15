@@ -8,7 +8,7 @@ output:
     reference_docx: ../word_template_format.docx
 ---
 
-Thank you so much for your comments. By addressing them, we believe the manuscript is improved significantly. Below you will find your comments in bold and our replies in a regular font.
+Thank you so much for your comments. By addressing them, we believe the manuscript has improved significantly. Below you will find your comments in bold and our replies in regular font.
 
 <br>
 
@@ -36,27 +36,27 @@ Units are added to the table and figure where applicable. They are now in Append
 **4. p. 21 l. 334: For example, instead of using , directly, some some topographical land features and soil properties (remove 1 some)**
 
 <span style="color:blue"> 
-The extra "some" was removed from the sentence (see p15 l.249).
+The extra "some" was removed from the sentence (see p15 l.250).
 </span>
 
 
 **5. p. 24 l. 403: The accuracy of EONR estimation was judged based on the RMSE (/h)of EONR estimation**
 
 <span style="color:blue"> 
-The typo was corrected (see p19 l.320). 
+The typo was corrected (see p19 l.321). 
 </span>
 
 
 **6. p. 26 l. 424: To examine whether this problem is a product solely of the specific choice**
 
 <span style="color:blue">  
-The grammatical error was corrected (see p20 l.340). 
+The grammatical error was corrected (see p20 l.341). 
 </span>
 
 **7. P. 29 l 449: Points are clustered much more tightly about the 1-to-1 line much for CF-base than RF and BRF. (remove much)**
 
 <span style="color:blue">  
-We removed "much" from the sentence (see p24 l.366).
+We removed "much" from the sentence (see p24 l.367).
 </span>
 
 
