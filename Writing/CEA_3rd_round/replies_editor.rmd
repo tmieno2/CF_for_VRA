@@ -6,14 +6,14 @@ output:
     reference_docx: ../word_template_format.docx
 ---
 
-Thank you so much for your comments. By addressing them, we believe the manuscript has improved significantly. Below you will find your comments in bold and our replies in regular font.
+We appreciate your comments and 
 
 <br>
 
 **1. The CNN result seems to be rather constant than linear. Please include a chart showing the CNN performance per training epoch to allow the reader to assess how good the CNN model converged.**
 
 <span style="color:blue">  
-The figure showing the CNN performance per training epoch is added to Appendix E.
+Please see Figure xx in Appendix xx that shows the convergence of CNN for a single simulation round. We cannot show this kind of figure for all the simulation rounds. But, any interested readers can replicate our work as the codes will be accessible publicly.
 </span>
 
 <br>
@@ -21,6 +21,10 @@ The figure showing the CNN performance per training epoch is added to Appendix E
 **2. Line 70. Why can't EOIRs be estimated by the intervention studies mentioned in 28ff?**
 
 <span style="color:blue">  
+We do not say EOIR cannot be estimated by studies mentioned in 28ff. Indeed, any methods can "estimate" EOIR. However, no method can estimate the "true" EONR and we will 
+"never" know true EONRs for real fields. We can only esimate them. This principle is at the core of statistical analysis. We never observe how data is generated (the underlying laws that govern how the world works whether it is physical, biological, or economic), but we can "estimate" (approximate) what thye look like. This means that when we try to evaluate how different models perofrm in predicting EONR using real data, we simply do not have a valid benchmark to compare against. Some may ask, then why don't we use models' yield prediction abililty because yield is observable. And this is precisely the dangerous practice that we show is wrong.
+
+Please note that this is a stark contrast to "yield" (not EOIR) prediction because yields ARE observable and models can be verified. However, that is not the case for EOIR. This is why you need MC simulations where the data generating process (how yield responds to N, and how field characteristics affect yield response to N) is "known" to the researcher. This way, we can test model's ability to predict EONR, not yield. Any journal article that proposes a new statistical method always accompany the theory of why their method works (consistency of their estimation, etc) with MC simulations where the researchers determines how data is generated and apply their method. This is because we can never test the statistical property of a statistical method in principle using the real data. For example, please see (Shun, cite CF paper here.)
 
 </span>
 
@@ -29,7 +33,7 @@ The figure showing the CNN performance per training epoch is added to Appendix E
 **3. Line 194 simualtions**
 
 <span style="color:blue">  
-The typo was corrected (see p11 l.194).
+
 </span>
 
 <br>
@@ -45,20 +49,32 @@ The typo was corrected (see p11 l.194).
 **5. Line 321 It seems RSME was never defined.**
 
 <span style="color:blue">  
-The equations for RMSE of EONR estimation and yield prediction are now added under section 3.3.3. 
+Please see page xx, line yy for the precise definition of the RMSE for yield and EONR predictions.
 </span>
 
 <br>
 
 **6. In principle, your ML models have to learn to replicate equation 3, right? You have to explain better why RSME for yield and EONR can be uncorrelated when they are directly related through Eq. 3 and 5. There must be an effect of yield prediction error on EONR. By definition, a 100% perfect yield prediction should reduce the EONR error to the effect of epsilon in Eq. 3. (As a side note, in this case the correlation between the RSMEs would also be zero.) A larger RSME for yield prediction would simultaneously increase the RSME of EONR until the EONR virtually becomes a random variable. Your comparison in Figure 6 may not be insightful in this regard. It might be confounded by effects from different prediction performance for different simulation parameters i.e. the prediction performance might be different depending on where you are in the hyperbola from Eq.3 . If the prediction performance is not uniform or the prediction error is of a similar size as the achievable yield increase, then it is natural that the RSMEs of EONR and yield prediction are not correlated. Figure C1.4 indicates that the effect size of the random error epsilon alone is already in the range of the achievable yield increase. I recommend to add a simulation of different ML performances and different epsilon values to test their effects.**
 
+
+
 <span style="color:blue">  
+
+We actually realized the results presented in Figure 6 is completely invalid. As you pointed out the problem with the relationship presented in the figure is basically comparing apples and oranges. The biggest problem of the relationship we identified is that the maximum profit of the field is very different across simulations (the field in some simulations are simply more profitable than the fields in other simulations). So, basically, the observed variation in achieved profits by estimated site-specific EONR is dominated simply by how profitable fields are on average. For this reason, we eliminated the figure and also dropped our cliam that yield prediction and EONR prediction are uncorrelated. Thank you so much for spotting this embarassing mistake from our side. 
+
+However, please note that our cliam that better yield prediction does "not necessarily" lead to higher profit remains intact. This is evident in Table 1 and the analysis behind this table is valid. This happens because you can prefict yield well for a "wrong" reason, attributing parts of variations in yield to something other than its true driver. 
+
+approximating yield response function , predicting yield levels at the observed points
+
+Estiamting the structure well leads to a better prediction of yield, however better prediction of yield does not necessarily mean a better prediction of the structure of the yield response function (yield response curve) because you can predicte yield levels at the observed rate for wrong reasons.
 
 </span>
 
 <br>
 
 **7. Please insert a plot for true yield vs yield prediction to enable the reader to estimate the achieved prediction performance.**
+
+Please see Figure xxx that plots true yields (without error, epsilon) against predicted yields by model (CF is not presented as it does not predict yield levels as discussed in the article) for a sigle simulation round. RMSE is presented in the figure as well. As we have 1000 simulations, it is simply infeasible to present figures like this for all the simulation rounds. But, this figure provides a better sense of the value of RMSE and how good the fit is. 
 
 <span style="color:blue">  
 
@@ -67,6 +83,8 @@ The equations for RMSE of EONR estimation and yield prediction are now added und
 <br>
 
 **8. Please show to which degree N affected yield and how the relation between yield estimation error and the effect of N on yield increase was. I would like to see whether the models were able to reproduce the effect of N on yield at all.**
+
+Please see Figure xxx for illustrations of how yield responds to N site-specifically for xxx sites within a field. Please note that Figure xxx (Figure 5) presents exactly the moldes' ability to predict the impact of N on yield at different treatments (lowest to the second lowest, second lowest to third lowest, etc). As you can see in the figure, RF underestimates the impact of N on yield severely, which leads to the underestimation of EONR. BRF suffers negative bias as well. On the contrary, CF does not suffer this bias. Of couese, the worst of all is CNN, which thinks that the impact of N on yield is almost nascent as you can see in Figure 5. On top of negative bias RF and BRF suffer, their estiamtion of the impact of N is also less accurate than CF. That is why CF performs better than RF and BRF in profit. Please note that CF does not even estimate (3). It estimates the change in yield when N is increased from one rate to another rate as discussed in the paper. 
 
 <span style="color:blue">  
 
@@ -77,7 +95,7 @@ The equations for RMSE of EONR estimation and yield prediction are now added und
 **9. Please extend the introduction by restating numbers for the state of the art of yield and EONR prediction performance from previous studies (as far as such numbers are available) to prevent that all of your readers have to consult the cited references.**
 
 <span style="color:blue">  
-
+Please see page xx, line xx for a new list of studies that attempt to estimate EONR. Please note that this study has no interest in studies that just predict yield without trying to show how they can use it for EONR estimation. Prediction of yield is almost always not the goal of farmers. We are listing studies that predict yields (or estimate yield resposne function to be more precise) and then predict EOIR based on them. Also, there is no study that test the performance of EONR using real data. This is because that is fundamentally impossible as we mentioned above. There are studies that predict field-level (not site-specific within a field) EONR for individual fields one by one using a traditional regression approach, then model EONR using ML methods to see how close their estimated field-level EONRs from the trained ML methods are to the EONR "estimated" for individual fields (Shun cite a paper that does this). But, please note that the field-level EONRs they compare against are "estimated." Why did they "estimate" EONR for each field? That is because they do not (and will never) know the true EONR for each field. Moreover, the objective of such studies are fundamentally different from ours. Our focus is on site-specific EONR within a field, theirs' are on field-specific EONR. We conside those studies not very relevant. Including those studies will simply bloat the introduction. 
 </span>
 
 <br>
@@ -89,4 +107,3 @@ The equations for RMSE of EONR estimation and yield prediction are now added und
 </span>
 
 <br>
-
