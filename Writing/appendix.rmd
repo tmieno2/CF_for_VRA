@@ -15,6 +15,8 @@ fancyRpartPlot(opfit, sub="")
 
 In the first node, all the samples ($1024$ observations) belong to the node, and the causal effect of the treatment was calculated as the difference in the mean yield of the treated and control groups, which turned out to be $593$ kg/ha in this example. The first data split criterion is whether the $\textit{ecs}$ value is greater or less than $25$. The observations with $\textit{ecs}$ greater than or equal to $25$ move to the left node, while those with $\textit{ecs}$ less than $25$ move to the right. For each of the subsamples, the treatment effect is identified as the difference in the mean yields of the treated and control groups within the subsample. The treatment effect for the low-$\textit{ecs}$ observations was $619$ kg/ha, and for the high-$\textit{ecs}$ observations was $982$ kg/ha. This means that for the impact of the increase in seed rate the treatment effect is heterogeneous over space, having a larger positive impact on yield in high-$\textit{ecs}$ areas. Trees are further developed to have more groups of subsamples to allow for more flexible representations of the heterogeneous treatment effects. The estimated heterogeneous treatments effects can then be used to identify site-specific EOIRs. It is noteworth that at no point CF estimates yield "level." 
 
+\newpage
+
 ## Appendix B: Understanding Yield Response Functions Better {-}
 
 Another way to writing Eq. \@ref(eq:eqn3) that may help understanding the yield response Eq. (B.1) better conceptually is as follows:
@@ -34,6 +36,8 @@ f(N_{i}, \mathbf{c}_{i}) = ymax(\mathbf{c}_{i})(1-exp(\alpha(\mathbf{c}_{i}) + \
 $$
 
 The simplified notation of this equation, where $c_i$ is dropped, is Eq. \@ref(eq:eqn3) in section 3.1.2. 
+
+\newpage
 
 ## Appendix C: Parameter Generation {-}
 
@@ -64,6 +68,7 @@ $\alpha^{1}_{i,j} = r^{\alpha}_{i,j} \cdot \alpha_{i,j}$, $\alpha^{2}_{i,j} = (1
 $\beta^{1}_{i,j} = r^{\beta}_{i,j} \cdot\beta_{i,j}$, $\beta^{2}_{i,j} = (1- r^{\beta}_{i,j}) \cdot\beta_{i,j}$,
 $ymax^{1}_{i,j} = r^{ymax}_{i,j} \cdot ymax_{i,j}$, and $ymax^{2}_{i,j} = (1- r^{ymax}_{i,j}) \cdot ymax_{i,j}$. The codes used to implement the abovementioned parameter splitting are publicly accessible as a Mendeley dataset [@Kakimoto2022codes].
 
+\newpage
 
 ## Appendix D:  Training Accuracy of the ML methods {-}
 
@@ -81,20 +86,61 @@ report_table_optN_train
 
 Table D.2 presents the training accuracy of yield prediction: namely, the yield prediction accuracy when the trained model is evaluated using the training datasets as opposed to separate testing datasets. 
 
-\newpage
+<br>
 
 ```{r table-y-train, tab.cap = "Table D.2: Mean RMSE of yield prediction (kg/ha) by ML method and modeling scenario on training datasets"}
 report_table_y_train
 ```
 
-<br>
+\newpage
 
 ## Appendix E: CNN performance per training epoch
-The below figure shows training and validation loss measured by mean square error (MSE) over the number of epochs in one of the thousand CNN simulation under aabbyytt scenario. 
+The below figure shows training and validation loss measured by mean square error (MSE) over the number of epochs in a single simulation round under aabbyytt scenario. 
 
-```{r, fig.width=4, fig.height=4, fig.cap = "An example of CNN performance per training epoch (scenario: aabbyytt)"}
+```{r cnn-epoch, fig.width=5, fig.height=4, fig.cap = "Figure E.1: An example of CNN performance per training epoch (scenario: aabbyytt)"}
 knitr::include_graphics(here("GitControlled/Writing/loss_model4_simID1.png"))
 ```
+
+\newpage
+
+## Appendix F: MB-yield response curves
+The below figure shows some examples of site-specific Mitscherlich-Baule yield function to illustrate how yield responds to N. 
+
+```{r vis-MB-curve, fig.cap = "Figure F.1: Examples of Mitscherlich-Baule yield response curve"}
+vis_MB_curve
+```
+
+\newpage
+
+## Appendix G: The difference between predicting yields and predicting change in yields
+
+```{r, vis-MB-BRF-y, fig.cap = "Figure G.1: Predicted (scenario: aby)"}
+vis_MB_BRF_y
+```
+
+\newpage
+
+## Appendix H: True Yields vs Predicted Yields by models
+
+```{r vis-y-pred, fig.width=7, fig.height=7.5, fig.cap = "Figure H.1: True yields without error and predicted yields"}
+vis_y_pred
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
