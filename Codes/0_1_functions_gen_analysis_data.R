@@ -663,7 +663,7 @@ prepare_raw_data <- function(i, field, coef_data_m, coef_data_t, app_error="no")
     .[, yield := det_yield * (1 + m_error)] %>%
       # === keep the relevant vars ===#
     .[, .(
-      yield, opt_N, rate, aa_n, alpha, beta, ymax, alpha1, alpha2, beta1, beta2, ymax1, ymax2,
+      yield, opt_N, rate, aa_n, alpha, beta, m_error, ymax, alpha1, alpha2, beta1, beta2, ymax1, ymax2,
       theta_1, theta_2, subplot_id, strip_id, padding, X, Y, unique_cell_id
     )]%>%
     .[,sim := i]
