@@ -83,6 +83,185 @@ field_cell_sf <-
 
 
 ## ----------------------------------------------------------------------------------------------
+#/*--------------------------------*/
+#' ## Preparation
+#/*--------------------------------*/
+# --- MB function --- #
+gen_yield_MB <- function(ymax, alpha, beta, N) {
+  yield <- ymax * (1 - exp(alpha + beta * N))
+  return(yield)
+}
+
+# --- extract sites that have wide range of true optimal N --- #
+get_rows_optN <- function(data, value, range) {
+  res <- data %>%
+    .[opt_N %between% c(quantile(opt_N, prob = value - range), quantile(opt_N, prob = value + range))
+    ] %>%
+    .[,group := value]
+}
+
+prep_coef_dt <- 
+  field_cell_sf %>%
+  data.table() %>%
+  .[sim==1,.(unique_cell_id, opt_N, alpha, beta, ymax, m_error)]
+
+set.seed(3957)
+
+coef_dt <- 
+  lapply(
+    c(0.1, 0.5, 0.9), 
+    function(x) get_rows_optN(data=prep_coef_dt, value = x, range = .0005)) %>%
+  bind_rows() %>%
+  # --- select one site from each group --- #
+  .[,.SD[sample(.N, size = 1)], by = group]
+
+seq_N <- 
+  seq(min(coef_dt[,opt_N]) -50, max(coef_dt[,opt_N])+100, by=1) %>%
+  round()
+
+res_y_dt <-  
+  coef_dt %>%
+  .[rep(1:nrow(.), each = length(seq_N)), ] %>%
+  .[, N := seq_N, by = group] %>%
+  .[, det_yield := gen_yield_MB(ymax, alpha, beta, N)] %>%
+  .[, yield := det_yield*(1 + m_error)] %>%
+  .[, opt_N := round(opt_N)] %>%
+  melt(id.vars = c("group", "N", "opt_N"), measure.vars = c("det_yield", "yield")) %>%
+  .[, variable := case_when(
+    variable == "det_yield" ~ "Yield",
+    variable == "yield" ~ "Yield including errors"
+  )]  
+
+#/*--------------------------------*/
+#' ## Visualization
+#/*--------------------------------*/
+sub_dt <- res_y_dt[variable=="Yield" & N == opt_N]
+
+# --- MB function to N --- #
+vis_MB_curve <- ggplot(res_y_dt[variable=="Yield"]) +
+  geom_line(aes(x=N, y=value, group=factor(group))) +
+  geom_point(data= sub_dt, aes(x=opt_N, y=value)) +
+  geom_segment(data = sub_dt, aes(x = N, xend=N, y = value, yend=-Inf), linetype = "dashed") +
+  labs(y = "Yield (kg/ha)") +
+  labs(x = "N (kg/ha)") +
+  theme_dist +
+  theme(legend.position = "none")
+
+# ggplot(res_y_dt) +
+#   geom_smooth(aes(x=N, y=value, color=factor(group))) +
+#   facet_wrap(~variable, ncol = 2) +
+#   labs(y = "Yield (kg/ha)") +
+#   labs(x = "N (kg/ha)") +
+#   theme_dist
+
+
+## ----------------------------------------------------------------------------------------------
+# /*===========================================*/
+#'=  Prepare illustrative yield response curve estimated by RF =
+# /*===========================================*/
+
+#/*--------------------------------*/
+#' ## Preparation
+#/*--------------------------------*/
+# --- ML functions --- #
+library(grf)
+source(here("GitControlled/Codes/0_2_functions_main_sim.R"))
+
+# === Data === #
+field_subplot_test_dt <- readRDS(here("Shared/Results/for_writing/field_subplot_test_dt.rds"))
+
+train_dt <- 
+  field_subplot_sf %>%
+  data.table()
+
+test_dt <- 
+  field_subplot_test_dt %>%
+  data.table()
+
+
+# /*===== Train ML =====*/
+temp_var_ls <- c("alpha", "beta", "ymax")
+
+set.seed(1356)
+
+# RF <- 
+#   RF_run(
+#     reg_data = train_dt,
+#     var_ls = temp_var_ls
+#   )
+
+BRF <- 
+  BRF_run(
+    reg_data = train_dt,
+    var_ls = temp_var_ls
+  )
+
+# === Yield prediction === #
+# --- All N experimental rates --- #
+N_rate <- test_dt[,aa_n] %>% unique() %>% sort()
+# For illustration purpose, we use site where either 2nd and 4th N rates are actually application
+tg_N_rate <- N_rate[c(2,4)]
+
+# --- for true yield response function --- #
+seq_N <- 
+  seq(min(N_rate) -30, max(N_rate)+30, by=1)
+# seq_N <- 
+#   seq(min(N_rate), max(N_rate), by=1)
+
+res_true <- 
+  test_dt %>%
+  .[aa_n %in% tg_N_rate] %>%
+  .[rep(1:nrow(.), each = length(seq_N)), ] %>%
+  .[, N := seq_N, by = unique_subplot_id] %>%
+  .[,det_yield := gen_yield_MB(ymax, alpha, beta, N)] %>%
+  .[,yield := det_yield*(1 + m_error)]
+
+# --- for predicted yield at five experimental N rates --- #
+res_pred <- 
+  test_dt %>%
+  .[aa_n %in% tg_N_rate] %>%
+  .[rep(1:nrow(.), each = length(N_rate)),] %>%
+  .[, N := N_rate, by = unique_subplot_id] %>%
+  # .[,pred_y_RF := predict(RF, newdata = .[, c("N", temp_var_ls), with = FALSE])] %>%
+  .[,pred_y_BRF := predict(BRF, newdata = .[, c("N", temp_var_ls), with = FALSE])]
+
+  
+# === For visualization === #
+set.seed(2032)
+low <- 
+  res_true[aa_n == tg_N_rate[1]] %>%
+  get_rows_optN(data=., value = 0.2, range = .005) %>%
+  .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1), unique_subplot_id] %>%
+  unique()
+
+high <- 
+  res_true[aa_n == tg_N_rate[2]] %>%
+  get_rows_optN(data=., value = 0.8, range = .005) %>%
+  .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1), unique_subplot_id] %>%
+  unique()
+
+vis_res_true <- res_true[unique_subplot_id %in% c(low, high)]
+vis_res_pred <- res_pred[unique_subplot_id %in% c(low, high)]
+
+vis_MB_BRF_y <- 
+  ggplot() +
+    # --- true yield response curve --- #
+    geom_line(
+      data=vis_res_true, aes(x=N, y=yield, group=factor(unique_subplot_id))
+    ) +
+    # --- Predicted yield points --- #
+    geom_point(
+      data=vis_res_pred, aes(x=N, y=pred_y_BRF, group=factor(unique_subplot_id)), color="red"
+    ) +
+    geom_point(data = vis_res_true[aa_n==N], aes(x=aa_n, y= yield), color = 'blue') +
+    geom_segment(data = vis_res_true[aa_n==N], aes(x = aa_n, xend=aa_n, y = yield, yend=-Inf), linetype = "dashed") +
+    labs(y = "Yield (kg/ha)") +
+    labs(x = "N (kg/ha)") +
+    theme_dist +
+    theme(legend.position = "none")
+
+
+## ----------------------------------------------------------------------------------------------
 variogram_tb <-
   data.frame(
     Parameters = c("alpha_ij", "beta_ij", "ymax_ij", "varepsilon_ij"),
@@ -389,6 +568,47 @@ fig_y_optN <-
   ylim(NA, 95) +
   labs(y = " RMSE of EONR Estimation (kg/ha)") +
   labs(x = " RMSE of Yield Prediction (kg/ha)") +
+  theme_dist
+
+
+## ----------------------------------------------------------------------------------------------
+sample_simRes_test_y <- readRDS(here("Shared/Results/for_writing/sample_simRes_test_y.rds"))
+
+rmse <- sample_simRes_test_y %>%
+  .[, .(
+    rmse_y_det = rmse_general(pred_yield, det_yield),
+    rmse_y = rmse_general(pred_yield, yield)
+    ), by= .(Method, Model)]
+
+# === Function for RMSE Calculation === #
+rmse_general <-function(preds,actual){ 
+  sqrt(mean((actual - preds)^2)) %>%
+  round(.,1) %>%
+  format(, nsmall = 1)
+
+}
+
+
+rmse <- sample_simRes_test_y %>%
+  .[, .(
+    rmse_y_det = paste0("RMSE = " ,rmse_general(pred_yield, det_yield)),
+    rmse_y = paste0("RMSE = ", rmse_general(pred_yield, yield))
+    ), by= .(Method, Model)]
+
+
+vis_y_pred <- ggplot(sample_simRes_test_y) +
+  geom_point(aes(x=det_yield, y=pred_yield), size = 0.5) +
+  geom_abline(aes(intercept = 0, slope = 1), color = "red", show.legend = TRUE) +
+  geom_text(data=rmse, aes(x=-Inf,y=+Inf,label=rmse_y_det),
+              hjust = -0.1,  vjust = 3, size=3.5, family = "Times New Roman") +
+  facet_grid(Model ~ Method) +
+  guides(
+    fill = guide_legend(keywidth = 1, keyheight = 1),
+    linetype = guide_legend(keywidth = 3, keyheight = 1),
+    colour = guide_legend(keywidth = 3, keyheight = 1)
+  ) +
+  labs(y = "Predicted Yield (kg/ha)") +
+  labs(x = "True Yield without error (kg/ha)") +
   theme_dist
 
 

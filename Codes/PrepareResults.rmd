@@ -96,6 +96,8 @@ field_cell_sf <-
 
 
 ## MB yield response to N
++ for comment 8
++ The figure illustrates how yield responds to N
 
 ```{r}
 #/*--------------------------------*/
@@ -153,8 +155,8 @@ res_y_dt <-
 sub_dt <- res_y_dt[variable=="Yield" & N == opt_N]
 
 # --- MB function to N --- #
-vis_res_y <- ggplot(res_y_dt[variable=="Yield"]) +
-  geom_line(aes(x=N, y=value, color=factor(group))) +
+vis_MB_curve <- ggplot(res_y_dt[variable=="Yield"]) +
+  geom_line(aes(x=N, y=value, group=factor(group))) +
   geom_point(data= sub_dt, aes(x=opt_N, y=value)) +
   geom_segment(data = sub_dt, aes(x = N, xend=N, y = value, yend=-Inf), linetype = "dashed") +
   labs(y = "Yield (kg/ha)") +
@@ -170,11 +172,10 @@ vis_res_y <- ggplot(res_y_dt[variable=="Yield"]) +
 #   theme_dist
 ```
 
-## MB yield response and estimated yield response by BRF
-+ true yield response curves for two sites within a field
-+ points true yield evaluated at the N rate that was actually applied at the site
-+ RF-estimated yield at all the potential experimental rates including the actual rate that was applied
 
+## MB yield response and estimated yield response by BRF
++ As a response to comment 6
++ The figure shows the true yield response function and predicted yields at five N experiment by BRF
 
 ```{r}
 # /*===========================================*/
@@ -264,7 +265,7 @@ high <-
 vis_res_true <- res_true[unique_subplot_id %in% c(low, high)]
 vis_res_pred <- res_pred[unique_subplot_id %in% c(low, high)]
 
-vis_pred_y_res <- 
+vis_MB_BRF_y <- 
   ggplot() +
     # --- true yield response curve --- #
     geom_line(
@@ -631,6 +632,8 @@ fig_y_optN <-
 
 
 ## True Yields vs Predicted Yields by models
++ for comment 7
++ a figure plots true yields (without error, epsilon) against predicted yields by model (without CF of course) for a single simulation round with RMSE printed for each model.
 
 ```{r}
 sample_simRes_test_y <- readRDS(here("Shared/Results/for_writing/sample_simRes_test_y.rds"))
