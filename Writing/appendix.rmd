@@ -87,6 +87,14 @@ Table D.2 presents the training accuracy of yield prediction: namely, the yield 
 report_table_y_train
 ```
 
+<br>
+
+## Appendix E: CNN performance per training epoch
+The below figure shows training and validation loss measured by mean square error (MSE) over the number of epochs in one of the thousand CNN simulation under aabbyytt scenario. 
+
+```{r, fig.width=4, fig.height=4, fig.cap = "An example of CNN performance per training epoch (scenario: aabbyytt)"}
+knitr::include_graphics(here("GitControlled/Writing/loss_model4_simID1.png"))
+```
 
 
 

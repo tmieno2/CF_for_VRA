@@ -13,7 +13,7 @@ Thank you so much for your comments. By addressing them, we believe the manuscri
 **1. The CNN result seems to be rather constant than linear. Please include a chart showing the CNN performance per training epoch to allow the reader to assess how good the CNN model converged.**
 
 <span style="color:blue">  
-
+The figure showing the CNN performance per training epoch is added to Appendix E.
 </span>
 
 <br>
@@ -29,7 +29,7 @@ Thank you so much for your comments. By addressing them, we believe the manuscri
 **3. Line 194 simualtions**
 
 <span style="color:blue">  
-
+The typo was corrected (see p11 l.194).
 </span>
 
 <br>
@@ -45,7 +45,7 @@ Thank you so much for your comments. By addressing them, we believe the manuscri
 **5. Line 321 It seems RSME was never defined.**
 
 <span style="color:blue">  
-
+The equations for RMSE of EONR estimation and yield prediction are now added under section 3.3.3. 
 </span>
 
 <br>

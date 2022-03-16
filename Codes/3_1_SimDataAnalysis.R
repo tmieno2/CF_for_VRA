@@ -277,13 +277,8 @@ allML_summary_bySim %>%
     .[type=="test" & Model == "aabbyytt"] %>%
     .[sim %in% agg_slope_model4$sim]
 
-
-
-
-
-
-
-
+allML_summary_bySim %>% 
+    .[type=="test" & Model == "aabbyytt" & sim==1]
 
 
 
