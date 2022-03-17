@@ -5,15 +5,15 @@
 Figure A.1 shows an example of a CT where the treatment is an increase in seed rate from $27,000$ seeds/ha (control) to $31,000$ seeds/ha (treated) with apparent electrical conductivity ($\textit{ecs}$) ($dS/m$) and topographical $\textit{slope}$ ($degree$) as variables to explain the heterogeneity of the impact of the treatment impact.  
 
 ```{r ct-ex, fig.width=5, fig.height=5, fig.align="center", fig.cap = "Figure A.1: An illustrative example of a causal tree"}
-par(family="Times")
-fancyRpartPlot(opfit, sub="")
+par(family = "Times")
+fancyRpartPlot(opfit, sub = "")
 ```
 
 `r ftext('NOTE: The first number in each node indicates the predicted treatment effects (in kg/ha). The number and the percentage of observations belonging to the node are shown below that.', fp_text(font.size = 9, font.family = "Times New Roman"))`
 
 <br>
 
-In the first node, all the samples ($1024$ observations) belong to the node, and the causal effect of the treatment was calculated as the difference in the mean yield of the treated and control groups, which turned out to be $593$ kg/ha in this example. The first data split criterion is whether the $\textit{ecs}$ value is greater or less than $25$. The observations with $\textit{ecs}$ greater than or equal to $25$ move to the left node, while those with $\textit{ecs}$ less than $25$ move to the right. For each of the subsamples, the treatment effect is identified as the difference in the mean yields of the treated and control groups within the subsample. The treatment effect for the low-$\textit{ecs}$ observations was $619$ kg/ha, and for the high-$\textit{ecs}$ observations was $982$ kg/ha. This means that for the impact of the increase in seed rate the treatment effect is heterogeneous over space, having a larger positive impact on yield in high-$\textit{ecs}$ areas. Trees are further developed to have more groups of subsamples to allow for more flexible representations of the heterogeneous treatment effects. The estimated heterogeneous treatments effects can then be used to identify site-specific EOIRs. It is noteworth that at no point CF estimates yield "level." 
+In the first node, all the samples ($1024$ observations) belong to the node, and the causal effect of the treatment was calculated as the difference in the mean yield of the treated and control groups, which turned out to be $593$ kg/ha in this example. The first data split criterion is whether the $\textit{ecs}$ value is greater or less than $25$. The observations with $\textit{ecs}$ greater than or equal to $25$ move to the left node, while those with $\textit{ecs}$ less than $25$ move to the right. For each of the subsamples, the treatment effect is identified as the difference in the mean yields of the treated and control groups within the subsample. The treatment effect for the high-$\textit{ecs}$ observations was $619$ kg/ha, and for the low-$\textit{ecs}$ observations was $982$ kg/ha. This means that for the impact of the increase in seed rate the treatment effect is heterogeneous over space, having a larger positive impact on yield in low-$\textit{ecs}$ areas. Trees are further developed to have more groups of subsamples to allow for more flexible representations of the heterogeneous treatment effects. The estimated heterogeneous treatments effects can then be used to identify site-specific EOIRs. It is noteworth that at no point CF estimates yield "level." 
 
 \newpage
 
