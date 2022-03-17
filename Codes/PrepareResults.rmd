@@ -638,12 +638,6 @@ fig_y_optN <-
 ```{r}
 sample_simRes_test_y <- readRDS(here("Shared/Results/for_writing/sample_simRes_test_y.rds"))
 
-rmse <- sample_simRes_test_y %>%
-  .[, .(
-    rmse_y_det = rmse_general(pred_yield, det_yield),
-    rmse_y = rmse_general(pred_yield, yield)
-    ), by= .(Method, Model)]
-
 # === Function for RMSE Calculation === #
 rmse_general <-function(preds,actual){ 
   sqrt(mean((actual - preds)^2)) %>%
@@ -651,6 +645,12 @@ rmse_general <-function(preds,actual){
   format(, nsmall = 1)
 
 }
+
+rmse <- sample_simRes_test_y %>%
+  .[, .(
+    rmse_y_det = rmse_general(pred_yield, det_yield),
+    rmse_y = rmse_general(pred_yield, yield)
+    ), by= .(Method, Model)]
 
 
 rmse <- sample_simRes_test_y %>%

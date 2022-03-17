@@ -35,6 +35,8 @@ sp_range <- 400
 # --- Number of iterations --- #
 B <- 1000
 
+# --- set seed --- #
+set.seed(39476)
 
 #/*--------------------------------------------------------*/
 #' ## Generate raw coefficients
@@ -178,5 +180,7 @@ coef_data[, beta_norm := (beta - mean(beta))/sd(beta)] %>%
   )]
 
 saveRDS(coef_data, here("Shared/Data/for_Simulations", paste0('coefficients_sprange_',sp_range,'.rds')))
+
+
 
 
