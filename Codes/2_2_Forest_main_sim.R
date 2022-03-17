@@ -20,9 +20,6 @@ source("./GitControlled/Codes/0_2_functions_main_sim.R")
 pCorn <- price_table[2, pCorn]
 pN <- price_table[2, pN]
 
-reg_data_all <- readRDS("./Shared/Data/for_Simulations/reg_data.rds")
-test_data_all <- readRDS("./Shared/Data/for_Simulations/test_data.rds")
-
 # x=1
 # train_dt <- reg_data_all[sim==x&padding==1,]
 # test_dt <- test_data_all[sim==x&padding==1,]
@@ -45,6 +42,14 @@ var_ls_variations <- list(
     c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2"),
     c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2", "theta_1", "theta_2")
   )
+
+
+#/*--------------------------------*/
+#' ## (1) Main sim (Medium m_error: psill = 0.015)
+#/*--------------------------------*/
+# --- Data --- #
+reg_data_all <- readRDS("./Shared/Data/for_Simulations/reg_data.rds")
+test_data_all <- readRDS("./Shared/Data/for_Simulations/test_data.rds")
 
 # --- Number of iterations --- #
 B=1000
@@ -69,5 +74,45 @@ for (var in var_ls_variations){
 
 	saveRDS(sim_results, paste0("./Shared/Results/Forest_rawRes/forest_SimRes_", paste0(var, collapse = "_"), ".rds"))
 }
+
+
+#/*--------------------------------*/
+#' ## (1) Sub sim (low m_error: psill = 0.002)
+#/*--------------------------------*/
+reg_data_low <- readRDS("./Shared/Data/for_Simulations/reg_data_low_error.rds")
+test_data_low <- readRDS("./Shared/Data/for_Simulations/test_data_low_error.rds")
+
+# --- Number of iterations --- #
+B=100
+
+# === start simulation === #
+for (var in var_ls_variations){
+	# var = c("alpha", "beta", "ymax")
+	set.seed(1378)
+	# --- for each modeling scenario run: --- #
+	sim_results <- lapply(1:B, 
+		function(x){
+			sim_par(
+				i = x,
+				var_ls = var,
+				reg_data = reg_data_low[sim==x&padding==1,],
+	      		test_data = test_data_low[sim==x&padding==1,],
+	      		N_levels = reg_data_low[sim==x,]$rate%>%unique()%>%sort()
+	      	)
+		}
+	) %>%
+	rbindlist()
+
+	saveRDS(sim_results, paste0("./Shared/Results/Forest_rawRes_low/forest_low_SimRes_", paste0(var, collapse = "_"), ".rds"))
+}
+
+
+
+
+
+
+
+
+
 
 
