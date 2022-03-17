@@ -320,8 +320,7 @@ We also showed that the model's yield prediction accuracy has little to do with 
 
 # Acknowledgements
 
-
-This research was supported by a USDA-NIFA-AFRI Food Security Program Coordinated Agricultural Project, titled "Using Precision Technology in On-farm Field Trials to Enable Data-Intensive Fertilizer Management," (Accession Number 2016-68004-24769), and also by the a USDA-NRCS Conservation Innovation Grant from the On-farm Trials Program, titled "Improving the Economic and Ecological Sustainability of US Crop Production through On-Farm Precision Experimentation" (Award Number NR213A7500013G021). 
+We thank Scott Swinton for providing helpful comments on this paper. This research was supported by a USDA-NIFA-AFRI Food Security Program Coordinated Agricultural Project, titled "Using Precision Technology in On-farm Field Trials to Enable Data-Intensive Fertilizer Management," (Accession Number 2016-68004-24769), and also by the a USDA-NRCS Conservation Innovation Grant from the On-farm Trials Program, titled "Improving the Economic and Ecological Sustainability of US Crop Production through On-Farm Precision Experimentation" (Award Number NR213A7500013G021). 
 
 \newpage
 

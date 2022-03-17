@@ -114,7 +114,7 @@ vis_MB_curve
 
 ## Appendix G: The difference between predicting yields and predicting change in yields
 
-```{r, vis-MB-BRF-y, fig.cap = "Figure G.1: Predicted (scenario: aabbyytt)"}
+```{r, vis-MB-BRF-y, fig.width=7, fig.height=5, fig.cap = "Figure G.1: Predicted (scenario: aabbyytt)"}
 vis_MB_BRF_y
 ```
 
@@ -127,6 +127,11 @@ vis_y_pred
 ```
 
 
+## Appendix I: The Relationship between Yield and EONR Prediction Performances (scenario: aabbyytt)
+
+```{r, vis-RMSE-y-eonr, fig.width=5, fig.height=5, fig.cap = "Figure I.1: The Relationship between Yield and EONR Prediction Performances"}
+vis_RMSE_y_eonr
+```
 
 
 
