@@ -37,12 +37,12 @@ b <- 1000
 
 
 #/*--------------------------------------------------------*/
-#' ## (1) Generate raw coefficients (Medium m_error: psill = 0.002, roughly 1300 sd)
+#' ## (1) Generate raw coefficients (Medium m_error: psill = 0.015, roughly 1300 sd)
 #/*--------------------------------------------------------*/
 # --- start simulation --- #
 coef_data <- 
   gen_coefs_par(
-    B = 100, 
+    B = b, 
     geo_xy = xy,
     sp_range = Range,
     psill_merror = 0.015
@@ -77,7 +77,7 @@ set.seed(57864)
 # --- start simulation --- #
 coef_data_high <- 
   gen_coefs_par(
-    B = 100, 
+    B = b, 
     geo_xy = xy,
     sp_range = Range,
     psill_merror = 0.028

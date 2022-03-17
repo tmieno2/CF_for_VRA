@@ -75,10 +75,8 @@ Estimating the structure well leads to a better prediction of yield, however bet
 
 **7. Please insert a plot for true yield vs yield prediction to enable the reader to estimate the achieved prediction performance.**
 
-Please see Figure H.1 that plots true yields (without error, epsilon) against predicted yields by model (CF is not presented as it does not predict yield levels as discussed in the article) for a single simulation round. RMSE is presented in the figure as well. As we have 1000 simulations, it is simply infeasible to present figures like this for all the simulation rounds. But, this figure provides a better sense of the value of RMSE and how good the fit is. 
-
 <span style="color:blue">  
-
+Please see Figure H.1 that plots true yields (without error, epsilon) against predicted yields by model (CF is not presented as it does not predict yield levels as discussed in the article) for a single simulation round. RMSE is presented in the figure as well. As we have 1000 simulations, it is simply infeasible to present figures like this for all the simulation rounds. But, this figure provides a better sense of the value of RMSE and how good the fit is. 
 </span>
 
 <br>

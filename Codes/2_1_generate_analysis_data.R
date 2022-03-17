@@ -89,7 +89,7 @@ coef_data_low <-
 #' ## Generate Cell-level Data sets
 #/*--------------------------------*/
 raw_data <- lapply(
-	1:1000, function(x) {
+	1:100, function(x) {
 		prepare_raw_data(
 			i = x,
 			field = field,
@@ -104,6 +104,10 @@ raw_data <- lapply(
 reg_raw_data <- sapply(raw_data,"[",1)%>%rbindlist()
 test_raw_data <- sapply(raw_data,"[",1)%>%rbindlist()
 
+
+saveRDS(reg_raw_data, here("Shared/Data/for_Simulations/reg_raw_data_low_error.rds"))
+saveRDS(test_raw_data, here("Shared/Data/for_Simulations/test_raw_data_low_error.rds"))
+
 #/*--------------------------------*/
 #' ## Generate analysis dataset (subplot-level)
 #/*--------------------------------*/
@@ -113,7 +117,7 @@ test_raw_data <- readRDS(here("Shared/Data/for_Simulations/test_raw_data_low_err
 
 ##== Aggregate Cell-Level Field Data to Subplot-Level Field Data ==##
 sim_data <- lapply(
-	1:1000, function(x) {
+	1:100, function(x) {
 		# print(paste0("working on ", x, " th iteration."))
 		prepare_data_for_sim(
 			reg_raw_data = reg_raw_data[sim==x,],

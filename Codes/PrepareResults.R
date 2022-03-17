@@ -1,4 +1,4 @@
-## ----set-up, cache = F-------------------
+## ----set-up, cache = F-------------------------------------------------------------------------
 library(knitr)
 library(here)
 
@@ -9,7 +9,7 @@ knitr::opts_chunk$set(
   cache = FALSE
 )
 
-## ----packages, cache = FALSE, include = FALSE----
+## ----packages, cache = FALSE, include = FALSE--------------------------------------------------
 # === packages ===#
 # --- data wrangling--- #
 library(sf)
@@ -36,7 +36,7 @@ library(officedown)
 library(modelsummary)
 
 
-## ----------------------------------------
+## ----------------------------------------------------------------------------------------------
 theme_figure <- 
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -65,7 +65,7 @@ set_flextable_defaults(
   )
 
 
-## ----setup, warning=FALSE, message=FALSE, cache= FALSE----
+## ----setup, warning=FALSE, message=FALSE, cache= FALSE-----------------------------------------
 # === plot-level field data set  === #
 field_plot_sf <-
   here("Shared/Results/for_writing/sample_field_plot_sf.rds") %>%
@@ -82,7 +82,7 @@ field_cell_sf <-
   readRDS()
 
 
-## ----------------------------------------
+## ----------------------------------------------------------------------------------------------
 #/*--------------------------------*/
 #' ## Preparation
 #/*--------------------------------*/
@@ -105,11 +105,11 @@ prep_coef_dt <-
   data.table() %>%
   .[sim==1,.(unique_cell_id, opt_N, alpha, beta, ymax, m_error)]
 
-set.seed(3957)
+set.seed(34864)
 
 coef_dt <- 
   lapply(
-    c(0.1, 0.5, 0.9), 
+    c(0.01, 0.25, 0.5, 0.75, 0.99), 
     function(x) get_rows_optN(data=prep_coef_dt, value = x, range = .0005)) %>%
   bind_rows() %>%
   # --- select one site from each group --- #
@@ -130,32 +130,44 @@ res_y_dt <-
   .[, variable := case_when(
     variable == "det_yield" ~ "Yield",
     variable == "yield" ~ "Yield including errors"
-  )]  
+  )] %>%
+  .[,group := case_when(
+    group == 0.01 ~ "site 1",
+    group == 0.25 ~ "site 2",
+    group == 0.5 ~ "site 3",
+    group == 0.75 ~ "site 4",
+    group == 0.99 ~ "site 5"
+    )]  
 
 #/*--------------------------------*/
 #' ## Visualization
 #/*--------------------------------*/
 sub_dt <- res_y_dt[variable=="Yield" & N == opt_N]
-
+  
 # --- MB function to N --- #
-vis_MB_curve <- ggplot(res_y_dt[variable=="Yield"]) +
-  geom_line(aes(x=N, y=value, group=factor(group))) +
-  geom_point(data= sub_dt, aes(x=opt_N, y=value)) +
-  geom_segment(data = sub_dt, aes(x = N, xend=N, y = value, yend=-Inf), linetype = "dashed") +
-  labs(y = "Yield (kg/ha)") +
-  labs(x = "N (kg/ha)") +
-  theme_dist +
-  theme(legend.position = "none")
+vis_MB_curve <- 
+  ggplot(res_y_dt[variable=="Yield"]) +
+    geom_line(
+      aes(x=N, y=value, color=factor(group)), size=1
+    ) +
+    geom_point(data= sub_dt, aes(x=opt_N, y=value, alpha = "Yield at EONR"), color = "red", size = 2) +
+    # geom_segment(data = sub_dt, aes(x = N, xend=N, y = value, yend=-Inf), linetype = "dashed") +
+    scale_alpha_manual(
+      name = NULL,
+      values = 1,
+      breaks = "Yield at EONR",
+      guide = guide_legend(override.aes = list(linetype = 0,
+        shape = 16,
+        color = "red")
+        ) 
+    ) +
+    labs(y = "Yield (kg/ha)") +
+    labs(x = "N (kg/ha)") +
+    theme_dist +
+    theme(legend.title = element_blank())
 
-# ggplot(res_y_dt) +
-#   geom_smooth(aes(x=N, y=value, color=factor(group))) +
-#   facet_wrap(~variable, ncol = 2) +
-#   labs(y = "Yield (kg/ha)") +
-#   labs(x = "N (kg/ha)") +
-#   theme_dist
 
-
-## ----------------------------------------
+## ----------------------------------------------------------------------------------------------
 # /*===========================================*/
 #'=  Prepare illustrative yield response curve estimated by RF =
 # /*===========================================*/
@@ -180,15 +192,15 @@ test_dt <-
 
 
 # /*===== Train ML =====*/
-temp_var_ls <- c("alpha", "beta", "ymax")
+temp_var_ls <- c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2", "theta_1", "theta_2")
 
 set.seed(1356)
 
-# RF <- 
-#   RF_run(
-#     reg_data = train_dt,
-#     var_ls = temp_var_ls
-#   )
+RF <- 
+  RF_run(
+    reg_data = train_dt,
+    var_ls = temp_var_ls
+  )
 
 BRF <- 
   BRF_run(
@@ -196,11 +208,12 @@ BRF <-
     var_ls = temp_var_ls
   )
 
+
 # === Yield prediction === #
 # --- All N experimental rates --- #
 N_rate <- test_dt[,aa_n] %>% unique() %>% sort()
 # For illustration purpose, we use site where either 2nd and 4th N rates are actually application
-tg_N_rate <- N_rate[c(2,4)]
+tg_N_rate <- N_rate[c(2,3,4)]
 
 # --- for true yield response function --- #
 seq_N <- 
@@ -222,46 +235,100 @@ res_pred <-
   .[aa_n %in% tg_N_rate] %>%
   .[rep(1:nrow(.), each = length(N_rate)),] %>%
   .[, N := N_rate, by = unique_subplot_id] %>%
-  # .[,pred_y_RF := predict(RF, newdata = .[, c("N", temp_var_ls), with = FALSE])] %>%
-  .[,pred_y_BRF := predict(BRF, newdata = .[, c("N", temp_var_ls), with = FALSE])]
+  .[,RF := predict(RF, newdata = .[, c("N", temp_var_ls), with = FALSE])] %>%
+  .[,BRF := predict(BRF, newdata = .[, c("N", temp_var_ls), with = FALSE])] %>%
+  melt(id.vars = c("unique_subplot_id", "yield", "aa_n", "N"), measure.vars = c("RF", "BRF"))   
 
-  
+# find_examples_main  <- 
+#   res_pred %>%
+#   .[variable == "BRF" & aa_n==N,] %>%
+#   .[, y_diff_brf := abs(yield - value)] %>%
+#   .[y_diff_brf < 700, unique_subplot_id]
+
+
 # === For visualization === #
-set.seed(2032)
-low <- 
-  res_true[aa_n == tg_N_rate[1]] %>%
-  get_rows_optN(data=., value = 0.2, range = .005) %>%
-  .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1), unique_subplot_id] %>%
-  unique()
+# set.seed(1256)
 
-high <- 
-  res_true[aa_n == tg_N_rate[2]] %>%
-  get_rows_optN(data=., value = 0.8, range = .005) %>%
-  .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1), unique_subplot_id] %>%
-  unique()
+# low <- 
+#   res_true[aa_n == tg_N_rate[1]] %>%
+#   get_rows_optN(data=., value = 0.2, range = 0.1) %>%
+#   .[unique_subplot_id %in% find_examples_main] %>%
+#   # .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1),] %>%
+#   .[, unique_subplot_id] %>%
+#   unique()
 
-vis_res_true <- res_true[unique_subplot_id %in% c(low, high)]
-vis_res_pred <- res_pred[unique_subplot_id %in% c(low, high)]
+# # length(low)
+
+# medium <-
+#    res_true[aa_n == tg_N_rate[1]] %>%
+#   get_rows_optN(data=., value = 0.5, range = 0.1) %>%
+#   .[unique_subplot_id %in% find_examples_main] %>%
+#   # .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1),] %>%
+#   .[, unique_subplot_id] %>%
+#   unique()
+
+
+# high <- 
+#   res_true[aa_n == tg_N_rate[3]] %>%
+#   get_rows_optN(data=., value = 0.9, range = 0.1) %>%
+#   .[unique_subplot_id %in% find_examples_main] %>%
+#   .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1), unique_subplot_id] %>%
+#   unique()
+
+# vis_res_true <- res_true[unique_subplot_id %in% c(low, medium, high)]
+# vis_res_pred <- res_pred[unique_subplot_id %in% c(low, medium, high)]
+
+
+# low: *13_41*, 15_34
+# medium: *8_41*, 8_42, 27_10
+# high: 4_21
+
+vis_res_true <- 
+  res_true[unique_subplot_id %in% c("15_34", "8_41", "4_21")] %>%
+  .[,site := case_when(
+    unique_subplot_id == "15_34" ~ "site 1",
+    unique_subplot_id == "8_41" ~ "site 2",
+    unique_subplot_id == "4_21" ~ "site 3",
+    )]
+
+vis_res_pred <- 
+  res_pred[unique_subplot_id %in% c("15_34", "8_41", "4_21")] %>%
+  .[,site := case_when(
+    unique_subplot_id == "15_34" ~ "site 1",
+    unique_subplot_id == "8_41" ~ "site 2",
+    unique_subplot_id == "4_21" ~ "site 3",
+    )]
+
 
 vis_MB_BRF_y <- 
   ggplot() +
     # --- true yield response curve --- #
     geom_line(
-      data=vis_res_true, aes(x=N, y=yield, group=factor(unique_subplot_id))
+      data=vis_res_true, aes(x=N, y=yield, color = site), size=1
     ) +
     # --- Predicted yield points --- #
     geom_point(
-      data=vis_res_pred, aes(x=N, y=pred_y_BRF, group=factor(unique_subplot_id)), color="red"
+      data=vis_res_pred, aes(x=N, y=value, color = site, alpha = "Predicts"), shape=2, size = 2, stroke = 1
     ) +
-    geom_point(data = vis_res_true[aa_n==N], aes(x=aa_n, y= yield), color = 'blue') +
-    geom_segment(data = vis_res_true[aa_n==N], aes(x = aa_n, xend=aa_n, y = yield, yend=-Inf), linetype = "dashed") +
+    # --- Yield at applied N rate --- #
+    geom_point(data = vis_res_true[aa_n==N], aes(x=aa_n, y= yield, alpha = "True yield at actual N rate that was applied"), color = 'blue', size = 2) +
+    facet_wrap(~variable) +
+    scale_alpha_manual(
+      name = NULL,
+      values = c(1, 1),
+      breaks = c("Predicts", "True yield at actual N rate that was applied"),
+      guide = guide_legend(override.aes = list(linetype = c(0, 1),
+        shape = c(2, 16),
+        color = c("black", "blue")) 
+        ) 
+    ) +
     labs(y = "Yield (kg/ha)") +
     labs(x = "N (kg/ha)") +
     theme_dist +
-    theme(legend.position = "none")
+    theme(legend.title = element_blank())
 
 
-## ----------------------------------------
+## ----------------------------------------------------------------------------------------------
 variogram_tb <-
   data.frame(
     Parameters = c("alpha_ij", "beta_ij", "ymax_ij", "varepsilon_ij"),
@@ -303,7 +370,7 @@ variogram_tb <-
   autofit()
 
 
-## ----field-map-visualization, dependson = "setup"----
+## ----field-map-visualization, dependson = "setup"----------------------------------------------
 
 # === Preparation === #
 ex_plot <- field_plot_sf[224, ]
@@ -397,7 +464,7 @@ field_structure <-
   theme_void()
 
 
-## ---- dependson = "setup"----------------
+## ---- dependson = "setup"----------------------------------------------------------------------
 field_Ndesign <-
   ggplot() +
   geom_sf(
@@ -411,7 +478,7 @@ field_Ndesign <-
   theme_figure
 
 
-## ---- dependson = "setup"----------------
+## ---- dependson = "setup"----------------------------------------------------------------------
 # === subplot-level === #
 vis_yield_subplot <-
   ggplot(field_subplot_sf) +
@@ -422,11 +489,11 @@ vis_yield_subplot <-
   theme_figure
 
 
-## ---- dependson = "setup"----------------
+## ---- dependson = "setup"----------------------------------------------------------------------
 
 
 
-## ---- dependson = "setup"----------------
+## ---- dependson = "setup"----------------------------------------------------------------------
 # === alpha map === #
 field_alpha <-
   ggplot(field_cell_sf) +
@@ -473,12 +540,12 @@ field_optN <-
   theme_figure
 
 
-## ----source-results, message=FALSE, warning=FALSE, cache= FALSE----
+## ----source-results, message=FALSE, warning=FALSE, cache= FALSE--------------------------------
 # === Load Results === #
 allML_summary_bySim <- readRDS(here("Shared/Results/for_writing/allML_summary_bySim.rds"))
 
 
-## ---- dependson = "source-results"-------
+## ---- dependson = "source-results"-------------------------------------------------------------
 # === Set up === #
 res_y_train <-
   allML_summary_bySim %>%
@@ -547,7 +614,7 @@ report_table_y <-
   autofit()
 
 
-## ----------------------------------------
+## ----------------------------------------------------------------------------------------------
 fig_y_optN <-
   res_y_test %>%
   .[Method %in% c("RF", "BRF", "CNN")] %>%
@@ -571,7 +638,7 @@ fig_y_optN <-
   theme_dist
 
 
-## ----------------------------------------
+## ----------------------------------------------------------------------------------------------
 sample_simRes_test_y <- readRDS(here("Shared/Results/for_writing/sample_simRes_test_y.rds"))
 
 # === Function for RMSE Calculation === #
@@ -579,7 +646,6 @@ rmse_general <-function(preds,actual){
   sqrt(mean((actual - preds)^2)) %>%
   round(.,1) %>%
   format(, nsmall = 1)
-
 }
 
 rmse <- sample_simRes_test_y %>%
@@ -612,7 +678,7 @@ vis_y_pred <- ggplot(sample_simRes_test_y) +
   theme_dist
 
 
-## ---- dependson = "source-results"-------
+## ---- dependson = "source-results"-------------------------------------------------------------
 # === Preparation === #
 prepare_count_tab <-
   res_y_test %>%
@@ -686,7 +752,7 @@ report_summary_res_CNN_RF_BRF <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---- dependson = "source-results"-------
+## ---- dependson = "source-results"-------------------------------------------------------------
 #/*----------------------------------*/
 #' ## Distribution of RMSE of EONR estimates
 #/*----------------------------------*/
@@ -830,7 +896,7 @@ report_table_optN <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ----------------------------------------
+## ----------------------------------------------------------------------------------------------
 piLoss_density <-
   allML_summary_bySim %>%
   .[type == "test", ] %>%
@@ -851,7 +917,7 @@ piLoss_density <-
   theme_dist
 
 
-## ----------------------------------------
+## ----------------------------------------------------------------------------------------------
 figure_te <-
   here("Shared/Results/for_writing/dt_TEcomparison.rds") %>%
   readRDS() %>%
@@ -870,7 +936,7 @@ figure_te <-
   theme_dist
 
 
-## ---- cache = TRUE-----------------------
+## ---- cache = TRUE-----------------------------------------------------------------------------
 # /*=================================================*/
 #' # Sample CT figure 
 # /*=================================================*/
