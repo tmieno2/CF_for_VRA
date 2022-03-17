@@ -148,9 +148,9 @@ sub_dt <- res_y_dt[variable=="Yield" & N == opt_N]
 vis_MB_curve <- 
   ggplot(res_y_dt[variable=="Yield"]) +
     geom_line(
-      aes(x=N, y=value, color=factor(group)), size=1
+      aes(x=N, y=value, group=factor(group))
     ) +
-    geom_point(data= sub_dt, aes(x=opt_N, y=value, alpha = "Yield at EONR"), color = "red", size = 2) +
+    geom_point(data= sub_dt, aes(x=opt_N, y=value, alpha = "Yield at EONR"), color = "red", size = 1.5) +
     # geom_segment(data = sub_dt, aes(x = N, xend=N, y = value, yend=-Inf), linetype = "dashed") +
     scale_alpha_manual(
       name = NULL,
@@ -164,7 +164,8 @@ vis_MB_curve <-
     labs(y = "Yield (kg/ha)") +
     labs(x = "N (kg/ha)") +
     theme_dist +
-    theme(legend.title = element_blank())
+    theme(legend.title = element_blank()) +
+    guides(color=guide_legend(nrow=2, byrow=TRUE))
 
 
 ## ----------------------------------------------------------------------------------------------
@@ -239,79 +240,129 @@ res_pred <-
   .[,BRF := predict(BRF, newdata = .[, c("N", temp_var_ls), with = FALSE])] %>%
   melt(id.vars = c("unique_subplot_id", "yield", "aa_n", "N"), measure.vars = c("RF", "BRF"))   
 
-# find_examples_main  <- 
-#   res_pred %>%
-#   .[variable == "BRF" & aa_n==N,] %>%
-#   .[, y_diff_brf := abs(yield - value)] %>%
-#   .[y_diff_brf < 700, unique_subplot_id]
+find_examples_main  <- 
+  res_pred %>%
+  .[variable == "BRF" & aa_n==N,] %>%
+  .[, y_diff_brf := abs(yield - value)] %>%
+  .[y_diff_brf < 500, unique_subplot_id]
+  # .[y_diff_brf < 500 & y_diff_brf < 1000, unique_subplot_id]
 
 
 # === For visualization === #
 # set.seed(1256)
 
 # low <- 
-#   res_true[aa_n == tg_N_rate[1]] %>%
-#   get_rows_optN(data=., value = 0.2, range = 0.1) %>%
-#   .[unique_subplot_id %in% find_examples_main] %>%
-#   # .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1),] %>%
-#   .[, unique_subplot_id] %>%
-#   unique()
-
-# # length(low)
-
-# medium <-
-#    res_true[aa_n == tg_N_rate[1]] %>%
-#   get_rows_optN(data=., value = 0.5, range = 0.1) %>%
-#   .[unique_subplot_id %in% find_examples_main] %>%
-#   # .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1),] %>%
-#   .[, unique_subplot_id] %>%
-#   unique()
-
-
-# high <- 
 #   res_true[aa_n == tg_N_rate[3]] %>%
 #   get_rows_optN(data=., value = 0.9, range = 0.1) %>%
 #   .[unique_subplot_id %in% find_examples_main] %>%
-#   .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1), unique_subplot_id] %>%
+#   # .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1),] %>%
+#   .[, unique_subplot_id] %>%
 #   unique()
 
-# vis_res_true <- res_true[unique_subplot_id %in% c(low, medium, high)]
-# vis_res_pred <- res_pred[unique_subplot_id %in% c(low, medium, high)]
+# length(low)
+# x <- 16
+# i= x:(x+1)
+# vis_res_true <- res_true[unique_subplot_id %in% low[i]]
+# vis_res_pred <- res_pred[unique_subplot_id %in% low[i]]
+# ggplot() +
+#     geom_line(
+#       data=vis_res_true, aes(x=N, y=yield, color = unique_subplot_id)
+#     ) +
+#     geom_point(
+#       data=vis_res_pred, aes(x=N, y=value, color = unique_subplot_id, alpha = "Predicts"), shape=2, size = 1.5
+#     ) +
+#     geom_point(data = vis_res_true[aa_n==N], aes(x=aa_n, y= yield, alpha = "True yield at actual N rate that was applied"), color = 'blue', size = 1.5) +
+#     facet_wrap(~variable) +
+#     scale_alpha_manual(
+#       name = NULL,
+#       values = c(1, 1),
+#       breaks = c("Predicts", "True yield at actual N rate that was applied"),
+#       guide = guide_legend(override.aes = list(linetype = c(0, 1),
+#         shape = c(2, 16),
+#         color = c("black", "blue")) 
+#         ) 
+#     ) +
+#     labs(y = "Yield (kg/ha)") +
+#     labs(x = "N (kg/ha)") +
+#     theme_dist +
+#     theme(legend.title = element_blank()) +
+#     guides(color=guide_legend(nrow=2, byrow=TRUE))
 
-
-# low: *13_41*, 15_34
-# medium: *8_41*, 8_42, 27_10
+# tg_N_rate <- N_rate[2]
+# low: 13_41, 15_34, 15_35, 11_40
+# medium: 8_41, *8_42*, *8_43*, 27_10
 # high: 4_21
 
+# tg_N_rate <- N_rate[3]
+# **2_18**, 10_42 ***6_47***
+
+# tg_N_rate <- N_rate[4]
+# 10_49
+
+
+# final
+# + *2_18* (more than 14500)
+# + *8_42* (11500) 
+# + *8_43* (11300)
+# + **6_47** (11100)
+
+
+# c("2_18", "8_42")
+# c("2_18", "6_47") **
+
+# vis_res_true <- res_true[unique_subplot_id %in% c("2_18", "6_47")]
+# vis_res_pred <- res_pred[unique_subplot_id %in% c("2_18", "6_47")]
+# ggplot() +
+#     geom_line(
+#       data=vis_res_true, aes(x=N, y=yield, color = unique_subplot_id)
+#     ) +
+#     geom_point(
+#       data=vis_res_pred, aes(x=N, y=value, color = unique_subplot_id, alpha = "Predicts"), shape=2, size = 1.5
+#     ) +
+#     geom_point(data = vis_res_true[aa_n==N], aes(x=aa_n, y= yield, alpha = "True yield at actual N rate that was applied"), color = 'blue', size = 1.5) +
+#     facet_wrap(~variable) +
+#     scale_alpha_manual(
+#       name = NULL,
+#       values = c(1, 1),
+#       breaks = c("Predicts", "True yield at actual N rate that was applied"),
+#       guide = guide_legend(override.aes = list(linetype = c(0, 1),
+#         shape = c(2, 16),
+#         color = c("black", "blue")) 
+#         ) 
+#     ) +
+#     labs(y = "Yield (kg/ha)") +
+#     labs(x = "N (kg/ha)") +
+#     theme_dist +
+#     theme(legend.title = element_blank()) +
+#     guides(color=guide_legend(nrow=2, byrow=TRUE))
+
+
 vis_res_true <- 
-  res_true[unique_subplot_id %in% c("15_34", "8_41", "4_21")] %>%
+  res_true[unique_subplot_id %in% c("2_18", "6_47")] %>%
   .[,site := case_when(
-    unique_subplot_id == "15_34" ~ "site 1",
-    unique_subplot_id == "8_41" ~ "site 2",
-    unique_subplot_id == "4_21" ~ "site 3",
+    unique_subplot_id == "2_18" ~ "site 1",
+    unique_subplot_id == "6_47" ~ "site 2"
     )]
 
 vis_res_pred <- 
-  res_pred[unique_subplot_id %in% c("15_34", "8_41", "4_21")] %>%
+  res_pred[unique_subplot_id %in% c("2_18", "6_47")] %>%
   .[,site := case_when(
-    unique_subplot_id == "15_34" ~ "site 1",
-    unique_subplot_id == "8_41" ~ "site 2",
-    unique_subplot_id == "4_21" ~ "site 3",
+    unique_subplot_id == "2_18" ~ "site 1",
+    unique_subplot_id == "6_47" ~ "site 2"
     )]
-
 
 vis_MB_BRF_y <- 
   ggplot() +
     # --- true yield response curve --- #
     geom_line(
-      data=vis_res_true, aes(x=N, y=yield, color = site), size=1
+      data=vis_res_true, aes(x=N, y=yield, group = site)
     ) +
     # --- Predicted yield points --- #
     geom_point(
-      data=vis_res_pred, aes(x=N, y=value, color = site, alpha = "Predicts"), shape=2, size = 2, stroke = 1
+      data=vis_res_pred, aes(x=N, y=value, group = site, alpha = "Predicts"), shape=2, size = 1.5
     ) +
     # --- Yield at applied N rate --- #
-    geom_point(data = vis_res_true[aa_n==N], aes(x=aa_n, y= yield, alpha = "True yield at actual N rate that was applied"), color = 'blue', size = 2) +
+    geom_point(data = vis_res_true[aa_n==N], aes(x=aa_n, y= yield, alpha = "True yield at actual N rate that was applied"), color = 'blue', size = 1.5) +
     facet_wrap(~variable) +
     scale_alpha_manual(
       name = NULL,
@@ -325,7 +376,8 @@ vis_MB_BRF_y <-
     labs(y = "Yield (kg/ha)") +
     labs(x = "N (kg/ha)") +
     theme_dist +
-    theme(legend.title = element_blank())
+    theme(legend.title = element_blank()) +
+    guides(color=guide_legend(nrow=2, byrow=TRUE))
 
 
 ## ----------------------------------------------------------------------------------------------
@@ -615,27 +667,46 @@ report_table_y <-
 
 
 ## ----------------------------------------------------------------------------------------------
-fig_y_optN <-
+# fig_y_optN <-
+  # res_y_test %>%
+  # .[Method %in% c("RF", "BRF", "CNN")] %>%
+  # ggplot(aes(x = rmse_y, y = rmse_optN)) +
+  # geom_point(size = 0.5) +
+  # facet_grid(Model ~ Method) +
+  # geom_smooth(method = "lm", se = FALSE, color = "red", size = 0.7) +
+  # stat_regline_equation(
+  #   label.x = 2050, label.y = 90,
+  #   aes(label = ..rr.label..),
+  #   size = 3
+  # ) +
+  # guides(
+  #   fill = guide_legend(keywidth = 1, keyheight = 1),
+  #   linetype = guide_legend(keywidth = 3, keyheight = 1),
+  #   colour = guide_legend(keywidth = 3, keyheight = 1)
+  # ) +
+  # ylim(NA, 95) +
+  # labs(y = " RMSE of EONR Estimation (kg/ha)") +
+  # labs(x = " RMSE of Yield Prediction (kg/ha)") +
+  # theme_dist
+
+
+## ----------------------------------------------------------------------------------------------
+vis_RMSE_y_eonr <- 
   res_y_test %>%
-  .[Method %in% c("RF", "BRF", "CNN")] %>%
-  ggplot(aes(x = rmse_y, y = rmse_optN)) +
-  geom_point(size = 0.5) +
-  facet_grid(Model ~ Method) +
-  geom_smooth(method = "lm", se = FALSE, color = "red", size = 0.7) +
-  stat_regline_equation(
-    label.x = 2050, label.y = 90,
-    aes(label = ..rr.label..),
-    size = 3
-  ) +
+  .[sim %in% c(10, 20, 30) & Method %in% c("RF", "BRF", "CNN") & Model == "aabbyytt"] %>%
+  ggplot() +
+  geom_point(aes(x = rmse_y, y = rmse_optN, shape = Method, fill = factor(sim)), size = 2) +
+  scale_shape_manual(values = c(21, 23, 25)) +
   guides(
-    fill = guide_legend(keywidth = 1, keyheight = 1),
-    linetype = guide_legend(keywidth = 3, keyheight = 1),
-    colour = guide_legend(keywidth = 3, keyheight = 1)
+    fill = guide_legend(override.aes=list(shape=21))
   ) +
+  labs(fill="Simulation Round", shape="Method") +
+  # guides(fill = "none") +
+  # facet_wrap( ~ Model, ncol = 2) +
   ylim(NA, 95) +
   labs(y = " RMSE of EONR Estimation (kg/ha)") +
   labs(x = " RMSE of Yield Prediction (kg/ha)") +
-  theme_dist
+  theme_dist 
 
 
 ## ----------------------------------------------------------------------------------------------
