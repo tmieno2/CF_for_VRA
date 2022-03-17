@@ -278,9 +278,12 @@ Table \@ref(tab:table-y) shows the mean RMSE of yield prediction over the one th
 report_table_y
 ```
 
+
+Distinction between yield prediction and yield response function estimation.
+
 Table \@ref(tab:xxx) illustrates the distinction between yield prediction and yield response function prediction. 
 
-In essence, good performance in predicinting yield "levels" at the observed points does not mean good performanc ein predicting yield response function, which is about finding out what "would" happen to yield if rates other than the one actually applied were applied. This happens because you can predict yield leves for wrong reasons by giving wrong amount of credit to wrong drivers (variables) of yield levels. This is because prediction-oriented ML methods focus on predicting yield levels well at the "observed" points, but not the points that were not seen. This is by construction because they are trained to minimize the error in yield "level" prediction at the "observed" points. In contrast, CF focuses to recover the yield response functions well (or alternatively the causal impact of N on yield at different discrete rates of N). Our results how that this distinction between prediction-oriented ML methods and CF can result in economically meanigful difference, where CF outperforms.  
+In essence, good performance in predicinting yield "levels" at the "observed" points does not mean good performanc in predicting yield response function, which is about finding out what "would" happen to yield if rates other than the one actually applied were applied. This happens because you can predict yield "levels" for wrong reasons by giving wrong amount of credit to wrong drivers (variables) of yield levels. Roughly speaking, the training process would twist the reasonings of why yield varies in a way that sacrifices its ability to recover yield response function as long as it fits the obejective of predicting yield at the "observed" nitrogen rate for each site. This is because prediction-oriented ML methods focus on predicting yield levels well at the "observed" points, but not the points that were not seen. This is by construction because they are trained to minimize the error in yield "level" prediction at the "observed" points. In contrast, CF focuses to recover the yield response functions well (or alternatively the causal impact of N on yield at different discrete rates of N). Our results show that this distinction between prediction-oriented ML methods and CF is crucial and using the former may result in significant economic loss relative to CF.  
 
 <br>
 
