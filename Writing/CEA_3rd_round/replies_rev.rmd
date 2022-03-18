@@ -4,17 +4,57 @@ output:
   bookdown::word_document2:
     number_sections: no
     reference_docx: ../word_template_format.docx
-bibliography: ../ ML_VRA.bib
+bibliography: ../ML_VRA.bib
 ---
 
-We really appreciate your comments, and we are glad that you expressed your own concerns despite the fact the reviewers were okay with the previous version. One of your comments was paritculary important and we were able to correct our mistake before this paper is published. So, thank you so much. We actually made significant changes to section 4.2, which I believe is much improved because it explains clearly why predicting yield levels well at the observed points do not necessarily mean predicting EONR well. Below, you find your comments in black and our replies in blue.
+```{r echo = F, include = FALSE, cache = F}
+library(knitr)
+library(here)
+here::i_am("GitControlled/Writing/CEA_3rd_round/replies_rev.rmd")
+# opts_knit$set(root.dir = here())
+
+options(htmltools.dir.version = FALSE)
+options(knitr.duplicate.label = "allow")
+
+opts_chunk$set(
+  fig.align = "center",
+  fig.retina = 5,
+  warning = F,
+  message = F,
+  cache = T,
+  echo = F
+)
+
+library(data.table)
+library(ggplot2)
+```
+
+
+We really appreciate your comments, and we are glad that you expressed your own concerns despite the fact the reviewers were okay with the previous version. One of your comments was particularity important and we were able to correct our mistake before this paper is published. So, thank you so much. We actually made significant changes to section 4.2, which I believe is much improved because it explains clearly why predicting yield levels well at the observed points do not necessarily mean predicting EONR well. Below, you find your comments in black and our replies in blue.
 
 <br>
 
 **1. The CNN result seems to be rather constant than linear. Please include a chart showing the CNN performance per training epoch to allow the reader to assess how good the CNN model converged.**
 
 <span style="color:blue">  
-Please see Figure E.1 in Appendix E that shows the convergence of CNN for a single simulation round. We cannot show this kind of figure for all the simulation rounds. But, any interested readers can replicate our work as the codes will be accessible publicly. Please also see the figure below. CNN severely underestimates the impact of N and estimated yield response to N is almost flat, but not exactly flat.
+Please see Figure E.1 in Appendix E that shows the convergence of CNN for a single simulation round. We cannot show this kind of figure for all the simulation rounds. But, any interested readers can replicate our work as the codes will be accessible publicly. Please also see the figure below. CNN severely underestimates the impact of N and estimated yield response to N is almost flat, but not exactly flat. Please see the figure below showing some examples of yield response function estimated by CNN with "aabbyytt" modeling scenario. Each of the lines indicates yield response curve of a specific site.
+
+
+```{r, fig.width=7, fig.cap = "An illustrative example of yield response functions estimated by CNN (scenario: aabbyytt)"}
+cnn_simRes_temp <- readRDS(here("Shared/Results/ex_cnn_y_ResCurve.rmd"))
+
+ggplot(cnn_simRes_temp, aes(x=rate, y=pred_yield, colour=factor(unique_subplot_id))) +
+    geom_point(size = 0.7) +
+    geom_smooth(method=lm, se=FALSE, size=0.3) +
+    facet_wrap(~Model, ncol = 2) +
+    theme(
+        legend.title = element_blank(),
+        legend.position = "none"
+    ) +
+  xlab("N (kg/ha)") +
+  ylab("Predicted Yield (kg/ha)")
+```
+
 </span>
 
 <br>

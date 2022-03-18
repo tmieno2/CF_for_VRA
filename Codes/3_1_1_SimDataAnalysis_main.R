@@ -1,5 +1,6 @@
 # ==========================================================================
 # Objective:
+# For main simulation results, 
 #' + Calculate profit-deficits and RMSE of EONR 
 #' + Calculate RMSE of yield predictions for RF, BRF and CNN
 #'      + For CNN results, estimate  EONR in this codes
@@ -49,7 +50,7 @@ subplots_infiled <- source_dt[,unique_subplot_id] %>% unique()
 
 
 # ==========================================================================
-# 1. Results of RF, BRF and CF
+# 1. Forest simulation regression results 
 # ==========================================================================
 
 # /*=================================================*/
@@ -112,7 +113,7 @@ forest_summary_bySim %>%
 
 
 # ==========================================================================
-# 2.  Results of CNN
+# 2.  CNN results
 # ==========================================================================
 
 # /*=================================================*/
@@ -169,7 +170,9 @@ cnn_simRes_all <-
 # Confirm that the predicted yield response functions are always linear
 cnn_simRes_temp <- 
     cnn_simRes_all %>%
-    .[type=="test" & Model == "aabbyytt" & sim==296 & unique_subplot_id %in% subplots_infiled[1:100],]
+    .[type=="test" & Model == "aabbyytt" & sim==296 & unique_subplot_id %in% subplots_infiled[1:50],]
+
+saveRDS(cnn_simRes_temp, here("Shared/Results/ex_cnn_y_ResCurve.rmd"))
 
 ggplot(cnn_simRes_temp, aes(x=rate, y=pred_yield, colour=factor(unique_subplot_id))) +
     geom_point(size = 0.7) +

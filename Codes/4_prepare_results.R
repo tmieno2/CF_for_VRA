@@ -20,16 +20,17 @@ source(here("GitControlled/Codes/0_1_functions_gen_analysis_data.R"))
 pCorn <- price_table[2, pCorn]
 pN <- price_table[2, pN]
 
-# /*=================================================*/
-#' # Field Data Sets
-# /*=================================================*/
+# === Field === #
+field <- readRDS(here("Shared/Data/for_Simulations/analysis_field.rds"))
+
+# ==========================================================================
+# Field Data Sets
+# ==========================================================================
 
 #/*----------------------------------*/
 #' ## (1) cell-level data set 
 #/*----------------------------------*/
 # + NOTE: I needed to do the following things, because the existing raw data does not have m_error
-field <- readRDS(here("Shared/Data/for_Simulations/analysis_field.rds"))
-
 coef_data <- readRDS(here("Shared/Data/for_Simulations/coefficients_sprange_400.rds"))
 
 x=1
@@ -122,125 +123,9 @@ field_plot_sf <- field_cell_sf%>%
 saveRDS(field_plot_sf, here("Shared/Results/for_writing/sample_field_plot_sf.rds"))
 
 
-
-# /*===========================================*/
-#'=  Prepare illustrative yield response curve estimated by RF =
-# /*===========================================*/
-library(grf)
-
-# --- MB function --- #
-gen_yield_MB <- function(ymax, alpha, beta, N) {
-  yield <- ymax * (1 - exp(alpha + beta * N))
-  return(yield)
-}
-
-# --- ML functions --- #
-source(here("GitControlled/Codes/0_2_functions_main_sim.R"))
-
-# --- Data --- #
-train_dt <- 
-  field_subplot_sf %>%
-  data.table()
-
-test_dt <- 
-  field_subplot_test_dt %>%
-  data.table()
-
-
-# /*===== Train ML =====*/
-temp_var_ls <- c("alpha", "beta", "ymax")
-
-set.seed(1356)
-
-RF <- 
-  RF_run(
-    reg_data = train_dt,
-    var_ls = temp_var_ls
-  )
-
-BRF <- 
-  BRF_run(
-    reg_data = train_dt,
-    var_ls = temp_var_ls
-  )
-
-# y_res_CNN <- 
-#     list.files(
-#         path = here("Shared/Results/CNN_rawRes_onEval"),
-#         full.names=TRUE
-#     ) %>%
-#     lapply(., fread) %>%
-#     rbindlist(.,idcol = "Model") %>%
-#     .[sim==1&Model == 1, type := "test"]
-
-
-N_rate <- test_dt[,aa_n] %>% unique() %>% sort()
-tg_N_rate <- N_rate[c(2,4)]
-
-# --- for true yield response function --- #
-seq_N <- 
-  seq(min(N_rate) -30, max(N_rate)+30, by=1)
-# seq_N <- 
-#   seq(min(N_rate), max(N_rate), by=1)
-
-res_true <- 
-  test_dt %>%
-  .[aa_n %in% tg_N_rate] %>%
-  .[rep(1:nrow(.), each = length(seq_N)), ] %>%
-  .[, N := seq_N, by = unique_subplot_id] %>%
-  .[,det_yield := gen_yield_MB(ymax, alpha, beta, N)] %>%
-  .[,yield := det_yield*(1 + m_error)]
-
-# --- for predicted yield at five experimental N rates --- #
-res_pred <- 
-  test_dt %>%
-  .[aa_n %in% tg_N_rate] %>%
-  .[rep(1:nrow(.), each = length(N_rate)),] %>%
-  .[, N := N_rate, by = unique_subplot_id] %>%
-  .[,pred_y_RF := predict(RF, newdata = .[, c("N", temp_var_ls), with = FALSE])] %>%
-  .[,pred_y_BRF := predict(BRF, newdata = .[, c("N", temp_var_ls), with = FALSE])]
-
-  
-# === For visualization === #
-set.seed(4098)
-# set.seed(4957)
-low <- 
-  res_true[aa_n == tg_N_rate[1]] %>%
-  get_rows_optN(data=., value = 0.1) %>%
-  .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1), unique_subplot_id] %>%
-  unique()
-
-high <- 
-  res_true[aa_n == tg_N_rate[2]] %>%
-  get_rows_optN(data=., value = 0.9) %>%
-  .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1), unique_subplot_id] %>%
-  unique()
-
-vis_res_true <- res_true[unique_subplot_id %in% c(low, high)]
-vis_res_pred <- res_pred[unique_subplot_id %in% c(low, high)]
-
-ggplot() +
-  # --- true yield response curve --- #
-  geom_line(
-    data=vis_res_true, aes(x=N, y=yield, group=factor(unique_subplot_id))
-  ) +
-  # --- Predicted yield points --- #
-  geom_point(
-    data=vis_res_pred, aes(x=N, y=pred_y_BRF, group=factor(unique_subplot_id)), color="red"
-  ) +
-  geom_point(data = vis_res_true[aa_n==N], aes(x=aa_n, y= yield), color = 'blue') +
-  geom_segment(data = vis_res_true[aa_n==N], aes(x = aa_n, xend=aa_n, y = yield, yend=-Inf), linetype = "dashed") +
-  labs(y = "Yield (kg/ha)") +
-  labs(x = "N (kg/ha)") +
-  theme_dist +
-  theme(legend.position = "none")
-
-
-
-
-# /*===========================================*/
-#'=  Preparation: True yield vs predicted yield =
-# /*===========================================*/
+# ==========================================================================
+# Preparation: True yield vs predicted yield =
+# ==========================================================================
 
 #/*--------------------------------*/
 #' ## Preparation
@@ -333,42 +218,51 @@ sample_simRes_test_y <-
 
 saveRDS(sample_simRes_test_y, here("Shared/Results/for_writing/sample_simRes_test_y.rds"))
 
-# rmse <- sample_simRes_test_y %>%
-#   .[, .(
-#     rmse_y_det = rmse_general(pred_yield, det_yield),
-#     rmse_y = rmse_general(pred_yield, yield)
-#     ), by= .(Method, Model)]
-
-# # === Function for RMSE Calculation === #
-# rmse_general <-function(preds,actual){ 
-#   sqrt(mean((actual - preds)^2)) %>%
-#   round(.,1) %>%
-#   format(, nsmall = 1)
-
-# }
 
 
-# rmse <- sample_simRes_test_y %>%
-#   .[, .(
-#     rmse_y_det = paste0("RMSE = " ,rmse_general(pred_yield, det_yield)),
-#     rmse_y = paste0("RMSE = ", rmse_general(pred_yield, yield))
-#     ), by= .(Method, Model)]
+# ==========================================================================
+# Cell-level Field dataset (Low-error) =
+# ==========================================================================
+field <- readRDS(here("Shared/Data/for_Simulations/analysis_field.rds"))
+
+sample_field_cell_low <- 
+  here("Shared/Data/for_Simulations/reg_raw_data_low_error.rds") %>%
+  readRDS() %>%
+  .[sim==1,]
+
+field_cell_low_sf <- 
+  left_join(dplyr::select(field, unique_cell_id), sample_field_cell_low, by="unique_cell_id")%>%
+    na.omit() %>%
+    mutate(plot_id = ceiling(subplot_id/4)) %>%
+    filter(padding==1)
+
+saveRDS(field_cell_low_sf, here("Shared/Results/for_writing/sample_field_cell_low_sf.rds"))
 
 
-# ggplot(sample_simRes_test_y) +
-#   geom_point(aes(x=det_yield, y=pred_yield), size = 0.5) +
-#   geom_abline(aes(intercept = 0, slope = 1), color = "red", show.legend = TRUE) +
-#   geom_text(data=rmse, aes(x=-Inf,y=+Inf,label=rmse_y_det),
-#               hjust = -0.1,  vjust = 3, size=3.5, family = "Times New Roman") +
-#   facet_grid(Model ~ Method) +
-#   guides(
-#     fill = guide_legend(keywidth = 1, keyheight = 1),
-#     linetype = guide_legend(keywidth = 3, keyheight = 1),
-#     colour = guide_legend(keywidth = 3, keyheight = 1)
-#   ) +
-#   labs(y = "Predicted Yield (kg/ha)") +
-#   labs(x = "True Yield without error (kg/ha)") +
-#   theme_dist
+
+# ==========================================================================
+# Cell-level Field dataset (Low-error) =
+# ==========================================================================
+sample_field_cell_high <- 
+  here("Shared/Data/for_Simulations/reg_raw_data_high_error.rds") %>%
+  readRDS() %>%
+  .[sim==1,]
+
+field_cell_high_sf <- 
+  left_join(dplyr::select(field, unique_cell_id), sample_field_cell_high, by="unique_cell_id")%>%
+    na.omit() %>%
+    mutate(plot_id = ceiling(subplot_id/4)) %>%
+    filter(padding==1)
+
+saveRDS(field_cell_high_sf, here("Shared/Results/for_writing/sample_field_cell_high_sf.rds"))
+
+
+
+
+
+
+
+
 
 
 

@@ -94,8 +94,10 @@ report_table_y_train
 
 \newpage
 
-## Appendix E: CNN performance per training epoch
-The figure below shows training and validation loss measured by mean square error (MSE) over the number of epochs in a single simulation round under aabbyytt scenario for CNN as an illustration. For readers interested in knowing how CNN is trained for all the simulation rounds, please see the python program available at a Mendeley dataset [@Kakimoto2022codes] or a Github repository at https://github.com/Shunkei3/VRA_with_CF.git.) 
+
+
+## Appendix E: CNN Performance per Training Epoch
+The figure below shows training and validation loss measured by mean square error (MSE) over the number of epochs in a single simulation round under aabbyytt scenario for CNN as an illustration. For readers interested in knowing how CNN is trained for all the simulation rounds, please see the python program available at a Mendeley dataset [@Kakimoto2022codes] or a Github repository at https://github.com/Shunkei3/VRA_with_CF.git.
 
 ```{r cnn-epoch, fig.width=5, fig.height=4, fig.cap = "Figure E.1: An example of CNN performance per training epoch (scenario: aabbyytt)"}
 knitr::include_graphics(here("GitControlled/Writing/loss_model4_simID1.png"))
@@ -103,10 +105,44 @@ knitr::include_graphics(here("GitControlled/Writing/loss_model4_simID1.png"))
 
 \newpage
 
-## Appendix H: True Yields vs Predicted Yields by models
+
+## Appendix H: True Yields vs Predicted Yields by Models
 
 ```{r vis-y-pred, fig.width=7, fig.height=7.5, fig.cap = "Figure H.1: True yields without error and predicted yields"}
 vis_y_pred
+```
+
+
+
+## Appendix I: Simulations with Different Size of Yield Disturbance Term.
+In this section, we present the results of EONR estimation and yield prediction with different size of yield disturbance term ($\varepsilon$). We created two additional yield datasets	that are only different in the size of $\varepsilon$ from the yield datasets we used in the study. This can be done by just changing the variogram parameter of $psill$ for $\varepsilon$. $0.002$ of $psill$ value was used to create low $\varepsilon$, and $0.028$ of $psill$ value was used to create high $\varepsilon$. Figure I.1 illustrates examples of generated $\varepsilon$. 
+
+```{r fig-nExp-yield, fig.width=7, fig.height=6, fig.cap = "Figure I.1: An example of experimental design of N and generated yield at the subplot resolution"}
+field_m_error_low | field_m_error_high
+```
+
+\newpage
+
+Using those yield datasets, we conducted one hundred simulations. The results of EONR estimation and yield prediction are shown in Table XX. (what about CNN reuslts??)
+
+
+```{r report-table-optN-low, tab.cap = "Table I.1: Mean RMSE (kg/ha) estimation and profit-deficit ($/ha) by ML method and modeling scenario on low yield disturbance datasets"}
+report_table_optN_low
+```
+
+```{r report-table-y-low, tab.cap = "Table I.2: Mean RMSE of yield prediction (kg/ha) by ML method and modeling scenario on training datasets on low yield disturbance datasets"}
+report_table_y_low
+```
+
+\newpage
+
+```{r report-table-optN-low, tab.cap = "Table I.3: Mean RMSE (kg/ha) estimation and profit-deficit ($/ha) by ML method and modeling scenario on low yield disturbance datasets"}
+report_table_optN_high
+```
+
+
+```{r report-table-y-low, tab.cap = "Table I.4: Mean RMSE of yield prediction (kg/ha) by ML method and modeling scenario on training datasets on low yield disturbance datasets"}
+report_table_y_high
 ```
 
 
