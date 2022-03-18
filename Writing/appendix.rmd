@@ -95,27 +95,10 @@ report_table_y_train
 \newpage
 
 ## Appendix E: CNN performance per training epoch
-The below figure shows training and validation loss measured by mean square error (MSE) over the number of epochs in a single simulation round under aabbyytt scenario. 
+The figure below shows training and validation loss measured by mean square error (MSE) over the number of epochs in a single simulation round under aabbyytt scenario for CNN as an illustration. For readers interested in knowing how CNN is trained for all the simulation rounds, please see the python program available at a Mendeley dataset [@Kakimoto2022codes] or a Github repository at https://github.com/Shunkei3/VRA_with_CF.git.) 
 
 ```{r cnn-epoch, fig.width=5, fig.height=4, fig.cap = "Figure E.1: An example of CNN performance per training epoch (scenario: aabbyytt)"}
 knitr::include_graphics(here("GitControlled/Writing/loss_model4_simID1.png"))
-```
-
-\newpage
-
-## Appendix F: MB-yield response curves
-The below figure shows some examples of site-specific Mitscherlich-Baule yield function to illustrate how yield responds to N. 
-
-```{r vis-MB-curve, fig.cap = "Figure F.1: Examples of Mitscherlich-Baule yield response curve"}
-vis_MB_curve
-```
-
-\newpage
-
-## Appendix G: The difference between predicting yields and predicting change in yields
-
-```{r, vis-MB-BRF-y, fig.width=7, fig.height=5, fig.cap = "Figure G.1: Predicted (scenario: aabbyytt)"}
-vis_MB_BRF_y
 ```
 
 \newpage
@@ -124,13 +107,6 @@ vis_MB_BRF_y
 
 ```{r vis-y-pred, fig.width=7, fig.height=7.5, fig.cap = "Figure H.1: True yields without error and predicted yields"}
 vis_y_pred
-```
-
-
-## Appendix I: The Relationship between Yield and EONR Prediction Performances (scenario: aabbyytt)
-
-```{r, vis-RMSE-y-eonr, fig.width=5, fig.height=5, fig.cap = "Figure I.1: The Relationship between Yield and EONR Prediction Performances"}
-vis_RMSE_y_eonr
 ```
 
 
