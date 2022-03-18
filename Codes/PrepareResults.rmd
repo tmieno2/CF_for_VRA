@@ -831,7 +831,7 @@ report_table_y <-
 
 ```{r}
 # sim_no <- c(300, 600, 900)
-# sim_no <- c(10, 20, 30)
+sim_no <- c(10, 20, 30)
 
 vis_RMSE_y_eonr <-
   res_y_test %>%
