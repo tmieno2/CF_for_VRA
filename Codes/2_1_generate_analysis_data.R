@@ -82,7 +82,8 @@ saveRDS(test_data, here("Shared/Data/for_Simulations/test_data.rds"))
 # === Load coef Data sets === #
 coef_data_low <- 
 	here("Shared/Data/for_Simulations/coefficients_sprange_400_low_error.rds") %>%
-	readRDS()
+	readRDS() %>%
+	.[sim %in% 1:100]
 
 
 #/*--------------------------------*/
@@ -140,21 +141,21 @@ saveRDS(test_data, here("Shared/Data/for_Simulations/test_data_low_error.rds"))
 # /*===========================================*/
 
 # === Load coef Data sets === #
-coef_data_low <- 
+coef_data_high <- 
 	here("Shared/Data/for_Simulations/coefficients_sprange_400_high_error.rds") %>%
-	readRDS()
-
+	readRDS() %>%
+	.[sim %in% 1:100]
 
 #/*--------------------------------*/
 #' ## Generate Cell-level Data sets
 #/*--------------------------------*/
 raw_data <- lapply(
-	1:1000, function(x) {
+	1:100, function(x) {
 		prepare_raw_data(
 			i = x,
 			field = field,
-			coef_data_m = coef_data_low[sim == x, ],
-			coef_data_t = coef_data_low[sim == ifelse(x + 1 >= max(sim), 1, x + 1), ],
+			coef_data_m = coef_data_high[sim == x, ],
+			coef_data_t = coef_data_high[sim == ifelse(x + 1 >= max(sim), 1, x + 1), ],
 			app_error="no"
 		)
 	}
@@ -163,6 +164,9 @@ raw_data <- lapply(
 
 reg_raw_data <- sapply(raw_data,"[",1)%>%rbindlist()
 test_raw_data <- sapply(raw_data,"[",1)%>%rbindlist()
+
+saveRDS(reg_data, here("Shared/Data/for_Simulations/reg_data_high_error.rds"))
+saveRDS(test_data, here("Shared/Data/for_Simulations/test_data_high_error.rds"))
 
 #/*--------------------------------*/
 #' ## Generate analysis dataset (subplot-level)
