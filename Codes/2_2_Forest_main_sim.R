@@ -3,7 +3,6 @@
 #/*----------------------------------*/
 #' ## Preparation
 #/*----------------------------------*/
-library(here)
 library(grf)
 library(data.table)
 library(tidyverse)
@@ -76,8 +75,10 @@ for (var in var_ls_variations){
 }
 
 
+
+
 #/*--------------------------------*/
-#' ## (1) Sub sim (low m_error: psill = 0.002)
+#' ## (2) Sub sim (low m_error: psill = 0.002)
 #/*--------------------------------*/
 reg_data_low <- readRDS("./Shared/Data/for_Simulations/reg_data_low_error.rds")
 test_data_low <- readRDS("./Shared/Data/for_Simulations/test_data_low_error.rds")
@@ -107,9 +108,68 @@ for (var in var_ls_variations){
 }
 
 
+var <- var_ls_variations[[2]]
+dt1 <- readRDS(paste0("./Shared/Results/Forest_rawRes_low/forest_low_SimRes_", paste0(var, collapse = "_"), ".rds"))
+
+dt1 %>%
+    .[,.(
+        rmse_optN = rmse_general(opt_N_hat, opt_N),
+        rmse_y = rmse_general(pred_yield, yield)
+        ), by= .(sim, type, Method)] %>%
+    .[,.(
+    	mean_rmse_optN = mean(rmse_optN),
+    	mean_rmse_y = mean(rmse_y)
+    	), by= .(type, Method)
+    ] %>%
+    .[order(type, Method)]
 
 
 
+#/*--------------------------------*/
+#' ## (3) Sub sim (high: psill = 0.002)
+#/*--------------------------------*/
+reg_data_high <- readRDS("./Shared/Data/for_Simulations/reg_data_high_error.rds")
+test_data_high <- readRDS("./Shared/Data/for_Simulations/test_data_high_error.rds")
+
+# --- Number of iterations --- #
+B=100
+
+# === start simulation === #
+for (var in var_ls_variations){
+	# var = c("alpha", "beta", "ymax")
+	set.seed(1378)
+	# --- for each modeling scenario run: --- #
+	sim_results <- lapply(1:B, 
+		function(x){
+			sim_par(
+				i = x,
+				var_ls = var,
+				reg_data = reg_data_high[sim==x&padding==1,],
+	      		test_data = test_data_high[sim==x&padding==1,],
+	      		N_levels = reg_data_high[sim==x,]$rate%>%unique()%>%sort()
+	      	)
+		}
+	) %>%
+	rbindlist()
+
+	saveRDS(sim_results, paste0("./Shared/Results/Forest_rawRes_high/forest_high_SimRes_", paste0(var, collapse = "_"), ".rds"))
+}
+
+
+var <- var_ls_variations[[2]]
+dt1 <- readRDS(paste0("./Shared/Results/Forest_rawRes_high/forest_high_SimRes_", paste0(var, collapse = "_"), ".rds"))
+
+dt1 %>%
+    .[,.(
+        rmse_optN = rmse_general(opt_N_hat, opt_N),
+        rmse_y = rmse_general(pred_yield, yield)
+        ), by= .(sim, type, Method)] %>%
+    .[,.(
+    	mean_rmse_optN = mean(rmse_optN),
+    	mean_rmse_y = mean(rmse_y)
+    	), by= .(type, Method)
+    ] %>%
+    .[order(type, Method)]
 
 
 
