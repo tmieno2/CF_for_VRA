@@ -7,7 +7,7 @@ output:
 bibliography: ../ ML_VRA.bib
 ---
 
-We appreciate your comments and 
+We really appreciate your comments, and we are glad that you expressed your own concerns despite the fact the reviewers were okay with the previous version. One of your comments was paritculary important and we were able to correct our mistake before this paper is published. So, thank you so much. We actually made significant changes to section 4.2, which I believe is much improved because it explains clearly why predicting yield levels well at the observed points do not necessarily mean predicting EONR well. Below, you find your comments in black and our replies in blue.
 
 <br>
 
