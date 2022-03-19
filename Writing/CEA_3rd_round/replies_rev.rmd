@@ -45,14 +45,14 @@ Please see Figure E.1 in Appendix E that shows the convergence of CNN for a sing
 ```{r, fig.width=7, fig.cap = "An illustrative example of yield response functions estimated by CNN (scenario: aabbyytt)"}
 cnn_simRes_temp <- readRDS(here("Shared/Results/ex_cnn_y_ResCurve.rmd"))
 
-ggplot(cnn_simRes_temp, aes(x=rate, y=pred_yield, colour=factor(unique_subplot_id))) +
-    geom_point(size = 0.7) +
-    geom_smooth(method=lm, se=FALSE, size=0.3) +
-    facet_wrap(~Model, ncol = 2) +
-    theme(
-        legend.title = element_blank(),
-        legend.position = "none"
-    ) +
+ggplot(cnn_simRes_temp, aes(x = rate, y = pred_yield, colour = factor(unique_subplot_id))) +
+  geom_point(size = 0.7) +
+  geom_smooth(method = lm, se = FALSE, size = 0.3) +
+  facet_wrap(~Model, ncol = 2) +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "none"
+  ) +
   xlab("N (kg/ha)") +
   ylab("Predicted Yield (kg/ha)")
 ```
@@ -64,8 +64,7 @@ ggplot(cnn_simRes_temp, aes(x=rate, y=pred_yield, colour=factor(unique_subplot_i
 **2. Line 70. Why can't EOIRs be estimated by the intervention studies mentioned in 28ff?**
 
 <span style="color:blue">  
-We do not say EOIR cannot be estimated by studies mentioned in 28ff. Indeed, any methods can "estimate" EOIR. However, no method can estimate the "true" EONR and we will 
-"never" know true EONRs for real fields. We can only estimate them. This principle is at the core of statistical analysis. We never observe how data is generated (the underlying laws that govern how the world works whether it is physical, biological, or economic), but we can "estimate" (approximate) what they look like. This means that when we try to evaluate how different models perform in predicting EONR using real data, we simply do not have a valid benchmark to compare against. Some may ask, then why don't we use models' yield prediction ability because yield is observable. And this is precisely the dangerous practice that we show is wrong.
+We are not saying EOIR cannot be estimated by studies mentioned in 28ff. Indeed, any methods can "estimate" EOIR. However, no method can estimate the "true" EONR and we will "never" know true EONRs for real fields. We can only estimate them. This principle is at the core of statistical analysis. We never observe how data is generated (the underlying laws that govern how the world works whether it is physical, biological, or economic), but we can "estimate" (approximate) what they look like. This means that when we try to evaluate how different models perform in predicting EONR using real data, we simply do not have a valid benchmark to compare against. Some may ask, then why don't we use models' yield prediction ability because yield is observable. And this is precisely the dangerous practice that we show can be harmful.
 
 Please note that this is a stark contrast to "yield" (not EOIR) prediction because yields ARE observable and models can be verified. However, that is not the case for EOIR. This is why you need MC simulations where the data generating process (how yield responds to N, and how field characteristics affect yield response to N) is "known" to the researcher. This way, we can test model's ability to predict EONR, not yield. Any journal article that proposes a new statistical method always accompany the theory of why their method works (consistency of their estimation, etc) with MC simulations where the researchers determines how data is generated and apply their method. This is because we can never test the statistical property of a statistical method in principle using the real data. For example, please see @Wager2018a and @oprescu2019orthogonal
 
@@ -84,7 +83,7 @@ The typo was corrected.
 **4. Line 194 How exactly were the simulation parameters (table c.1, figure c.1) inspired by the field study (line 161ff) ?**
 
 <span style="color:blue">  
-
+Fiels studies were used to obtain the plausible range of optimal EONR and the size of error. 
 </span>
 
 <br>
@@ -103,11 +102,11 @@ Please see page 19, line 323 and 328 for the precise definition of the RMSE for 
 
 <span style="color:blue">  
 
-We actually realized the results presented in Figure 6 (in the previous round) is completely invalid. As you pointed out the problem with the relationship presented in the figure is basically comparing apples and oranges: comparing across simulation rounds. Figure 8 plots RMSE of yield and EONR predictions by model and simulation round for several simulation rounds. Figure 6 in the previous round was basically mixing RMSE from all the simulation rounds and finding R^2 of the two relationshiop. That is why R^2 was extremely low. Therefore, we decided to remove the figure entirely. Also, we do not claim that yield and EONR predictions are not correlated at all as we realized that it is a false claim. Thank you so much for saving us from claiming the false statement.
+We actually realized the results presented in Figure 6 (in the previous round) is completely invalid. As you pointed out the problem with the relationship presented in the figure is basically comparing apples and oranges: comparing across simulation rounds. Figure 8 plots RMSE of yield and EONR predictions by model and simulation round for several simulation rounds. Figure 6 in the previous round was basically mixing RMSE from all the simulation rounds and finding R^2 of the two relationshiop. That is why R^2 was extremely low. Therefore, we decided to remove the figure entirely. Also, we no longer claim that yield and EONR predictions are not correlated at all as we realized that it is false. Thank you so much for saving us from claiming the false statement.
 
-However, please note that our claim that better yield prediction does "not necessarily" lead to higher profit remains intact. According to your suggestions, we provide much more in-depth discussions about why that is the case under section 4.2. As you suggested, models that can recover the "structure" of the yield response function will perform well in predicting EONR. However, you can predict yield leves at the observed rates (rates that are actually applied in the experiment) without recovering the structure of the yield response function well. The training process of prediction-oriented ML methods may twist the reasonings of why yield varies in a way that sacrifices its ability to recover yield response function as long as it fits its primary obejective of predicting yield levels well at the "observed" nitrogen rate for each site well. Please see our more detailed discussions on this matter in section 4.2.
+However, please note that our claim that better yield prediction does "not necessarily" lead to higher profit remains intact. According to your suggestions, we provide much more in-depth discussions about why that is the case under section 4.2. As you suggested, models that can recover the "structure" of the yield response function will perform well in predicting EONR. However, you can predict yield levels at the observed rates (rates that are actually applied in the experiment) without recovering the structure of the yield response function well (predicting yield levels well for wrong reasons). The training process of prediction-oriented ML methods may twist the reasonings of why yield varies in a way that sacrifices its ability to recover yield response function as long as it fits its primary obejective of predicting yield levels well at the "observed" nitrogen rate for each site well. Please see our more detailed discussions on this matter in section 4.2.
 
-We understand your suggestion of running simulations under different magnitude of erorr comes from your doubt about why yield and EONR prediction is not correlated. But, ee conducted simulations with different degrees of error anyway. **The results are shown in Appendix**.  
+We understand your suggestion of running simulations under different magnitude of erorr comes from your doubt about why yield and EONR prediction is not correlated. But, we conducted simulations with different degrees of error anyway. **The results are shown in Appendix**.  
 
 </span>
 
@@ -123,7 +122,7 @@ Please see Figure H.1 that plots true yields (without error, epsilon) against pr
 
 **8. Please show to which degree N affected yield and how the relation between yield estimation error and the effect of N on yield increase was. I would like to see whether the models were able to reproduce the effect of N on yield at all.**
 
-Please see Figure F.1 for illustrations of how yield responds to N site-specifically for three sites within a field. Please note that Figure xxx (Figure 5) presents exactly the models' ability to predict the impact of N on yield at different treatments (lowest to the second lowest, second lowest to third lowest, etc). As you can see in the figure, RF underestimates the impact of N on yield severely, which leads to the underestimation of EONR. BRF suffers negative bias as well. On the contrary, CF does not suffer this bias. Of course, the worst of all is CNN, which thinks that the impact of N on yield is almost nascent as you can see in Figure 5. On top of negative bias RF and BRF suffer, their estimation of the impact of N is also less accurate than CF. That is why CF performs better than RF and BRF in profit. Please note that CF does not even estimate (3). It estimates the change in yield when N is increased from one rate to another rate as discussed in the paper. 
+Please see Figure F.1 for illustrations of how yield responds to N site-specifically for several sites within a field. Please note that Figure xxx (Figure 5) presents exactly the models' ability to predict the impact of N on yield at different treatments (lowest to the second lowest, second lowest to third lowest, etc). As you can see in the figure, RF underestimates the impact of N on yield severely, which leads to the underestimation of EONR. BRF suffers negative bias as well. On the contrary, CF does not suffer this bias. Of course, the worst of all is CNN, which thinks that the impact of N on yield is almost nascent as you can see in Figure 5. On top of negative bias RF and BRF suffer, their estimation of the impact of N is also less accurate than CF. That is why CF performs better than RF and BRF in profit. Please note that CF does not even estimate (3). It estimates the change in yield when N is increased from one rate to another rate as discussed in the paper. 
 
 <span style="color:blue">  
 
@@ -134,7 +133,7 @@ Please see Figure F.1 for illustrations of how yield responds to N site-specific
 **9. Please extend the introduction by restating numbers for the state of the art of yield and EONR prediction performance from previous studies (as far as such numbers are available) to prevent that all of your readers have to consult the cited references.**
 
 <span style="color:blue">  
-Please see page xx, line xx for a new list of studies that attempt to estimate EONR. Please note that this study has no interest in studies that just predict yield without trying to show how they can use it for EONR estimation. Prediction of yield is almost always not the goal of farmers. We are listing studies that predict yields (or estimate yield response function to be more precise) and then predict EOIR based on them. Also, there is no study that tests the performance of EONR using real data. This is because that is fundamentally impossible as we mentioned above. There are studies that predict field-level (not site-specific within a field) EONR for individual fields one by one using a traditional regression approach, then model EONR using ML methods to see how close their estimated field-level EONRs from the trained ML methods are to the EONR "estimated" for individual fields (Shun cite a paper that does this). But, please note that the field-level EONRs they compare against are "estimated." Why did they "estimate" EONR for each field? That is because they do not (and will never) know the true EONR for each field. Moreover, the objective of such studies are fundamentally different from ours. Our focus is on site-specific EONR within a field, theirs' are on field-specific EONR. We consider those studies not very relevant. Including those studies will simply bloat the introduction. 
+Please see page xx, line xx for a new list of studies that attempt to estimate EONR. Please note that the previous stufies relevant to out study are those that apply ML methods to OFE data with the ultimate intention of estimating site-specific EONR. There is no study that tests the performance of EONR using real data. This is because that is fundamentally impossible as we mentioned above. There are studies that predict field-level (not site-specific within a field) EONR for individual fields one by one using a traditional regression approach, then model EONR using ML methods to see how close their estimated field-level EONRs from the trained ML methods are to the EONR "estimated" for individual fields (Shun cite a paper that does this). But, please note that the field-level EONRs they compare against are "estimated." Why did they "estimate" EONR for each field? That is because they do not (and will never) know the true EONR for each field. Moreover, the objective of such studies are fundamentally different from ours. Our focus is on site-specific EONR within a field, theirs' are on field-specific EONR. We consider those studies not very relevant. We believe including those studies will simply bloat the introduction. 
 </span>
 
 <br>
@@ -142,7 +141,7 @@ Please see page xx, line xx for a new list of studies that attempt to estimate E
 **10. Please discuss your results with regard to the state of the art (again as specific as possible) and discuss whether your yield prediction performance and your simulation approach (e.g. epsilon effect size) may have affected the results for EONR prediction.**
 
 <span style="color:blue">  
-We already discuss our results to the state of the art of the literature. The state of the art is sadly trying to predict yield as well as possible. We show that such practice can be misleading when your goal is to actually help farmers with making nitrogen application decisions (predicting EONR well). There is nothing wrong with our approach in yield prediction as evident in Figure 12. We are using ML methods that have been used in the literature of OFE for site-specific input management. Those studies were published very recently. We added our description about how the size of epsilon affects our results briefly at line xx, page yy. But, it is imporatnt to realize that all the models uses the same data. That is the models are competing against each other on the even ground. Changing the size of error has little effect on the comparative advantage of CF over other models much. 
+We already discuss our results to the state of the art of the literature. The state of the art is sadly trying to predict yields site-specifically as well as possible. We show that such practice can be misleading and economically harmful when your ultimate goal is to actually help farmers make nitrogen application decisions (predicting EONR well). There is nothing wrong with our approach in yield prediction as evident in Figure 12. We are using ML methods that have been used in the literature of OFE for site-specific input management. Those studies were published very recently. We added our description about how the size of epsilon affects our results briefly at line xx, page yy. But, it is imporatnt to realize that all the models uses the same data in our study. That is, the models are competing against each other on the level ground. Changing the size of error has little effects on the comparative advantage of CF over other models much. 
 
 </span>
 
