@@ -673,7 +673,7 @@ field_m_error_high <-
     geom_sf(aes(fill = yield_error), size = 0) +
     scale_fill_viridis_c() +
     labs(fill = expression(paste( ~ epsilon, " (kg/ha)"))) +
-    ggtitle("(1) High error") +
+    ggtitle("(2) High error") +
     theme_figure
 
 
@@ -777,7 +777,7 @@ report_table_y <-
 
 ## ----------------------------------------------------------------------------------------------
 # sim_no <- c(300, 600, 900)
-# sim_no <- c(10, 20, 30)
+sim_no <- c(10, 20, 30)
 
 vis_RMSE_y_eonr <-
   res_y_test %>%
@@ -1147,127 +1147,34 @@ opfit <- prune(tree, opcp)
 
 
 ## ----------------------------------------------------------------------------------------------
+# === Load the data === #
 Simres_low <- readRDS(here("Shared/Results/for_writing/forest_summry_bySim_low.rds"))
 
-# === Preparation === #
-table_optN_prep_low <-
-  Simres_low%>%
-  .[, .(
-    rmse_optN = format(round(mean(rmse_optN), 1), nsmall = 1),
-    pi_loss = format(round(mean(pi_loss), 2), nsmall = 2)
-  ), by = .(type, Method, Model)] %>%
-  dcast(type + Model ~ Method, value.var = c("rmse_optN", "pi_loss")) %>%
-  .[, `:=`(
-    blank1 = NA, blank2 = NA, blank3 = NA
-  )] %>%
-  .[, .(type, Model, blank1, rmse_optN_RF, pi_loss_RF, blank2, rmse_optN_BRF, pi_loss_BRF, blank3, rmse_optN_CF_base, pi_loss_CF_base)]
-
-
-# === Summary Table (Testing Data sets) === #
-report_table_optN_low <-
-  table_optN_prep_low %>%
-  .[type == "test", !"type"] %>%
-  mutate(
-    across(
-      everything(),
-      as.character
-    )
-  ) %>%
-  # add_row(.after = 4) %>%
-  flextable(.) %>%
-  border_remove() %>%
-  delete_part(part = "header") %>%
-  add_header(
-    Model = "Model",
-    blank1 = "", rmse_optN_RF = "RF", pi_loss_RF = "RF",
-    blank2 = "", rmse_optN_BRF = "BRF", pi_loss_BRF = "BRF",
-    # blank3 = "", rmse_optN_CNN = "CNN", pi_loss_CNN = "CNN",
-    blank3 = "", rmse_optN_CF_base = "CF-base", pi_loss_CF_base = "CF-base",
-    top = TRUE
-  ) %>%
-  merge_h(part = "header") %>%
-  hline_bottom(j = c(3:4, 6:7, 9:10), part = "header") %>%
-  add_header(
-    Model = "",
-    blank1 = "", rmse_optN_RF = "RMSE", pi_loss_RF = "pi_loss",
-    blank2 = "", rmse_optN_BRF = "RMSE", pi_loss_BRF = "pi_loss",
-    # blank3 = "", rmse_optN_CNN = "RMSE", pi_loss_CNN = "pi_loss",
-    blank3 = "", rmse_optN_CF_base = "RMSE", pi_loss_CF_base = "pi_loss",
-    top = FALSE
-  ) %>%
-  compose(i = 2, j = c(4, 7, 10), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))) %>%
-  hline_bottom(part = "all") %>%
-  hline_top(part = "header") %>%
-  align(align = "center", part = "all") %>%
-  align(j = 1, align = "left", part = "all") %>%
-  # autofit() %>%
-  # width(j = c(2,5,8,11), width=0.3) %>%
-  # fix_border_issues()
-  footnote(
-    # i = 1, j = c(4, 7, 10, 13), part = "header",
-    value = as_paragraph("NOTE: \U1D70B\U0302", as_sub(as_i("def")), " indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), "."),
-    ref_symbols = NA
-  ) %>%
-  fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
-  autofit() %>%
-  width(j = c(3, 4, 6, 7, 9, 10), width = 0.6) %>%
-  width(j = c(2, 5, 8), width = 0.1)
-
-
-#/*--------------------------------*/
-#' ## Yield prediction
-#/*--------------------------------*/ 
-report_table_y_low <-
-  Simres_low %>%
-  .[type == "test" & Method %in% c("RF", "BRF")] %>%
-  .[, .(rmse_y = mean(rmse_y)), by = .(Method, Model)] %>%
-  .[, rmse_y := format(round(rmse_y, 1), nsmall = 1)] %>%
-  dcast(Model ~ Method, value.var = "rmse_y") %>%
-  .[, CF_base := "-"] %>%
-  mutate(
-    across(
-      everything(),
-      as.character
-    )
-  ) %>%
-  flextable(.) %>%
-  set_header_labels(values = list(
-    Model = "Model",
-    RF = "RF",
-    BRF = "BRF",
-    CF_base = "CF-base"
-  )) %>%
-  align(align = "center", part = "all") %>%
-  align(j = 1, align = "left", part = "all") %>%
-  #- change the borders just for consistency with other figures -#
-  hline_bottom(part = "all") %>%
-  hline_top(part = "header") %>%
-  autofit()
-
-
-## ----------------------------------------------------------------------------------------------
-#/*--------------------------------*/
-#' ## EONR estimation
-#/*--------------------------------*/
 Simres_high <- readRDS(here("Shared/Results/for_writing/forest_summry_bySim_high.rds"))
 
+Simres_low_high<-
+ bind_rows(Simres_low, Simres_high, .id = "Degree") %>%
+ .[, Degree := ifelse(Degree==1, "Low", "High")] %>%
+ .[, Degree := factor(Degree, levels =c("Low", "High"))]
+
+
 # === Preparation === #
-table_optN_prep_high <-
-  Simres_high%>%
+table_optN_prep_low_high <-
+  Simres_low_high %>%
   .[, .(
     rmse_optN = format(round(mean(rmse_optN), 1), nsmall = 1),
     pi_loss = format(round(mean(pi_loss), 2), nsmall = 2)
-  ), by = .(type, Method, Model)] %>%
-  dcast(type + Model ~ Method, value.var = c("rmse_optN", "pi_loss")) %>%
+  ), by = .(Degree, type, Method, Model)] %>%
+  dcast(Degree + type + Model ~ Method, value.var = c("rmse_optN", "pi_loss")) %>%
   .[, `:=`(
     blank1 = NA, blank2 = NA, blank3 = NA
   )] %>%
-  .[, .(type, Model, blank1, rmse_optN_RF, pi_loss_RF, blank2, rmse_optN_BRF, pi_loss_BRF, blank3, rmse_optN_CF_base, pi_loss_CF_base)]
+  .[, .(Degree, type, Model, blank1, rmse_optN_RF, pi_loss_RF, blank2, rmse_optN_BRF, pi_loss_BRF, blank3, rmse_optN_CF_base, pi_loss_CF_base)]
 
 
 # === Summary Table (Testing Data sets) === #
-report_table_optN_high <-
-  table_optN_prep_high %>%
+table_optN_prep_low_high <- 
+  table_optN_prep_low_high %>%
   .[type == "test", !"type"] %>%
   mutate(
     across(
@@ -1275,11 +1182,12 @@ report_table_optN_high <-
       as.character
     )
   ) %>%
-  # add_row(.after = 4) %>%
-  flextable(.) %>%
+  as_grouped_data(, groups = c("Degree")) %>%
+  flextable() %>%
   border_remove() %>%
   delete_part(part = "header") %>%
   add_header(
+    Degree = "Error Size",
     Model = "Model",
     blank1 = "", rmse_optN_RF = "RF", pi_loss_RF = "RF",
     blank2 = "", rmse_optN_BRF = "BRF", pi_loss_BRF = "BRF",
@@ -1288,8 +1196,9 @@ report_table_optN_high <-
     top = TRUE
   ) %>%
   merge_h(part = "header") %>%
-  hline_bottom(j = c(3:4, 6:7, 9:10), part = "header") %>%
+  hline_bottom(j = c(4:5, 7:8, 10:11), part = "header") %>%
   add_header(
+    Degree = "",
     Model = "",
     blank1 = "", rmse_optN_RF = "RMSE", pi_loss_RF = "pi_loss",
     blank2 = "", rmse_optN_BRF = "RMSE", pi_loss_BRF = "pi_loss",
@@ -1297,7 +1206,7 @@ report_table_optN_high <-
     blank3 = "", rmse_optN_CF_base = "RMSE", pi_loss_CF_base = "pi_loss",
     top = FALSE
   ) %>%
-  compose(i = 2, j = c(4, 7, 10), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))) %>%
+  compose(i = 2, j = c(5, 8, 11), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))) %>%
   hline_bottom(part = "all") %>%
   hline_top(part = "header") %>%
   align(align = "center", part = "all") %>%
@@ -1312,18 +1221,20 @@ report_table_optN_high <-
   ) %>%
   fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
   autofit() %>%
-  width(j = c(3, 4, 6, 7, 9, 10), width = 0.6) %>%
-  width(j = c(2, 5, 8), width = 0.1)
+  width(j = c(4, 5, 7, 8, 10, 11), width = 0.6) %>%
+  width(j = 1, width = 0.8) %>%
+  width(j = c(3, 6, 9), width = 0.1)
+
 
 #/*--------------------------------*/
 #' ## Yield prediction
 #/*--------------------------------*/ 
-report_table_y_high <-
-  Simres_high %>%
+report_table_y_low_high <-
+  Simres_low_high %>%
   .[type == "test" & Method %in% c("RF", "BRF")] %>%
-  .[, .(rmse_y = mean(rmse_y)), by = .(Method, Model)] %>%
+  .[, .(rmse_y = mean(rmse_y)), by = .(Degree, Method, Model)] %>%
   .[, rmse_y := format(round(rmse_y, 1), nsmall = 1)] %>%
-  dcast(Model ~ Method, value.var = "rmse_y") %>%
+  dcast(Degree + Model ~ Method, value.var = "rmse_y") %>%
   .[, CF_base := "-"] %>%
   mutate(
     across(
@@ -1331,8 +1242,10 @@ report_table_y_high <-
       as.character
     )
   ) %>%
+  as_grouped_data(, groups = c("Degree")) %>%
   flextable(.) %>%
   set_header_labels(values = list(
+    Degree = "Error Size",
     Model = "Model",
     RF = "RF",
     BRF = "BRF",
@@ -1343,5 +1256,6 @@ report_table_y_high <-
   #- change the borders just for consistency with other figures -#
   hline_bottom(part = "all") %>%
   hline_top(part = "header") %>%
-  autofit()
+  autofit() %>%
+  width(j = 1, width = 0.8)
 
