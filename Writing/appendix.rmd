@@ -123,7 +123,7 @@ field_m_error_low | field_m_error_high
 
 \newpage
 
-Using those yield datasets, we conducted one hundred simulations. The results of EONR estimation and yield prediction are shown in Table XX. (what about CNN reuslts??)
+Using those yield datasets, we conducted one hundred rounds of simulations. The results of EONR estimation and yield prediction are shown in Table XX. (what about CNN reuslts??)
 
 
 ```{r report-table-optN-low, tab.cap = "Table I.1: Mean RMSE (kg/ha) estimation and profit-deficit ($/ha) by ML method and modeling scenario on low and high degree of yield disturbance datasets"}

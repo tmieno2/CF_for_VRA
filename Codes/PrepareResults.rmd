@@ -181,8 +181,7 @@ vis_MB_curve <-
   ) +
   labs(y = "Yield (kg/ha)") +
   labs(x = "N (kg/ha)") +
-  theme_dist +
-  theme(legend.title = element_blank())
+  theme_dist
 ```
 
 
