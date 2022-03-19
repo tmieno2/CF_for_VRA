@@ -126,23 +126,15 @@ field_m_error_low | field_m_error_high
 Using those yield datasets, we conducted one hundred simulations. The results of EONR estimation and yield prediction are shown in Table XX. (what about CNN reuslts??)
 
 
-```{r report-table-optN-low, tab.cap = "Table I.1: Mean RMSE (kg/ha) estimation and profit-deficit ($/ha) by ML method and modeling scenario on low yield disturbance datasets"}
-report_table_optN_low
+```{r report-table-optN-low, tab.cap = "Table I.1: Mean RMSE (kg/ha) estimation and profit-deficit ($/ha) by ML method and modeling scenario on low and high degree of yield disturbance datasets"}
+table_optN_prep_low_high
 ```
 
-```{r report-table-y-low, tab.cap = "Table I.2: Mean RMSE of yield prediction (kg/ha) by ML method and modeling scenario on training datasets on low yield disturbance datasets"}
-report_table_y_low
-```
-
-\newpage
-
-```{r report-table-optN-low, tab.cap = "Table I.3: Mean RMSE (kg/ha) estimation and profit-deficit ($/ha) by ML method and modeling scenario on low yield disturbance datasets"}
-report_table_optN_high
-```
+\newpage 
 
 
-```{r report-table-y-low, tab.cap = "Table I.4: Mean RMSE of yield prediction (kg/ha) by ML method and modeling scenario on training datasets on low yield disturbance datasets"}
-report_table_y_high
+```{r report-table-optN-low, tab.cap = "Table I.2: Mean RMSE of yield prediction (kg/ha) by ML method and modeling scenario on low and high degree of yield disturbance datasets"}
+report_table_y_low_high
 ```
 
 
