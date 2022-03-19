@@ -1,4 +1,4 @@
-## ----set-up, cache = F-------------------------------------------------------------------------
+## ----set-up, cache = F--------
 library(knitr)
 library(here)
 
@@ -9,7 +9,7 @@ knitr::opts_chunk$set(
   cache = FALSE
 )
 
-## ----packages, cache = FALSE, include = FALSE--------------------------------------------------
+## ----packages, cache = FALSE, include = FALSE----
 # === packages ===#
 # --- data wrangling--- #
 library(sf)
@@ -36,7 +36,7 @@ library(officedown)
 library(modelsummary)
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------
 theme_figure <-
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -65,7 +65,7 @@ set_flextable_defaults(
 )
 
 
-## ----setup, warning=FALSE, message=FALSE, cache= FALSE-----------------------------------------
+## ----setup, warning=FALSE, message=FALSE, cache= FALSE----
 # === plot-level field data set  === #
 field_plot_sf <-
   here("Shared/Results/for_writing/sample_field_plot_sf.rds") %>%
@@ -82,7 +82,7 @@ field_cell_sf <-
   readRDS()
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------
 # /*--------------------------------*/
 #' ## Preparation
 # /*--------------------------------*/
@@ -169,7 +169,7 @@ vis_MB_curve <-
   guides(color = guide_legend(nrow = 2, byrow = TRUE))
 
 
-## ----prepare-data-vis, cache = TRUE------------------------------------------------------------
+## ----prepare-data-vis, cache = TRUE----
 # /*===========================================*/
 #' =  Prepare illustrative yield response curve estimated by RF =
 # /*===========================================*/
@@ -381,7 +381,7 @@ vis_true_points <-
 vis_all_points <- rbind(vis_res_pred, vis_true_points)
 
 
-## ----make-plot-MB-BRF-y------------------------------------------------------------------------
+## ----make-plot-MB-BRF-y-------
 vis_MB_BRF_y <-
   ggplot() +
   # --- true yield response curve --- #
@@ -431,7 +431,7 @@ vis_MB_BRF_y <-
   theme_dist
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------
 variogram_tb <-
   data.frame(
     Parameters = c("alpha_ij", "beta_ij", "ymax_ij", "varepsilon_ij"),
@@ -473,7 +473,7 @@ variogram_tb <-
   autofit()
 
 
-## ----field-map-visualization, dependson = "setup"----------------------------------------------
+## ----field-map-visualization, dependson = "setup"----
 
 # === Preparation === #
 ex_plot <- field_plot_sf[224, ]
@@ -573,7 +573,7 @@ field_structure <-
   theme_void()
 
 
-## ---- dependson = "setup"----------------------------------------------------------------------
+## ---- dependson = "setup"-----
 field_Ndesign <-
   ggplot() +
   geom_sf(
@@ -587,7 +587,7 @@ field_Ndesign <-
   theme_figure
 
 
-## ---- dependson = "setup"----------------------------------------------------------------------
+## ---- dependson = "setup"-----
 # === subplot-level === #
 vis_yield_subplot <-
   ggplot(field_subplot_sf) +
@@ -598,11 +598,11 @@ vis_yield_subplot <-
   theme_figure
 
 
-## ---- dependson = "setup"----------------------------------------------------------------------
+## ---- dependson = "setup"-----
 
 
 
-## ---- dependson = "setup"----------------------------------------------------------------------
+## ---- dependson = "setup"-----
 # === alpha map === #
 field_alpha <-
   ggplot(field_cell_sf) +
@@ -649,7 +649,7 @@ field_optN <-
   theme_figure
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------
 # === Low error field map === #
 field_cell_low_sf <- 
   here("Shared/Results/for_writing/sample_field_cell_low_sf.rds") %>%
@@ -677,12 +677,12 @@ field_m_error_high <-
     theme_figure
 
 
-## ----source-results, message=FALSE, warning=FALSE, cache= FALSE--------------------------------
+## ----source-results, message=FALSE, warning=FALSE, cache= FALSE----
 # === Load Results === #
 allML_summary_bySim <- readRDS(here("Shared/Results/for_writing/allML_summary_bySim.rds"))
 
 
-## ---- dependson = "source-results"-------------------------------------------------------------
+## ---- dependson = "source-results"----
 # === Set up === #
 res_y_train <-
   allML_summary_bySim %>%
@@ -751,7 +751,7 @@ report_table_y <-
   autofit()
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------
 # fig_y_optN <-
 # res_y_test %>%
 # .[Method %in% c("RF", "BRF", "CNN")] %>%
@@ -775,9 +775,9 @@ report_table_y <-
 # theme_dist
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------
 # sim_no <- c(300, 600, 900)
-# sim_no <- c(10, 20, 30)
+sim_no <- c(10, 20, 30)
 
 vis_RMSE_y_eonr <-
   res_y_test %>%
@@ -797,7 +797,7 @@ vis_RMSE_y_eonr <-
     labs(fill="Simulation Round", shape="Method") 
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------
 sample_simRes_test_y <- readRDS(here("Shared/Results/for_writing/sample_simRes_test_y.rds"))
 
 # === Function for RMSE Calculation === #
@@ -839,7 +839,7 @@ vis_y_pred <- ggplot(sample_simRes_test_y) +
   theme_dist
 
 
-## ---- dependson = "source-results"-------------------------------------------------------------
+## ---- dependson = "source-results"----
 # === Preparation === #
 prepare_count_tab <-
   res_y_test %>%
@@ -913,7 +913,7 @@ report_summary_res_CNN_RF_BRF <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---- dependson = "source-results"-------------------------------------------------------------
+## ---- dependson = "source-results"----
 # /*----------------------------------*/
 #' ## Distribution of RMSE of EONR estimates
 # /*----------------------------------*/
@@ -1057,7 +1057,7 @@ report_table_optN <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------
 piLoss_density <-
   allML_summary_bySim %>%
   .[type == "test", ] %>%
@@ -1078,7 +1078,7 @@ piLoss_density <-
   theme_dist
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------
 figure_te <-
   here("Shared/Results/for_writing/dt_TEcomparison.rds") %>%
   readRDS() %>%
@@ -1097,7 +1097,7 @@ figure_te <-
   theme_dist
 
 
-## ---- cache = TRUE-----------------------------------------------------------------------------
+## ---- cache = TRUE------------
 # /*=================================================*/
 #' # Sample CT figure
 # /*=================================================*/
@@ -1146,7 +1146,7 @@ opfit <- prune(tree, opcp)
 # fancyRpartPlot(opfit, sub="", shadow.col = "")
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------
 Simres_low <- readRDS(here("Shared/Results/for_writing/forest_summry_bySim_low.rds"))
 
 # === Preparation === #
@@ -1245,7 +1245,7 @@ report_table_y_low <-
   autofit()
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------
 #/*--------------------------------*/
 #' ## EONR estimation
 #/*--------------------------------*/

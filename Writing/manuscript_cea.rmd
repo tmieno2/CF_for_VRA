@@ -153,7 +153,7 @@ f(N_{i}: \alpha_{i,j}, \beta_{i,j}, ymax_{i,j}) = ymax_{i,j}(1-exp(\alpha_{i,j} 
 
 The first term on the right-hand side of Eq. \@ref(eq:eqn3) is the deterministic yield component. The variable $N$ represents the nitrogen fertilizer application rate (kg/ha) which the trial designs varied by plot. Also in Eq. \@ref(eq:eqn3), $\alpha$, $\beta$, and $ymax$ are spatially varying parameters that govern how yield level is determined in conjunction with the applied N rate. They reflect local cell-level production conditions, such as soil characteristics and topography. For example, $\alpha$, which represents what the yield would be when no nitrogen is applied in conjunction with $ymax$, may reflect soil organic matter and residual nitrogen from previous year's production. $ymax$, which determines the maximum yield attainable, may include other micro nutrients like phosphorus and soil depth. $\beta$ can be interpreted as reflecting how efficiently the crop uses N to create grain mass, and might depend on soil properties that affect the availability of applied N fertilizer to the crop, say due to N immobilization, leaching, denitrification, and volatilization [@johnson2005nitrogen; @alva2006nitrogen]. Figure \@ref(fig:vis-MB-curve) presents example visualization of site-specific yield response fuctions for some sites.  
 
-```{r vis-MB-curve, fig.cap = "Figure F.1: Examples of Mitscherlich-Baule yield response curve"}
+```{r vis-MB-curve, fig.cap = "Examples of site-specific Mitscherlich-Baule yield response curves"}
 vis_MB_curve
 ```
 
@@ -295,7 +295,7 @@ Since you need to be able to estimate yield curves (yield response function) wel
 
 All previous research has followed a two-step procedure to estimate site-specific EONRs. The first step was to select the model that predicts yield leves most accurately at the observed points, and the following step used the selected model to predict EONR. As discussed ealier, this practice can be economically harmful. Figure \@ref(fig:vis-RMSE-y-eonr) further illustrates the underlying problem. It plots RMSE of yield (x-axis) and EONR (y-axis) predictions by model and simulation round for several simulation rounds. As you can see clearly, the model with the lowest yield RMSE is not necessarily the model with the lower EONR RMSE for a given simulation round (simulation round xx and yy).
 
-```{r, vis-RMSE-y-eonr, fig.width=5, fig.height=5, fig.cap = "Figure I.1: The Relationship between Yield and EONR Prediction Performances ((scenario: aabbyytt)"}
+```{r, vis-RMSE-y-eonr, fig.width=5, fig.height=5, fig.cap = "The Relationship between Yield and EONR Prediction Performances under the aabbyytt scenario"}
 vis_RMSE_y_eonr
 ```
 
