@@ -527,7 +527,7 @@ gen_coefs <- function(mean, psill, range, coef_name, nsim, xy) {
 
 
 gen_coefs_par <- function(B, geo_xy, sp_range, psill_merror){
-
+  # geo_xy=xy; sp_range=400
   #/*--------------------------------------------------------*/
   #' ## Generate raw coefficients
   #/*--------------------------------------------------------*/
@@ -567,8 +567,9 @@ gen_coefs_par <- function(B, geo_xy, sp_range, psill_merror){
 
   # === m_error === #
   # --- error psill --- #
-  #' roughly,
-  #' 0.002 means 500 sd,
+  #' roughly (on average),
+  #' 0.002 means 500 sd ,
+  #' 0.0035 means 650 sd
   #' 0.015 means 1300 sd,
   #' 0.028 means 2000 sd
   m_error <- gen_coefs(
@@ -579,6 +580,12 @@ gen_coefs_par <- function(B, geo_xy, sp_range, psill_merror){
     nsim = B,
     xy = geo_xy
   )
+
+  m_error_agg <- 
+    m_error %>%
+    .[, y_error := 12000*m_error_uncorrelated] %>%
+    .[,.(mean_y_error = sd(y_error), by = sim)] %>%
+    .[,.(mean_yield = mean(mean_y_error))]
 
   # === split_ratio === #
   split_ratio <- gen_coefs(

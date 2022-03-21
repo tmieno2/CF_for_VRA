@@ -1,7 +1,6 @@
 <!-- NOTE: Erase the extra Figure, Table and section numbers manually-->
 
 ## Appendix A: Causal Tree Example {-}
-
 Figure A.1 shows an example of a CT where the treatment is an increase in seed rate from $27,000$ seeds/ha (control) to $31,000$ seeds/ha (treated) with apparent electrical conductivity ($\textit{ecs}$) ($dS/m$) and topographical $\textit{slope}$ ($degree$) as variables to explain the heterogeneity of the impact of the treatment impact.  
 
 ```{r ct-ex, fig.width=5, fig.height=5, fig.align="center", fig.cap = "Figure A.1: An illustrative example of a causal tree"}
@@ -18,7 +17,6 @@ In the first node, all the samples ($1024$ observations) belong to the node, and
 \newpage
 
 ## Appendix B: Understanding Yield Response Functions Better {-}
-
 Another way to writing Eq. \@ref(eq:eqn3) that may help understanding the yield response Eq. (B.1) better conceptually is as follows:
 
 $$
@@ -41,10 +39,21 @@ The simplified notation of this equation, where $c_i$ is dropped, is Eq. \@ref(e
 
 ## Appendix C: Parameter Generation {-}
 
-### C.1 $\quad$ Base parameters **$\alpha$**, **$\beta$**, and **$ymax$** {-}
-Parameters $\alpha_{i,j}$, $\beta_{i,j}$, $ymax_{i,j}$, and $\varepsilon_{i,j}$ were modeled as spatially autocorrelated using unconditional Gaussian geostatistical simulation based on the spherical variogram model. The `gstat` package (version 2.0.6 [@gstat1; @gstat2]) in R was used for this purpose 
+### C.1 $\quad$ Base parameters **$\alpha$**, **$\beta$**, **$ymax$**, and **$\varepsilon$** {-}
+Parameters $\alpha_{i,j}$, $\beta_{i,j}$, $ymax_{i,j}$, and $\varepsilon_{i,j}$ were modeled as spatially autocorrelated using unconditional Gaussian geostatistical simulation based on the spherical variogram model. The `gstat` package (version 2.0.6 [@gstat1; @gstat2]) in R was used for this purpose.
 
-Table C.1 shows the main variogram parameter values used in generating $\alpha_{i,j}$, $\beta_{i,j}$, $ymax_{i,j}$, and $\varepsilon_{i,j}$, which were chosen to generate yields consistent with those observed in experiments conducted by the DIFM project. (Codes used to generate parameter values are publicly accessible as a Mendeley dataset [@Kakimoto2022codes], or as a Github repository at https://github.com/Shunkei3/VRA_with_CF.git.) The range and nugget of all parameters were assumed to be $400$ m and 0. The means of $\alpha$, $\beta$, $ymax$, and $\varepsilon$ were assumed to be $-0.5$, $0$, $12,000$ kg/ha, and $0$, and their sills were assumed to be $0.02$, $1.0$, $2.0 \times 10^{6}$ kg/ha, and $0.015$. See Figure C.1 for an example of the generated parameters. 
+The size of random yield error $\varepsilon$ should be coordinated with the potential yield level for a site $(i,j)$.  To do so, we first created spatially autocorrelated weights $r^{\varepsilon}_{i,j} \in (-1,1)$. After $\alpha_{i,j}$, $\beta_{i,j}$, $ymax_{i,j}$, and $r^{\varepsilon}_{i,j}$ were generated, then $\varepsilon_{i,j}$ was determined by interacting $r^{\varepsilon}_{i,j}$ with the deterministic part of yield (i.e., $ymax_{i,j}(1-exp(\alpha_{i,j} + \beta_{i,j} \cdot N_{i}))$). This process can be expressed by rewriting Eq. \@ref(eq:eqn3) as follows. The observed yield at site $(i, j)$ (i.e., $y_{i,j}$) is:
+
+\begin{align}
+y_{i,j} 
+&=  ymax_{i,j}(1-exp(\alpha_{i,j} + \beta_{i,j} \cdot N_{i}))(1+r^{\varepsilon}_{i,j}) \\
+&=  ymax_{i,j}(1-exp(\alpha_{i,j} + \beta_{i,j} \cdot N_{i})) +  ymax_{i,j}(1-exp(\alpha_{i,j} + \beta_{i,j} \cdot N_{i})) \cdot r^{\varepsilon}_{i,j} \\
+&= ymax_{i,j}(1-exp(\alpha_{i,j} + \beta_{i,j} \cdot N_{i})) + \varepsilon_{i,j}
+\end{align}
+, where $\varepsilon_{i,j} = ymax_{i,j}(1-exp(\alpha_{i,j} + \beta_{i,j} \cdot N_{i})) \cdot r^{\varepsilon}_{i,j}$.
+
+
+Table C.1 shows the main variogram parameter values used in generating $\alpha_{i,j}$, $\beta_{i,j}$, $ymax_{i,j}$, and $r^{\varepsilon}_{i,j}$<!--  $\varepsilon_{i,j}$ -->, which were chosen to generate yields consistent with those observed in experiments conducted by the DIFM project. (Codes used to generate parameter values are publicly accessible as a Mendeley dataset [@Kakimoto2022codes], or as a Github repository at https://github.com/Shunkei3/VRA_with_CF.git.) <!-- The range and nugget of all parameters were assumed to be $400$ m and 0. The means of $\alpha$, $\beta$, $ymax$, and $\varepsilon$ were assumed to be $-0.5$, $0$, $12,000$ kg/ha, and $0$, and their sills were assumed to be $0.02$, $1.0$, $2.0 \times 10^{6}$ kg/ha, and $0.015$. See Figure C.1 for an example of the generated parameters.  -->
 
 <br>
 
@@ -62,7 +71,6 @@ field_alpha + field_beta + field_ymax + field_m_error + field_optN + plot_layout
 <br>
 
 ### C.2 $\quad$ Splitting the Base Parameters {-}
-
 For scenarios "aabbyy" and "aabbyytt," each of the base parameters $\alpha$, $\beta$, and $ymax$ are splitted into two part in a spatially correlated manner. Specifically, for each cell $(i,j)$, we assigned one of a set of spatially autocorrelated weights $r^{\alpha}_{i,j} \in (0,1)$ to the $\alpha$ variable, another set of spatially autocorrelated weights $r^{\beta}_{i,j} \in (0,1)$ to the $\beta$ variable, and another set of spatially autocorrelated weights $r^{ymax}_{i,j} \in (0,1)$ to the ${ymax}_{i,j}$ variable. Each of the weight variables are generated using unconditional Gaussian geostatistical simulation just like the base parameters. (There was no spatial correlation between the $r^{\alpha}_{i,j}$ and $r^{\beta}_{i,j}$ data, between $r^{\alpha}_{i,j}$ and $r^{ymax}_{i,j}$ data, or between $r^{\beta}_{i,j}$ and $r^{ymax}_{i,j}$.) Six new covariates were created with the weights and the original covariates $\alpha_{i,j}$, $\beta_{i,j}$ and $ymax_{i,j}$. These were 
 $\alpha^{1}_{i,j} = r^{\alpha}_{i,j} \cdot \alpha_{i,j}$, $\alpha^{2}_{i,j} = (1- r^{\alpha}_{i,j}) \cdot \alpha_{i,j}$,
 $\beta^{1}_{i,j} = r^{\beta}_{i,j} \cdot\beta_{i,j}$, $\beta^{2}_{i,j} = (1- r^{\beta}_{i,j}) \cdot\beta_{i,j}$,
@@ -70,7 +78,34 @@ $ymax^{1}_{i,j} = r^{ymax}_{i,j} \cdot ymax_{i,j}$, and $ymax^{2}_{i,j} = (1- r^
 
 \newpage
 
-## Appendix D:  Training Accuracy of the ML methods {-}
+
+## Appendix D: CNN Performance per Training Epoch {-}
+The figure below shows training and validation loss measured by mean square error (MSE) over the number of epochs in a single simulation round under aabbyytt scenario for CNN as an illustration. For readers interested in knowing how CNN is trained for all the simulation rounds, please see the python program available at a Mendeley dataset [@Kakimoto2022codes] or a Github repository at https://github.com/Shunkei3/VRA_with_CF.git.
+
+```{r cnn-epoch, fig.width=5, fig.height=4, fig.cap = "Figure D.1: An example of CNN performance per training epoch (scenario: aabbyytt)"}
+knitr::include_graphics(here("GitControlled/Writing/loss_model4_simID1.png"))
+```
+
+\newpage
+
+
+## Appendix E: True Yields vs Predicted Yields by Models
+
+The figure XX plots the predicted yields against the true yield without error in one of the one thousand simulation rounds by ML method and modeling scenario. The predicted points clustered around the red 1-to-1 line, meaning that the prediction-oriented ML methods predicted yields well.
+
+However, as mentioned in section 4.2, please note that even though the yield prediction accuracy evaluated at the actually applied N rate is , it does not necessary mean good performance in predicting yield “response” function which requires counterfactual prediction.  
+
+
+```{r vis-y-pred, fig.width=7, fig.height=7.5, fig.cap = "Figure E.1: True yields without error and predicted yields"}
+vis_y_pred
+```
+
+`r ftext('NOTE: The red line in the figures denotes the 1-to-1 line to show the ideal relationship between true and predicted yields.', fp_text(font.size = 9, font.family = "Times New Roman"))`
+
+\newpage
+
+
+## Appendix F:  Training Accuracy of the ML methods {-}
 
 In this section, the performance of the models in terms of profitability, EONR estimation, and yield estimation when the trained models are evaluated against the training datasets instead of the separate testing datasets as supplementary information. 
 
@@ -78,7 +113,7 @@ Table D.1 shows the mean RMSE of the EONR estimation and $\hat{\pi}_{def}$ over 
 
 <br>
 
-```{r table-optN-train, tab.cap = "Table D.1: Mean RMSE of EONR (kg/ha) estimation and profit-deficit ($/ha) by ML method and modeling scenario on training datasets"}
+```{r table-optN-train, tab.cap = "Table F.1: Mean RMSE of EONR (kg/ha) estimation and profit-deficit ($/ha) by ML method and modeling scenario on training datasets"}
 report_table_optN_train
 ```
 
@@ -88,7 +123,7 @@ Table D.2 presents the training accuracy of yield prediction: namely, the yield 
 
 <br>
 
-```{r table-y-train, tab.cap = "Table D.2: Mean RMSE of yield prediction (kg/ha) by ML method and modeling scenario on training datasets"}
+```{r table-y-train, tab.cap = "Table F.2: Mean RMSE of yield prediction (kg/ha) by ML method and modeling scenario on training datasets"}
 report_table_y_train
 ```
 
@@ -96,48 +131,34 @@ report_table_y_train
 
 
 
-## Appendix E: CNN Performance per Training Epoch
-The figure below shows training and validation loss measured by mean square error (MSE) over the number of epochs in a single simulation round under aabbyytt scenario for CNN as an illustration. For readers interested in knowing how CNN is trained for all the simulation rounds, please see the python program available at a Mendeley dataset [@Kakimoto2022codes] or a Github repository at https://github.com/Shunkei3/VRA_with_CF.git.
+## Appendix G: Simulations with Different Size of Yield Disturbance Term.
+In this section, we present the results of EONR estimation and yield prediction with different size of random yield error ($\varepsilon$). We created two additional yield datasets	that are only different in the size of $\varepsilon$ from the yield datasets we used in the study by changing the variogram parameter of $psill$ for $r^{\varepsilon}_{i,j}$. Half size of $psill$ value ($0.0075$) was used to create yield datasets with low yield error, and one and a half size of $psill$ value ($$0.0225$$) was used to create yield datasets with high yield error. Figure G.1 illustrates examples of the generated low and high $\varepsilon$. 
 
-```{r cnn-epoch, fig.width=5, fig.height=4, fig.cap = "Figure E.1: An example of CNN performance per training epoch (scenario: aabbyytt)"}
-knitr::include_graphics(here("GitControlled/Writing/loss_model4_simID1.png"))
-```
-
-\newpage
-
-
-## Appendix H: True Yields vs Predicted Yields by Models
-
-```{r vis-y-pred, fig.width=7, fig.height=7.5, fig.cap = "Figure H.1: True yields without error and predicted yields"}
-vis_y_pred
-```
-
-
-
-## Appendix I: Simulations with Different Size of Yield Disturbance Term.
-In this section, we present the results of EONR estimation and yield prediction with different size of yield disturbance term ($\varepsilon$). We created two additional yield datasets	that are only different in the size of $\varepsilon$ from the yield datasets we used in the study. This can be done by just changing the variogram parameter of $psill$ for $\varepsilon$. $0.002$ of $psill$ value was used to create low $\varepsilon$, and $0.028$ of $psill$ value was used to create high $\varepsilon$. Figure I.1 illustrates examples of generated $\varepsilon$. 
-
-```{r fig-nExp-yield, fig.width=7, fig.height=6, fig.cap = "Figure I.1: An example of experimental design of N and generated yield at the subplot resolution"}
+```{r fig-nExp-yield, fig.width=7, fig.height=6, fig.cap = "Figure G.1: An example of experimental design of N and generated yield at the subplot resolution"}
 field_m_error_low | field_m_error_high
 ```
 
 \newpage
 
-Using those yield datasets, we conducted one hundred rounds of simulations. The results of EONR estimation and yield prediction are shown in Table XX. (what about CNN reuslts??)
+Using those new yield datasets, we conducted one hundred rounds of simulations respectively. The results of EONR estimation and yield prediction are shown in Table G.1 and G.2. Table G.3 summarizes the relationship between yield and EONR prediction RMSE.  
+
+As the size of yield error increases, EONR estimation and yield prediction accuracy becomes improved. However, qualitative results about the comparative advantage of CF over other models remain the same, and Table G.3 consistently illustrates that good performance in yield prediction does not necessary indicate good performance in EONR estimation. 
 
 
-```{r report-table-optN-low, tab.cap = "Table I.1: Mean RMSE (kg/ha) estimation and profit-deficit ($/ha) by ML method and modeling scenario on low and high degree of yield disturbance datasets"}
-table_optN_prep_low_high
+```{r report-table-optN-low, tab.cap = "Table G.1: Mean RMSE (kg/ha) estimation and profit-deficit ($/ha) by ML method and modeling scenario on low and high degree of yield disturbance datasets"}
+# table_optN_prep_low_high
 ```
 
 \newpage 
 
 
-```{r report-table-optN-low, tab.cap = "Table I.2: Mean RMSE of yield prediction (kg/ha) by ML method and modeling scenario on low and high degree of yield disturbance datasets"}
-report_table_y_low_high
+```{r report-table-optN-low, tab.cap = "Table G.2: Mean RMSE of yield prediction (kg/ha) by ML method and modeling scenario on low and high degree of yield disturbance datasets"}
+# report_table_y_low_high
 ```
 
-
+```{r count-tbl-low-high, tab.cap = "Table G.3: Relationship between the EONR prediction performances (as measured by profit) and the yield prediction performances of prediction-oriented ML methods on low and high degree of yield disturbance datasets"}
+# count_tbl_low_high
+```
 
 
 

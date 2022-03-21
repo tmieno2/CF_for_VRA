@@ -467,7 +467,8 @@ variogram_tb <-
   compose(i = 1, j = 1, part = "body", value = as_paragraph(as_i("\U03B1"), as_sub(as_i("i,j")))) %>%
   compose(i = 2, j = 1, part = "body", value = as_paragraph(as_i("\U03B2"), as_sub(as_i("i,j")))) %>%
   compose(i = 3, j = 1, part = "body", value = as_paragraph(as_i("ymax"), as_sub(as_i("i,j")))) %>%
-  compose(i = 4, j = 1, part = "body", value = as_paragraph(as_i("\U03B5"), as_sub(as_i("i,j")))) %>%
+  # compose(i = 4, j = 1, part = "body", value = as_paragraph(as_i("\U03B5"), as_sub(as_i("i,j")))) %>%
+  compose(i = 4, j = 1, part = "body", value = as_paragraph("r", as_sup(as_i(" \U03B5")), as_sub(as_i("i,j")))) %>%
   compose(i = 1, j = 5, part = "body", value = as_paragraph("2.0", "\U2A2F", "10", as_sup("-2"))) %>%
   compose(i = 3, j = 3, part = "body", value = as_paragraph("1.2", "\U2A2F", "10", as_sup("4"))) %>%
   compose(i = 3, j = 5, part = "body", value = as_paragraph("2.0", "\U2A2F", "10", as_sup("6"))) %>%
@@ -882,7 +883,8 @@ rmse <- sample_simRes_test_y %>%
   ), by = .(Method, Model)]
 
 
-vis_y_pred <- ggplot(sample_simRes_test_y) +
+vis_y_pred <- 
+  ggplot(sample_simRes_test_y) +
   geom_point(aes(x = det_yield, y = pred_yield), size = 0.5) +
   geom_abline(aes(intercept = 0, slope = 1), color = "red", show.legend = TRUE) +
   geom_text(
@@ -902,17 +904,22 @@ vis_y_pred <- ggplot(sample_simRes_test_y) +
 
 
 
+
 ## Yield Prediction vs EONR estimation : Count Table in terms of profit loss
 
 ```{r, dependson = "source-results"}
 # === Preparation === #
 prepare_count_tab <-
   res_y_test %>%
-  dcast(sim + Model ~ Method, value.var = c("pi_loss", "rmse_y")) %>%
+    dcast(sim + Model ~ Method, value.var = c("pi_loss", "rmse_y")) %>%
   .[, which_ML_y := case_when(
     rmse_y_BRF < rmse_y_RF & rmse_y_BRF < rmse_y_CNN ~ "BRF",
     rmse_y_RF < rmse_y_BRF & rmse_y_RF < rmse_y_CNN ~ "RF",
     rmse_y_CNN < rmse_y_BRF & rmse_y_CNN < rmse_y_RF ~ "CNN"
+  )] %>%
+  .[, which_ML_piLoss := case_when(
+    pi_loss_BRF < pi_loss_RF ~ "BRF",
+    pi_loss_RF < pi_loss_BRF ~ "RF"
   )] %>%
   .[, which_ML_piLoss := case_when(
     pi_loss_BRF < pi_loss_RF & pi_loss_BRF < pi_loss_CNN ~ "BRF",
@@ -1303,8 +1310,11 @@ table_optN_prep_low_high <-
   width(j = c(4, 5, 7, 8, 10, 11), width = 0.6) %>%
   width(j = 1, width = 0.8) %>%
   width(j = c(3, 6, 9), width = 0.1)
+```
 
+## Yield Prediction
 
+```{r}
 # /*--------------------------------*/
 #' ## Yield prediction
 #/*--------------------------------*/ 
@@ -1340,3 +1350,72 @@ report_table_y_low_high <-
 ```
 
 
+## Yield Prediction vs EONR estimation : Count Table in terms of profit loss
+
+```{r, dependson = "source-results"}
+# === Preparation === #
+prepare_count_tbl_low_high <-
+  Simres_low_high %>%
+  .[type=="test" & Method %in% c("RF", "BRF")] %>%
+  dcast(Degree + sim + Model ~ Method, value.var = c("pi_loss", "rmse_y")) %>%
+  .[, which_ML_y := case_when(
+    rmse_y_BRF < rmse_y_RF ~ "BRF",
+    rmse_y_RF < rmse_y_BRF ~ "RF"
+  )] %>%
+  .[, which_ML_piLoss := case_when(
+    pi_loss_BRF < pi_loss_RF ~ "BRF",
+    pi_loss_RF < pi_loss_BRF ~ "RF"
+  )] %>%
+  .[, index_cnst_y_piLoss := ifelse(which_ML_piLoss == which_ML_y, 1, 0)] %>%
+  .[, ML_cnst_y_piLoss := ifelse(index_cnst_y_piLoss == 1, which_ML_piLoss, NA)] %>%
+  .[, .(
+    count_BRF = nrow(.SD[ML_cnst_y_piLoss == "BRF", ]),
+    count_RF = nrow(.SD[ML_cnst_y_piLoss == "RF", ]),
+    count_y_BRF = nrow(.SD[which_ML_y == "BRF", ]),
+    count_y_RF = nrow(.SD[which_ML_y == "RF", ]),
+    Total = sum(index_cnst_y_piLoss)
+  ), by = .(Degree, Model)] %>%
+  .[, `:=`(
+    blank1 = NA, blank2 = NA, blank3 = NA
+  )] %>%
+  .[, .(Degree, Model, blank1, count_y_RF, count_RF, blank2, count_y_BRF, count_BRF, blank3, Total)]
+
+# === Table creation === #
+count_tbl_low_high <-
+  prepare_count_tbl_low_high %>%
+  as_grouped_data(, groups = c("Degree")) %>%
+  flextable(.) %>%
+  border_remove() %>%
+  delete_part(part = "header") %>%
+  add_header(
+    Degree = "Error Size",
+    Model = "Model",
+    blank1 = "", count_y_RF = "RF", count_RF = "RF",
+    blank2 = "", count_y_BRF = "BRF", count_BRF = "BRF",
+    blank4 = "", Total = "Total",
+    top = TRUE
+  ) %>%
+  merge_h(part = "header") %>%
+  hline_bottom(j = c(4:5, 7:8), part = "header") %>%
+  add_header(
+    Degree = "",
+    Model = "",
+    blank1 = "", count_y_RF = "#Y", count_RF = "#YP",
+    blank2 = "", count_y_BRF = "#Y", count_BRF = "#YP",
+    blank4 = "", Total = "",
+    top = FALSE
+  ) %>%
+  hline_bottom(part = "all") %>%
+  hline_top(part = "header") %>%
+  align(align = "center", part = "all") %>%
+  align(j = 1, align = "left", part = "all") %>%
+  footnote(
+    value = as_paragraph("NOTE: #Y indicates the number of simulation rounds in which the model provided the lowest RMSE for yield prediction. #YP indicates the number of simulation rounds in which the model provided the lower RMSE of yield prediction and the highest profit at the same time."),
+    ref_symbols = NA
+  ) %>%
+  fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
+  autofit() %>%
+  width(j = c(4, 5, 7, 8, 10), width = 0.6) %>%
+  width(j = 1, width = 0.8) %>%
+  width(j = c(3, 6, 9), width = 0.1)
+```

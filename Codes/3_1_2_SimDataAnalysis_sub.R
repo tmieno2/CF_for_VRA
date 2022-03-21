@@ -102,7 +102,7 @@ forest_summary_bySim_low <-
         rmse_y = rmse_general(pred_yield, yield)
     ), by= .(sim, type, Method, Model)]
 
-saveRDS(forest_summary_bySim_low, here("Shared/Results/for_writing/forest_summry_bySim_low.rds"))
+# saveRDS(forest_summary_bySim_low, here("Shared/Results/for_writing/forest_summry_bySim_low.rds"))
 
 # === Summarize by Method and Model === #
 forest_summary_bySim_low %>%
@@ -113,8 +113,9 @@ forest_summary_bySim_low %>%
         ), by=.(type, Method, Model)] %>%
     .[order(type, Method)]
 
-
-
+forest_summary_bySim_low %>%
+  .[type == "test" & Method %in% c("RF", "BRF")] %>%
+  dcast(sim + Model ~ Method, value.var = c("pi_loss", "rmse_y"))
 
 
 
