@@ -44,7 +44,7 @@ var_ls_variations <- list(
 
 
 #/*--------------------------------*/
-#' ## (1) Main sim (Medium m_error: psill = 0.015)
+#' ## (1) Main sim (medium m_error)
 #/*--------------------------------*/
 # --- Data --- #
 reg_data_all <- readRDS("./Shared/Data/for_Simulations/reg_data.rds")
@@ -78,7 +78,7 @@ for (var in var_ls_variations){
 
 
 #/*--------------------------------*/
-#' ## (2) Sub sim (low m_error: psill = 0.002)
+#' ## (2) Sub sim (low m_error)
 #/*--------------------------------*/
 reg_data_low <- readRDS("./Shared/Data/for_Simulations/reg_data_low_error.rds")
 test_data_low <- readRDS("./Shared/Data/for_Simulations/test_data_low_error.rds")
@@ -126,7 +126,7 @@ dt1 %>%
 
 
 #/*--------------------------------*/
-#' ## (3) Sub sim (high: psill = 0.002)
+#' ## (3) Sub sim (high m_error)
 #/*--------------------------------*/
 reg_data_high <- readRDS("./Shared/Data/for_Simulations/reg_data_high_error.rds")
 test_data_high <- readRDS("./Shared/Data/for_Simulations/test_data_high_error.rds")
