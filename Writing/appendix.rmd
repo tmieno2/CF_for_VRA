@@ -146,18 +146,18 @@ As the size of yield error increases, EONR estimation and yield prediction accur
 
 
 ```{r report-table-optN-low, tab.cap = "Table G.1: Mean RMSE (kg/ha) estimation and profit-deficit ($/ha) by ML method and modeling scenario on low and high degree of yield disturbance datasets"}
-# table_optN_prep_low_high
+table_optN_low_high
 ```
 
 \newpage 
 
 
 ```{r report-table-optN-low, tab.cap = "Table G.2: Mean RMSE of yield prediction (kg/ha) by ML method and modeling scenario on low and high degree of yield disturbance datasets"}
-# report_table_y_low_high
+report_table_y_low_high
 ```
 
 ```{r count-tbl-low-high, tab.cap = "Table G.3: Relationship between the EONR prediction performances (as measured by profit) and the yield prediction performances of prediction-oriented ML methods on low and high degree of yield disturbance datasets"}
-# count_tbl_low_high
+count_tbl_low_high
 ```
 
 
