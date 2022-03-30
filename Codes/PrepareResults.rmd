@@ -191,17 +191,21 @@ vis_MB_curve <-
 library(grf)
 source(here("GitControlled/Codes/0_2_functions_main_sim.R"))
 
-# === Data === #
-field_subplot_test_dt <-
-  readRDS(here("Shared/Results/for_writing/field_subplot_test_dt.rds"))
+# --- Data --- #
+test_subplot_dt <- 
+  here("Shared/Results/for_writing/test_subplot_dt.rds") %>%
+  readRDS()
 
-train_dt <-
-  field_subplot_sf %>%
-  data.table()
+# subplots_infiled <- test_subplot_dt[,unique_subplot_id] %>% unique()
 
-test_dt <-
-  field_subplot_test_dt %>%
-  data.table()
+# cnn_pred <- 
+#   here("Shared/Results/CNN_rawRes_onEval/alldata_model4.csv") %>%
+#   fread() %>%
+#   .[, c("subplot_id", "strip_id") := tstrsplit(id, "_", fixed=TRUE)] %>%
+#   .[,unique_subplot_id := paste0(strip_id,"_",subplot_id)] %>%
+#   .[sim==x & unique_subplot_id %in% subplots_infiled,] %>%
+#   .[,.(sim, unique_subplot_id, rate, pred)] %>%
+#   setnames(names(.), c("sim", "unique_subplot_id", "N", "CNN"))
 
 # /*===== Train ML =====*/
 temp_var_ls <-
@@ -214,34 +218,27 @@ set.seed(1356)
 
 RF <-
   RF_run(
-    reg_data = train_dt,
+    reg_data = data.table(field_subplot_sf),
     var_ls = temp_var_ls
   )
 
 BRF <-
   BRF_run(
-    reg_data = train_dt,
+    reg_data = data.table(field_subplot_sf),
     var_ls = temp_var_ls
   )
 
-
-# === Yield prediction === #
+# /*===== Yield Calculation =====*/
 # --- All N experimental rates --- #
-N_rate <- test_dt[, aa_n] %>%
-  unique() %>%
-  sort()
-# For illustration purpose, we use site where either 2nd and 4th N rates are actually application
-tg_N_rate <- N_rate[c(2, 3, 4)]
+N_rate <- test_subplot_dt[, aa_n] %>% unique() %>% sort()
 
 # --- for true yield response function --- #
 seq_N <-
   seq(min(N_rate) - 30, max(N_rate) + 30, by = 1)
-# seq_N <-
-#   seq(min(N_rate), max(N_rate), by=1)
 
 res_true <-
-  test_dt %>%
-  .[aa_n %in% tg_N_rate] %>%
+  test_subplot_dt %>%
+  # .[aa_n %in% tg_N_rate] %>%
   .[rep(1:nrow(.), each = length(seq_N)), ] %>%
   .[, N := seq_N, by = unique_subplot_id] %>%
   .[, det_yield := gen_yield_MB(ymax, alpha, beta, N)] %>%
@@ -249,135 +246,44 @@ res_true <-
 
 # --- for predicted yield at five experimental N rates --- #
 res_pred <-
-  test_dt %>%
-  .[aa_n %in% tg_N_rate] %>%
+  test_subplot_dt %>%
+  # .[aa_n %in% tg_N_rate] %>%
   .[rep(1:nrow(.), each = length(N_rate)), ] %>%
   .[, N := N_rate, by = unique_subplot_id] %>%
   .[, RF := predict(RF, newdata = .[, c("N", temp_var_ls), with = FALSE])] %>%
   .[, BRF := predict(BRF, newdata = .[, c("N", temp_var_ls), with = FALSE])] %>%
-  melt(id.vars = c("unique_subplot_id", "yield", "aa_n", "N"), measure.vars = c("RF", "BRF"))
-
-find_examples_main <-
-  res_pred %>%
-  .[variable == "BRF" & aa_n == N, ] %>%
-  .[, y_diff_brf := abs(yield - value)] %>%
-  .[y_diff_brf < 500, unique_subplot_id]
-# .[y_diff_brf < 500 & y_diff_brf < 1000, unique_subplot_id]
-
-
-# === For visualization === #
-# set.seed(1256)
-
-# low <-
-#   res_true[aa_n == tg_N_rate[3]] %>%
-#   get_rows_optN(data=., value = 0.9, range = 0.1) %>%
-#   .[unique_subplot_id %in% find_examples_main] %>%
-#   # .[unique_subplot_id %in% sample(unique(unique_subplot_id), size = 1),] %>%
-#   .[, unique_subplot_id] %>%
-#   unique()
-
-# length(low)
-# x <- 16
-# i= x:(x+1)
-# vis_res_true <- res_true[unique_subplot_id %in% low[i]]
-# vis_res_pred <- res_pred[unique_subplot_id %in% low[i]]
-# ggplot() +
-#     geom_line(
-#       data=vis_res_true, aes(x=N, y=yield, color = unique_subplot_id)
-#     ) +
-#     geom_point(
-#       data=vis_res_pred, aes(x=N, y=value, color = unique_subplot_id, alpha = "Predicts"), shape=2, size = 1.5
-#     ) +
-#     geom_point(data = vis_res_true[aa_n==N], aes(x=aa_n, y= yield, alpha = "True yield at actual N rate that was applied"), color = 'blue', size = 1.5) +
-#     facet_wrap(~variable) +
-#     scale_alpha_manual(
-#       name = NULL,
-#       values = c(1, 1),
-#       breaks = c("Predicts", "True yield at actual N rate that was applied"),
-#       guide = guide_legend(override.aes = list(linetype = c(0, 1),
-#         shape = c(2, 16),
-#         color = c("black", "blue"))
-#         )
-#     ) +
-#     labs(y = "Yield (kg/ha)") +
-#     labs(x = "N (kg/ha)") +
-#     theme_dist +
-#     theme(legend.title = element_blank()) +
-#     guides(color=guide_legend(nrow=2, byrow=TRUE))
-
-# tg_N_rate <- N_rate[2]
-# low: 13_41, 15_34, 15_35, 11_40
-# medium: 8_41, *8_42*, *8_43*, 27_10
-# high: 4_21
-
-# tg_N_rate <- N_rate[3]
-# **2_18**, 10_42 ***6_47***
-
-# tg_N_rate <- N_rate[4]
-# 10_49
+  # .[cnn_pred, on = c("sim", "unique_subplot_id", "N")] %>%
+  melt(
+    id.vars = c("unique_subplot_id", "yield", "aa_n", "N"),
+    # measure.vars = c("RF", "BRF", "CNN")
+    measure.vars = c("RF", "BRF")
+    ) %>%
+  .[, observed := ifelse(
+    aa_n == N,
+    "Observed",
+    "Unobserved"
+  )] %>%
+  .[, y_diff := abs(yield - value)]
 
 
-# final
-# + *2_18* (more than 14500)
-# + *8_42* (11500)
-# + *8_43* (11300)
-# + **6_47** (11100)
-
-
-# c("2_18", "8_42")
-# c("2_18", "6_47") **
-
-# vis_res_true <- res_true[unique_subplot_id %in% c("2_18", "6_47")]
-# vis_res_pred <- res_pred[unique_subplot_id %in% c("2_18", "6_47")]
-# ggplot() +
-#     geom_line(
-#       data=vis_res_true, aes(x=N, y=yield, color = unique_subplot_id)
-#     ) +
-#     geom_point(
-#       data=vis_res_pred, aes(x=N, y=value, color = unique_subplot_id, alpha = "Predicts"), shape=2, size = 1.5
-#     ) +
-#     geom_point(data = vis_res_true[aa_n==N], aes(x=aa_n, y= yield, alpha = "True yield at actual N rate that was applied"), color = 'blue', size = 1.5) +
-#     facet_wrap(~variable) +
-#     scale_alpha_manual(
-#       name = NULL,
-#       values = c(1, 1),
-#       breaks = c("Predicts", "True yield at actual N rate that was applied"),
-#       guide = guide_legend(override.aes = list(linetype = c(0, 1),
-#         shape = c(2, 16),
-#         color = c("black", "blue"))
-#         )
-#     ) +
-#     labs(y = "Yield (kg/ha)") +
-#     labs(x = "N (kg/ha)") +
-#     theme_dist +
-#     theme(legend.title = element_blank()) +
-#     guides(color=guide_legend(nrow=2, byrow=TRUE))
-
+# /*===== Preparation for plots =====*/
+# new one
+# c("8_43", "2_20")
+# old one
+# c("2_18", "6_47")
 
 vis_res_true <-
-  res_true[unique_subplot_id %in% c("2_18", "6_47")] %>%
-  .[, site := case_when(
-    unique_subplot_id == "2_18" ~ "site 1",
-    unique_subplot_id == "6_47" ~ "site 2"
-  )]
+  res_true[unique_subplot_id %in% c("2_18", "6_47")]
 
 vis_res_pred <-
   res_pred[unique_subplot_id %in% c("2_18", "6_47")] %>%
-  .[, site := case_when(
-    unique_subplot_id == "2_18" ~ "site 1",
-    unique_subplot_id == "6_47" ~ "site 2"
-  )] %>%
   .[, type := "Predicted"] %>%
-  .[, observed := ifelse(
-    aa_n == N,
-    "Observed Rate",
-    "Unobserved Rate"
-  )] %>%
   setnames("variable", "model") %>%
-  .[, .(N, value, type, observed, model, site)]
+  .[, .(N, value, type, observed, model, unique_subplot_id)]
 
 vis_true_points <-
-  vis_res_true[N %in% unique(vis_res_pred$N), ] %>%
+  vis_res_true %>%
+  .[N %in% unique(vis_res_pred$N), ] %>%
   .[, type := "True"] %>%
   .[, observed := ifelse(
     aa_n == N,
@@ -387,7 +293,7 @@ vis_true_points <-
   setnames("yield", "value") %>%
   .[rep(1:.N, 2), ] %>%
   .[, model := c("RF", "BRF") %>% rep(each = 10)] %>%
-  .[, .(N, value, type, observed, model, site)]
+  .[, .(N, value, type, observed, model, unique_subplot_id)]
 
 vis_all_points <- rbind(vis_res_pred, vis_true_points)
 ```
@@ -398,7 +304,7 @@ vis_MB_BRF_y <-
   # --- true yield response curve --- #
   geom_line(
     data = vis_res_true,
-    aes(x = N, y = yield, group = site)
+    aes(x = N, y = yield, group = unique_subplot_id)
   ) +
   geom_point(
     data = vis_all_points,
@@ -407,7 +313,7 @@ vis_MB_BRF_y <-
   ) +
   geom_line(
     data = vis_all_points[type == "Predicted", ],
-    aes(y = value, x = N, color = site),
+    aes(y = value, x = N, color = unique_subplot_id),
     linetype = 2,
     size = 0.5
   ) +
@@ -417,6 +323,13 @@ vis_MB_BRF_y <-
     linetype = 2,
     size = 0.3
   ) +
+  # annotate(
+  #   "text",
+  #   x = 137,  y = 9700,
+  #   label = "Observed Rate \n = 117 (kg/ha)",
+  #   family = "Times",
+  #   size = 2
+  # ) +
   annotate(
     "text",
     x = 180, y = 9400,
@@ -441,6 +354,7 @@ vis_MB_BRF_y <-
   guides(color = "none") +
   theme_dist
 ```
+
 
 
 # Variogram Prameter Table
