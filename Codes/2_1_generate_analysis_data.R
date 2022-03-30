@@ -20,7 +20,9 @@ pCorn <- price_table[2, pCorn]
 pN <- price_table[2, pN]
 
 # === Load Field data === #
-field <- readRDS(here("Shared/Data/for_Simulations/analysis_field.rds"))
+field <- 
+	here("Shared/Data/for_Simulations/analysis_field.rds") %>%
+	readRDS()
 
 
 # /*===========================================*/
@@ -28,7 +30,9 @@ field <- readRDS(here("Shared/Data/for_Simulations/analysis_field.rds"))
 # /*===========================================*/
 
 # === Load coef Data sets === #
-coef_data <- readRDS(here("Shared/Data/for_Simulations/coefficients_sprange_400.rds")))
+# coef_data <- 
+# 	here("Shared/Data/for_Simulations/coefficients_sprange_400.rds") %>%
+# 	readRDS()
 
 #/*--------------------------------*/
 #' ## (1)-1 Generate Cell-level Data sets
@@ -52,8 +56,13 @@ test_raw_data <- sapply(raw_data,"[",2)%>%rbindlist()
 #/*--------------------------------*/
 #' ## (1)-2 Generate analysis dataset (subplot-level)
 #/*--------------------------------*/
-reg_raw_data <- readRDS(here("Shared/Data/for_Simulations/reg_raw_data.rds"))
-test_raw_data <- readRDS(here("Shared/Data/for_Simulations/test_raw_data.rds"))
+reg_raw_data <- 
+	here("Shared/Data/for_Simulations/reg_raw_data.rds") %>%
+	readRDS()
+
+test_raw_data <- 
+	here("Shared/Data/for_Simulations/test_raw_data.rds") %>%
+	readRDS()
 
 ##== Aggregate Cell-Level Field Data to Subplot-Level Field Data ==##
 sim_data <- lapply(
@@ -69,8 +78,8 @@ sim_data <- lapply(
 reg_data <- sapply(sim_data,"[",1)%>%rbindlist()
 test_data <- sapply(sim_data,"[",2)%>%rbindlist()
 
-saveRDS(reg_data, here("Shared/Data/for_Simulations/reg_data.rds"))
-saveRDS(test_data, here("Shared/Data/for_Simulations/test_data.rds"))
+# saveRDS(reg_data, here("Shared/Data/for_Simulations/reg_data.rds"))
+# saveRDS(test_data, here("Shared/Data/for_Simulations/test_data.rds"))
 
 
 
@@ -88,8 +97,7 @@ saveRDS(test_data, here("Shared/Data/for_Simulations/test_data.rds"))
 # === Load coef Data sets === #
 coef_data_low <- 
 	here("Shared/Data/for_Simulations/coefficients_sprange_400_low_error.rds") %>%
-	readRDS() %>%
-	.[sim %in% 1:100]
+	readRDS()
 
 
 #/*--------------------------------*/
@@ -116,11 +124,12 @@ saveRDS(reg_raw_data, here("Shared/Data/for_Simulations/reg_raw_data_low_error.r
 saveRDS(test_raw_data, here("Shared/Data/for_Simulations/test_raw_data_low_error.rds"))
 
 
+
 #/*--------------------------------*/
 #' ## (2)-2 Generate analysis dataset (subplot-level)
 #/*--------------------------------*/
-reg_raw_data <- readRDS(here("Shared/Data/for_Simulations/reg_raw_data_low_error.rds"))
-test_raw_data <- readRDS(here("Shared/Data/for_Simulations/test_raw_data_low_error.rds"))
+# reg_raw_data <- readRDS(here("Shared/Data/for_Simulations/reg_raw_data_low_error.rds"))
+# test_raw_data <- readRDS(here("Shared/Data/for_Simulations/test_raw_data_low_error.rds"))
 
 
 ##== Aggregate Cell-Level Field Data to Subplot-Level Field Data ==##
@@ -146,8 +155,6 @@ saveRDS(test_data, here("Shared/Data/for_Simulations/test_data_low_error.rds"))
 
 
 
-
-
 # /*===========================================*/
 #'=  (3) For high degree of m_error =
 # /*===========================================*/
@@ -155,8 +162,8 @@ saveRDS(test_data, here("Shared/Data/for_Simulations/test_data_low_error.rds"))
 # === Load coef Data sets === #
 coef_data_high <- 
 	here("Shared/Data/for_Simulations/coefficients_sprange_400_high_error.rds") %>%
-	readRDS() %>%
-	.[sim %in% 1:100]
+	readRDS()
+
 
 #/*--------------------------------*/
 #' ## (3)-1 Generate Cell-level Data sets
@@ -180,11 +187,12 @@ test_raw_data <- sapply(raw_data,"[",2)%>%rbindlist()
 saveRDS(reg_raw_data, here("Shared/Data/for_Simulations/reg_raw_data_high_error.rds"))
 saveRDS(test_raw_data, here("Shared/Data/for_Simulations/test_raw_data_high_error.rds"))
 
+
 #/*--------------------------------*/
 #' ##  (3)-2 Generate analysis dataset (subplot-level)
 #/*--------------------------------*/
-reg_raw_data <- readRDS(here("Shared/Data/for_Simulations/reg_raw_data_high_error.rds"))
-test_raw_data <- readRDS(here("Shared/Data/for_Simulations/test_raw_data_high_error.rds"))
+# reg_raw_data <- readRDS(here("Shared/Data/for_Simulations/reg_raw_data_high_error.rds"))
+# test_raw_data <- readRDS(here("Shared/Data/for_Simulations/test_raw_data_high_error.rds"))
 
 ##== Aggregate Cell-Level Field Data to Subplot-Level Field Data ==##
 sim_data <- lapply(
@@ -203,9 +211,6 @@ test_data <- sapply(sim_data,"[",2)%>%rbindlist()
 saveRDS(reg_data, here("Shared/Data/for_Simulations/reg_data_high_error.rds"))
 saveRDS(test_data, here("Shared/Data/for_Simulations/test_data_high_error.rds"))
 
-
-reg_data <- readRDS(here("Shared/Data/for_Simulations/reg_data_high_error.rds"))
-test_data <- readRDS(here("Shared/Data/for_Simulations/test_data_high_error.rds"))
 
 
 

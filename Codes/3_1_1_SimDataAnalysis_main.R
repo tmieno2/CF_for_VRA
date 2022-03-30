@@ -1,6 +1,6 @@
 # ==========================================================================
 # Objective:
-# For main simulation results, 
+# For main simulation, 
 #' + Calculate profit-deficits and RMSE of EONR 
 #' + Calculate RMSE of yield predictions for RF, BRF and CNN
 #'      + For CNN results, estimate  EONR in this codes
@@ -21,6 +21,7 @@ library(hrbrthemes)
 library(tidyverse)
 library(ggpubr)
 library(here)
+library(parallel)
 
 # === Source Functions === #
 source(here("GitControlled/Codes/0_1_functions_gen_analysis_data.R"))
@@ -144,7 +145,8 @@ res_cnn_onEval <-
 
 # === Combine to one data set=== #
 cnn_simRes_all <- 
-    rbind(res_cnn_onTrain, res_cnn_onEval) %>%
+    res_cnn_onEval %>%
+    # rbind(res_cnn_onTrain, res_cnn_onEval) %>%
     .[,Model := case_when(
         Model == 1 ~ "aby",
         Model == 2 ~ "abytt",
@@ -170,19 +172,30 @@ cnn_simRes_all <-
 # Confirm that the predicted yield response functions are always linear
 cnn_simRes_temp <- 
     cnn_simRes_all %>%
-    .[type=="test" & Model == "aabbyytt" & sim==296 & unique_subplot_id %in% subplots_infiled[1:50],]
+    .[type=="test" & Model == "aabbyytt" & sim==296 & unique_subplot_id %in% subplots_infiled[1:12],]
 
-saveRDS(cnn_simRes_temp, here("Shared/Results/ex_cnn_y_ResCurve.rmd"))
+# saveRDS(cnn_simRes_temp, here("Shared/Results/ex_cnn_y_ResCurve.rmd"))
 
 ggplot(cnn_simRes_temp, aes(x=rate, y=pred_yield, colour=factor(unique_subplot_id))) +
     geom_point(size = 0.7) +
-    geom_smooth(method=lm, se=FALSE, size=0.3) +
+    # geom_smooth(method=lm, se=FALSE, size=0.3) +
     facet_wrap(~Model, ncol = 2) +
     theme(
         legend.title = element_blank(),
         legend.position = "none"
     )
 
+ggplot(cnn_simRes_temp) +
+    geom_point(aes(x=rate, y=pred_yield, colour=factor(unique_subplot_id)),size = 1) +
+    geom_line(aes(x=rate, y=pred_yield, color = factor(unique_subplot_id))) +
+    facet_wrap(~unique_subplot_id, ncol = 3, scales = "free") +
+    # geom_line(aes(x=rate, y=yield, color = factor(unique_subplot_id)), linetype = "dashed") +
+    labs(y = "Yield (kg/ha)") +
+    labs(x = "N (kg/ha)") +
+    theme(
+        legend.title = element_blank(),
+        legend.position = "none"
+    )
 
 #/*----------------------------------*/
 #' ## EONR estimation
@@ -207,7 +220,8 @@ cal_slope <- function(case){
     .[, .(slope = coef(lm(pred_yield~rate))["rate"]), by= .(type, Model, sim, unique_subplot_id)]
 }
 
-slope_dt <- mclapply(all_var_case, cal_slope, mc.cores=detectCores()-2)%>%
+slope_dt <- 
+    mclapply(all_var_case, cal_slope, mc.cores=detectCores()-2)%>%
     rbindlist()
 
 # saveRDS(slope_dt, here("Shared/Results/CNN_EONR_anlaysis/cnn_response_slope_all.rds"))
@@ -225,7 +239,7 @@ cnn_optN_dt <-
             , by=.(type, Model, sim, unique_subplot_id)]
 
 # /*=================================================*/
-#' # RMSE of EONRs and Profit-deficits Calculation
+#' # RMSE of EONRs and Yields and Profit-loss Calculation
 # /*=================================================*/
 cnn_optN_piLoss <- 
     source_dt %>%

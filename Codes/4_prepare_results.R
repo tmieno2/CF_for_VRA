@@ -53,7 +53,6 @@ field_cell_sf <-
    
 saveRDS(field_cell_sf, here("Shared/Results/for_writing/sample_field_cell_sf.rds"))
 
-
 #/*----------------------------------*/
 #' ## (2) subplot-level field without padding area 
 #/*----------------------------------*/
@@ -219,43 +218,82 @@ sample_simRes_test_y <-
 saveRDS(sample_simRes_test_y, here("Shared/Results/for_writing/sample_simRes_test_y.rds"))
 
 
-
 # ==========================================================================
 # Cell-level Field dataset (Low-error) =
 # ==========================================================================
 field <- readRDS(here("Shared/Data/for_Simulations/analysis_field.rds"))
 
-sample_field_cell_low <- 
+field_cell_low <- 
   here("Shared/Data/for_Simulations/reg_raw_data_low_error.rds") %>%
-  readRDS() %>%
-  .[sim==1,]
+  readRDS()
+
+sample_field_cell_low %>%
+  .[,.(
+    min = min(yield_error),
+    mean = mean(yield_error),
+    max = max(yield_error)
+    ), by= sim] %>%
+  .[,.(
+    min = mean(min),
+    mean = mean(mean),
+    max = mean(max)
+    )]
+
+sample_field_cell_low <- field_cell_low[sim==4,]
 
 field_cell_low_sf <- 
   left_join(dplyr::select(field, unique_cell_id), sample_field_cell_low, by="unique_cell_id")%>%
     na.omit() %>%
-    mutate(plot_id = ceiling(subplot_id/4)) %>%
     filter(padding==1)
+
+ggplot(field_cell_low_sf) +
+  geom_sf(aes(fill = yield_error), size = 0) +
+  scale_fill_viridis_c() +
+  labs(fill = expression(paste(~epsilon, " (kg/ha)"))) +
+  ggtitle("(1) Low error") +
+  theme_figure
 
 saveRDS(field_cell_low_sf, here("Shared/Results/for_writing/sample_field_cell_low_sf.rds"))
 
 
 
+
+
 # ==========================================================================
-# Cell-level Field dataset (Low-error) =
+# Cell-level Field dataset (High-error) =
 # ==========================================================================
-sample_field_cell_high <- 
+field_cell_high <- 
   here("Shared/Data/for_Simulations/reg_raw_data_high_error.rds") %>%
-  readRDS() %>%
-  .[sim==1,]
+  readRDS()
+
+field_cell_high %>%
+  .[,.(
+    min = min(yield_error),
+    mean = mean(yield_error),
+    max = max(yield_error)
+    ), by= sim] %>%
+  .[,.(
+    min = mean(min),
+    mean = mean(mean),
+    max = mean(max)
+    )]
+
+
+sample_field_cell_high <- field_cell_high[sim==3,]
 
 field_cell_high_sf <- 
   left_join(dplyr::select(field, unique_cell_id), sample_field_cell_high, by="unique_cell_id")%>%
     na.omit() %>%
-    mutate(plot_id = ceiling(subplot_id/4)) %>%
     filter(padding==1)
 
-saveRDS(field_cell_high_sf, here("Shared/Results/for_writing/sample_field_cell_high_sf.rds"))
+ggplot(field_cell_high_sf) +
+  geom_sf(aes(fill = yield_error), size = 0) +
+  scale_fill_viridis_c() +
+  labs(fill = expression(paste(~epsilon, " (kg/ha)"))) +
+  ggtitle("(1) Low error") +
+  theme_figure
 
+saveRDS(field_cell_high_sf, here("Shared/Results/for_writing/sample_field_cell_high_sf.rds"))
 
 
 
