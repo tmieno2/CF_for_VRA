@@ -1,15 +1,4 @@
-## ----set-up, cache = F-------------------------------------------------------------------------
-library(knitr)
-library(here)
-
-here::i_am("GitControlled/Writing/manuscript_cea.rmd")
-
-knitr::opts_chunk$set(
-  # cache = TRUE
-  cache = FALSE
-)
-
-## ----packages, cache = FALSE, include = FALSE--------------------------------------------------
+## ----packages, cache = FALSE, include = FALSE----
 # === packages ===#
 # --- data wrangling--- #
 library(sf)
@@ -36,7 +25,7 @@ library(officedown)
 library(modelsummary)
 
 
-## ----------------------------------------------------------------------------------------------
+## ---- include = F-------------------------
 theme_figure <-
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -65,7 +54,7 @@ set_flextable_defaults(
 )
 
 
-## ----setup, warning=FALSE, message=FALSE, cache= FALSE-----------------------------------------
+## ----setup, include = FALSE---------------
 # === plot-level field data set  === #
 field_plot_sf <-
   here("Shared/Results/for_writing/sample_field_plot_sf.rds") %>%
@@ -82,7 +71,7 @@ field_cell_sf <-
   readRDS()
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------------------
 # /*--------------------------------*/
 #' ## Preparation
 # /*--------------------------------*/
@@ -167,7 +156,7 @@ vis_MB_curve <-
   theme_dist
 
 
-## ----prepare-data-vis, cache = TRUE------------------------------------------------------------
+## ----prepare-data-vis, cache = TRUE-------
 # /*===========================================*/
 #' =  Prepare illustrative yield response curve estimated by RF =
 # /*===========================================*/
@@ -341,6 +330,7 @@ find_examples_main <-
 #     theme(legend.title = element_blank()) +
 #     guides(color=guide_legend(nrow=2, byrow=TRUE))
 
+
 vis_res_true <-
   res_true[unique_subplot_id %in% c("2_18", "6_47")] %>%
   .[, site := case_when(
@@ -379,7 +369,7 @@ vis_true_points <-
 vis_all_points <- rbind(vis_res_pred, vis_true_points)
 
 
-## ----make-plot-MB-BRF-y------------------------------------------------------------------------
+## ----make-plot-MB-BRF-y-------------------
 vis_MB_BRF_y <-
   ggplot() +
   # --- true yield response curve --- #
@@ -406,7 +396,7 @@ vis_MB_BRF_y <-
   ) +
   annotate(
     "text",
-    x = 180,  y = 9400,
+    x = 180, y = 9400,
     label = "Observed Rate \n = 150 (kg/ha)",
     family = "Times",
     size = 3
@@ -429,7 +419,7 @@ vis_MB_BRF_y <-
   theme_dist
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------------------
 variogram_tb <-
   data.frame(
     Parameters = c("alpha_ij", "beta_ij", "ymax_ij", "varepsilon_ij"),
@@ -472,7 +462,7 @@ variogram_tb <-
   autofit()
 
 
-## ----field-map-visualization, dependson = "setup"----------------------------------------------
+## ----field-map-visualization--------------
 
 # === Preparation === #
 ex_plot <- field_plot_sf[224, ]
@@ -485,8 +475,6 @@ ex_cells <- field_cell_sf[ex_one_subplot, , op = st_within]
 one_subplot <- ex_subplots[3, ]
 
 #-- (1) plot-level field map  --#
-
-
 plot <-
   ggplot() +
   geom_sf(data = field_plot_sf) +
@@ -572,7 +560,7 @@ field_structure <-
   theme_void()
 
 
-## ---- dependson = "setup"----------------------------------------------------------------------
+## ---- dependson = "setup"-----------------
 field_Ndesign <-
   ggplot() +
   geom_sf(
@@ -586,7 +574,7 @@ field_Ndesign <-
   theme_figure
 
 
-## ---- dependson = "setup"----------------------------------------------------------------------
+## ---- dependson = "setup"-----------------
 # === subplot-level === #
 vis_yield_subplot <-
   ggplot(field_subplot_sf) +
@@ -597,11 +585,11 @@ vis_yield_subplot <-
   theme_figure
 
 
-## ---- dependson = "setup"----------------------------------------------------------------------
+## ---- dependson = "setup"-----------------
 
 
 
-## ---- dependson = "setup"----------------------------------------------------------------------
+## ---- dependson = "setup"-----------------
 # === alpha map === #
 field_alpha <-
   ggplot(field_cell_sf) +
@@ -648,7 +636,7 @@ field_optN <-
   theme_figure
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------------------
 # === Low error field map === #
 field_cell_low_sf <-
   here("Shared/Results/for_writing/sample_field_cell_low_sf.rds") %>%
@@ -669,19 +657,17 @@ field_cell_high_sf <-
 
 field_m_error_high <-
   ggplot(field_cell_high_sf) +
-    geom_sf(aes(fill = yield_error), size = 0) +
-    scale_fill_viridis_c() +
-    labs(fill = expression(paste( ~ epsilon, " (kg/ha)"))) +
-    ggtitle("(2) High error") +
-    theme_figure
+  geom_sf(aes(fill = yield_error), size = 0) +
+  scale_fill_viridis_c() +
+  labs(fill = expression(paste(~epsilon, " (kg/ha)"))) +
+  ggtitle("(2) High error") +
+  theme_figure
 
 
-## ----source-results, message=FALSE, warning=FALSE, cache= FALSE--------------------------------
+## ----source-results, message=FALSE, warning=FALSE----
 # === Load Results === #
 allML_summary_bySim <- readRDS(here("Shared/Results/for_writing/allML_summary_bySim.rds"))
 
-
-## ---- dependson = "source-results"-------------------------------------------------------------
 # === Set up === #
 res_y_train <-
   allML_summary_bySim %>%
@@ -691,6 +677,8 @@ res_y_test <-
   allML_summary_bySim %>%
   .[type == "test" & Method %in% c("RF", "BRF", "CNN")]
 
+
+## ---- dependson = "source-results"--------
 # ==== Summary Table ====#
 # --- on training data sets--- #
 report_table_y_train <-
@@ -750,7 +738,7 @@ report_table_y <-
   autofit()
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------------------
 # fig_y_optN <-
 # res_y_test %>%
 # .[Method %in% c("RF", "BRF", "CNN")] %>%
@@ -774,7 +762,7 @@ report_table_y <-
 # theme_dist
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------------------
 # sim_no <- c(300, 600, 900)
 sim_no <- c(10, 20, 30)
 
@@ -796,7 +784,7 @@ vis_RMSE_y_eonr <-
   labs(fill = "Simulation Round", shape = "Method")
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------------------
 sample_simRes_test_y <- readRDS(here("Shared/Results/for_writing/sample_simRes_test_y.rds"))
 
 # === Function for RMSE Calculation === #
@@ -820,7 +808,7 @@ rmse <- sample_simRes_test_y %>%
   ), by = .(Method, Model)]
 
 
-vis_y_pred <- 
+vis_y_pred <-
   ggplot(sample_simRes_test_y) +
   geom_point(aes(x = det_yield, y = pred_yield), size = 0.5) +
   geom_abline(aes(intercept = 0, slope = 1), color = "red", show.legend = TRUE) +
@@ -839,19 +827,15 @@ vis_y_pred <-
   theme_dist
 
 
-## ---- dependson = "source-results"-------------------------------------------------------------
+## ---- dependson = "source-results"--------
 # === Preparation === #
 prepare_count_tab <-
   res_y_test %>%
-    dcast(sim + Model ~ Method, value.var = c("pi_loss", "rmse_y")) %>%
+  dcast(sim + Model ~ Method, value.var = c("pi_loss", "rmse_y")) %>%
   .[, which_ML_y := case_when(
     rmse_y_BRF < rmse_y_RF & rmse_y_BRF < rmse_y_CNN ~ "BRF",
     rmse_y_RF < rmse_y_BRF & rmse_y_RF < rmse_y_CNN ~ "RF",
     rmse_y_CNN < rmse_y_BRF & rmse_y_CNN < rmse_y_RF ~ "CNN"
-  )] %>%
-  .[, which_ML_piLoss := case_when(
-    pi_loss_BRF < pi_loss_RF ~ "BRF",
-    pi_loss_RF < pi_loss_BRF ~ "RF"
   )] %>%
   .[, which_ML_piLoss := case_when(
     pi_loss_BRF < pi_loss_RF & pi_loss_BRF < pi_loss_CNN ~ "BRF",
@@ -889,7 +873,7 @@ report_summary_res_CNN_RF_BRF <-
     blank1 = "", count_y_RF = "RF", count_RF = "RF",
     blank2 = "", count_y_BRF = "BRF", count_BRF = "BRF",
     blank3 = "", count_y_CNN = "CNN", count_CNN = "CNN",
-    blank4 = "", Total = "Total",
+    blank4 = "", Total = "Total #YP",
     top = TRUE
   ) %>%
   merge_h(part = "header") %>%
@@ -913,11 +897,13 @@ report_summary_res_CNN_RF_BRF <-
   # set_table_properties(width = .7, layout = "autofit") %>%
   fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
   autofit() %>%
-  width(j = c(3, 4, 6, 7, 9, 10, 12), width = 0.6) %>%
+  width(j = c(3:4, 6:7, 9:10), width = 0.6) %>%
+  width(j = 12, width = 0.82) %>%
+  width(j = 1, width = 0.5) %>%
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---- dependson = "source-results"-------------------------------------------------------------
+## ---- dependson = "source-results"--------
 # /*----------------------------------*/
 #' ## Distribution of RMSE of EONR estimates
 # /*----------------------------------*/
@@ -1061,7 +1047,7 @@ report_table_optN <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------------------
 piLoss_density <-
   allML_summary_bySim %>%
   .[type == "test", ] %>%
@@ -1082,7 +1068,7 @@ piLoss_density <-
   theme_dist
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------------------
 figure_te <-
   here("Shared/Results/for_writing/dt_TEcomparison.rds") %>%
   readRDS() %>%
@@ -1101,7 +1087,7 @@ figure_te <-
   theme_dist
 
 
-## ---- cache = TRUE-----------------------------------------------------------------------------
+## ---- cache = TRUE------------------------
 # /*=================================================*/
 #' # Sample CT figure
 # /*=================================================*/
@@ -1150,16 +1136,21 @@ opfit <- prune(tree, opcp)
 # fancyRpartPlot(opfit, sub="", shadow.col = "")
 
 
-## ----------------------------------------------------------------------------------------------
+## ---- cache = F---------------------------
 # === Load the data === #
-Simres_low <- readRDS(here("Shared/Results/for_writing/forest_summry_bySim_low.rds"))
+Simres_low <-
+  here("Shared/Results/for_writing/allML_summary_bySim_low.rds") %>%
+  readRDS()
 
-Simres_high <- readRDS(here("Shared/Results/for_writing/forest_summry_bySim_high.rds"))
+Simres_high <-
+  here("Shared/Results/for_writing/allML_summary_bySim_high.rds") %>%
+  readRDS()
 
-Simres_low_high<-
- bind_rows(Simres_low, Simres_high, .id = "Degree") %>%
- .[, Degree := ifelse(Degree==1, "Low", "High")] %>%
- .[, Degree := factor(Degree, levels =c("Low", "High"))]
+Simres_low_high <-
+  bind_rows(Simres_low, Simres_high, .id = "Degree") %>%
+  .[, Degree := ifelse(Degree == 1, "Low", "High")] %>%
+  .[, Degree := factor(Degree, levels = c("Low", "High"))] %>%
+  .[type == "test", ]
 
 
 # === Preparation === #
@@ -1168,18 +1159,17 @@ table_optN_prep_low_high <-
   .[, .(
     rmse_optN = format(round(mean(rmse_optN), 1), nsmall = 1),
     pi_loss = format(round(mean(pi_loss), 2), nsmall = 2)
-  ), by = .(Degree, type, Method, Model)] %>%
-  dcast(Degree + type + Model ~ Method, value.var = c("rmse_optN", "pi_loss")) %>%
+  ), by = .(Degree, Method, Model)] %>%
+  dcast(Degree + Model ~ Method, value.var = c("rmse_optN", "pi_loss")) %>%
   .[, `:=`(
-    blank1 = NA, blank2 = NA, blank3 = NA
+    blank1 = NA, blank2 = NA, blank3 = NA, blank4 = NA
   )] %>%
-  .[, .(Degree, type, Model, blank1, rmse_optN_RF, pi_loss_RF, blank2, rmse_optN_BRF, pi_loss_BRF, blank3, rmse_optN_CF_base, pi_loss_CF_base)]
+  .[, .(Degree, Model, blank1, rmse_optN_RF, pi_loss_RF, blank2, rmse_optN_BRF, pi_loss_BRF, blank3, rmse_optN_CNN, pi_loss_CNN, blank4, rmse_optN_CF_base, pi_loss_CF_base)]
 
 
 # === Summary Table (Testing Data sets) === #
-table_optN_prep_low_high <- 
+table_optN_low_high <-
   table_optN_prep_low_high %>%
-  .[type == "test", !"type"] %>%
   mutate(
     across(
       everything(),
@@ -1195,48 +1185,47 @@ table_optN_prep_low_high <-
     Model = "Model",
     blank1 = "", rmse_optN_RF = "RF", pi_loss_RF = "RF",
     blank2 = "", rmse_optN_BRF = "BRF", pi_loss_BRF = "BRF",
-    # blank3 = "", rmse_optN_CNN = "CNN", pi_loss_CNN = "CNN",
+    blank3 = "", rmse_optN_CNN = "CNN", pi_loss_CNN = "CNN",
     blank3 = "", rmse_optN_CF_base = "CF-base", pi_loss_CF_base = "CF-base",
     top = TRUE
   ) %>%
   merge_h(part = "header") %>%
-  hline_bottom(j = c(4:5, 7:8, 10:11), part = "header") %>%
+  hline_bottom(j = c(4:5, 7:8, 10:11, 13:14), part = "header") %>%
   add_header(
     Degree = "",
     Model = "",
     blank1 = "", rmse_optN_RF = "RMSE", pi_loss_RF = "pi_loss",
     blank2 = "", rmse_optN_BRF = "RMSE", pi_loss_BRF = "pi_loss",
-    # blank3 = "", rmse_optN_CNN = "RMSE", pi_loss_CNN = "pi_loss",
+    blank3 = "", rmse_optN_CNN = "RMSE", pi_loss_CNN = "pi_loss",
     blank3 = "", rmse_optN_CF_base = "RMSE", pi_loss_CF_base = "pi_loss",
     top = FALSE
   ) %>%
-  compose(i = 2, j = c(5, 8, 11), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))) %>%
+  compose(i = 2, j = c(5, 8, 11, 14), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))) %>%
   hline_bottom(part = "all") %>%
   hline_top(part = "header") %>%
   align(align = "center", part = "all") %>%
   align(j = 1, align = "left", part = "all") %>%
-  # autofit() %>%
-  # width(j = c(2,5,8,11), width=0.3) %>%
-  # fix_border_issues()
+  width(j = c(2, 5, 8, 11, 14), width = 0.3) %>%
   footnote(
     # i = 1, j = c(4, 7, 10, 13), part = "header",
     value = as_paragraph("NOTE: \U1D70B\U0302", as_sub(as_i("def")), " indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), "."),
     ref_symbols = NA
   ) %>%
   fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
-  autofit() %>%
-  width(j = c(4, 5, 7, 8, 10, 11), width = 0.6) %>%
-  width(j = 1, width = 0.8) %>%
-  width(j = c(3, 6, 9), width = 0.1)
+  width(j = c(4, 5, 7, 8, 10, 11, 13, 14), width = 0.2) %>%
+  width(j = 1, width = 0.3) %>%
+  width(j = 2, width = 0.3) %>%
+  align(j = 2, align = "left", part = "body") %>%
+  width(j = c(3, 6, 9, 12), width = 0.1) %>%
+  autofit()
 
 
-## ----------------------------------------------------------------------------------------------
+## -----------------------------------------
 # /*--------------------------------*/
 #' ## Yield prediction
-#/*--------------------------------*/ 
+# /*--------------------------------*/
 report_table_y_low_high <-
   Simres_low_high %>%
-  .[type == "test" & Method %in% c("RF", "BRF")] %>%
   .[, .(rmse_y = mean(rmse_y)), by = .(Degree, Method, Model)] %>%
   .[, rmse_y := format(round(rmse_y, 1), nsmall = 1)] %>%
   dcast(Degree + Model ~ Method, value.var = "rmse_y") %>%
@@ -1254,6 +1243,7 @@ report_table_y_low_high <-
     Model = "Model",
     RF = "RF",
     BRF = "BRF",
+    CNN = "CNN",
     CF_base = "CF-base"
   )) %>%
   align(align = "center", part = "all") %>%
@@ -1262,36 +1252,41 @@ report_table_y_low_high <-
   hline_bottom(part = "all") %>%
   hline_top(part = "header") %>%
   autofit() %>%
-  width(j = 1, width = 0.8)
+  width(j = 1, width = 0.82) %>%
+  align(j = 2, align = "left", part = "body")
 
 
-## ---- dependson = "source-results"-------------------------------------------------------------
+## ---- dependson = "source-results"--------
 # === Preparation === #
 prepare_count_tbl_low_high <-
   Simres_low_high %>%
-  .[type=="test" & Method %in% c("RF", "BRF")] %>%
+  .[Method %in% c("RF", "BRF", "CNN")] %>%
   dcast(Degree + sim + Model ~ Method, value.var = c("pi_loss", "rmse_y")) %>%
   .[, which_ML_y := case_when(
-    rmse_y_BRF < rmse_y_RF ~ "BRF",
-    rmse_y_RF < rmse_y_BRF ~ "RF"
+    rmse_y_BRF < rmse_y_RF & rmse_y_BRF < rmse_y_CNN ~ "BRF",
+    rmse_y_RF < rmse_y_BRF & rmse_y_RF < rmse_y_CNN ~ "RF",
+    rmse_y_CNN < rmse_y_BRF & rmse_y_CNN < rmse_y_RF ~ "CNN"
   )] %>%
   .[, which_ML_piLoss := case_when(
-    pi_loss_BRF < pi_loss_RF ~ "BRF",
-    pi_loss_RF < pi_loss_BRF ~ "RF"
+    pi_loss_BRF < pi_loss_RF & pi_loss_BRF < pi_loss_CNN ~ "BRF",
+    pi_loss_RF < pi_loss_BRF & pi_loss_RF < pi_loss_CNN ~ "RF",
+    pi_loss_CNN < pi_loss_BRF & pi_loss_CNN < pi_loss_RF ~ "CNN"
   )] %>%
   .[, index_cnst_y_piLoss := ifelse(which_ML_piLoss == which_ML_y, 1, 0)] %>%
   .[, ML_cnst_y_piLoss := ifelse(index_cnst_y_piLoss == 1, which_ML_piLoss, NA)] %>%
   .[, .(
     count_BRF = nrow(.SD[ML_cnst_y_piLoss == "BRF", ]),
     count_RF = nrow(.SD[ML_cnst_y_piLoss == "RF", ]),
+    count_CNN = nrow(.SD[ML_cnst_y_piLoss == "CNN", ]),
     count_y_BRF = nrow(.SD[which_ML_y == "BRF", ]),
     count_y_RF = nrow(.SD[which_ML_y == "RF", ]),
+    count_y_CNN = nrow(.SD[which_ML_y == "CNN", ]),
     Total = sum(index_cnst_y_piLoss)
   ), by = .(Degree, Model)] %>%
   .[, `:=`(
-    blank1 = NA, blank2 = NA, blank3 = NA
+    blank1 = NA, blank2 = NA, blank3 = NA, blank4 = NA
   )] %>%
-  .[, .(Degree, Model, blank1, count_y_RF, count_RF, blank2, count_y_BRF, count_BRF, blank3, Total)]
+  .[, .(Degree, Model, blank1, count_y_RF, count_RF, blank2, count_y_BRF, count_BRF, blank3, count_y_CNN, count_CNN, blank4, Total)]
 
 # === Table creation === #
 count_tbl_low_high <-
@@ -1305,16 +1300,18 @@ count_tbl_low_high <-
     Model = "Model",
     blank1 = "", count_y_RF = "RF", count_RF = "RF",
     blank2 = "", count_y_BRF = "BRF", count_BRF = "BRF",
-    blank4 = "", Total = "Total",
+    blank3 = "", count_y_CNN = "CNN", count_CNN = "CNN",
+    blank4 = "", Total = "Total #YP",
     top = TRUE
   ) %>%
   merge_h(part = "header") %>%
-  hline_bottom(j = c(4:5, 7:8), part = "header") %>%
+  hline_bottom(j = c(4:5, 7:8, 10:11), part = "header") %>%
   add_header(
     Degree = "",
     Model = "",
     blank1 = "", count_y_RF = "#Y", count_RF = "#YP",
     blank2 = "", count_y_BRF = "#Y", count_BRF = "#YP",
+    blank3 = "", count_y_CNN = "#Y", count_CNN = "#YP",
     blank4 = "", Total = "",
     top = FALSE
   ) %>%
@@ -1327,8 +1324,11 @@ count_tbl_low_high <-
     ref_symbols = NA
   ) %>%
   fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
-  autofit() %>%
-  width(j = c(4, 5, 7, 8, 10), width = 0.6) %>%
-  width(j = 1, width = 0.8) %>%
-  width(j = c(3, 6, 9), width = 0.1)
+  width(j = c(4:5, 7:8, 10:11), width = 0.2) %>%
+  width(j = 1, width = 0.3) %>%
+  width(j = 13, width = 0.3) %>%
+  width(j = 2, width = 0.2) %>%
+  align(j = 2, align = "left", part = "body") %>%
+  width(j = c(3, 6, 9, 12), width = 0.1) %>%
+  autofit()
 

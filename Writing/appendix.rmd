@@ -132,9 +132,9 @@ report_table_y_train
 
 
 ## Appendix G: Simulations with Different Size of Yield Disturbance Term.
-In this section, we present the results of EONR estimation and yield prediction with different size of random yield error ($\varepsilon$). We created two additional yield datasets	that are only different in the size of $\varepsilon$ from the yield datasets we used in the study by changing the variogram parameter of $psill$ for $r^{\varepsilon}_{i,j}$. Half size of $psill$ value ($0.0075$) was used to create yield datasets with low yield error, and one and a half size of $psill$ value ($$0.0225$$) was used to create yield datasets with high yield error. Figure G.1 illustrates examples of the generated low and high $\varepsilon$. 
+In this section, we present the results of EONR estimation and yield prediction with different size of random yield error ($\varepsilon$). We created two additional yield datasets	that are only different in the size of $\varepsilon$ from the yield datasets we used in the study by changing the variogram parameter of $psill$ for $r^{\varepsilon}_{i,j}$. Half size of $psill$ value ($0.0075$) was used to create yield datasets with low yield error, and one and a half size of $psill$ value ($0.0225$) was used to create yield datasets with high yield error. Figure G.1 illustrates examples of the generated low and high $\varepsilon$. 
 
-```{r fig-nExp-yield, fig.width=7, fig.height=6, fig.cap = "Figure G.1: An example of experimental design of N and generated yield at the subplot resolution"}
+```{r fig-nExp-yield, fig.width=7, fig.height=6, fig.cap = "Figure G.1: An example of experimental design of N and generated yield at the subplot resolution", cache = TRUE}
 field_m_error_low | field_m_error_high
 ```
 

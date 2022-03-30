@@ -30,7 +30,7 @@ opts_chunk$set(
   fig.retina = 5,
   warning = F,
   message = F,
-  cache = T,
+  cache = F,
   echo = F
 )
 ```
@@ -63,19 +63,8 @@ library(causalTree)
 library(rpart)
 library(rattle)
 ```
-
-```{r analyses, results = "hide", fig.show='hide', cache = FALSE}
-# /*=================================================*/
-#' # Create figures and tables
-# /*=================================================*/
-# --- Convert an Rmd file into a pure R file using purl() ---#
-knitr::purl(
-  here("GitControlled/Codes/PrepareResults.rmd"),
-  output = here("GitControlled/Codes/PrepareResults.R")
-)
-
-# --- Read the simulation results and prepare figures and tables ---#
-source(here("GitControlled/Codes/PrepareResults.R"))
+```{r, include = F, cache = F}
+knit_child(here("GitControlled/Codes/PrepareResults.Rmd"), quiet = TRUE)
 ```
 
 # Keywords: {-}

@@ -1,16 +1,5 @@
 # Set up
 
-```{r set-up, cache = F}
-library(knitr)
-library(here)
-
-here::i_am("GitControlled/Writing/manuscript_cea.rmd")
-
-knitr::opts_chunk$set(
-  # cache = TRUE
-  cache = FALSE
-)
-```
 ```{r packages, cache = FALSE, include = FALSE}
 # === packages ===#
 # --- data wrangling--- #
@@ -401,7 +390,6 @@ vis_true_points <-
   .[, .(N, value, type, observed, model, site)]
 
 vis_all_points <- rbind(vis_res_pred, vis_true_points)
-
 ```
 
 ```{r make-plot-MB-BRF-y}
@@ -431,7 +419,7 @@ vis_MB_BRF_y <-
   ) +
   annotate(
     "text",
-    x = 180,  y = 9400,
+    x = 180, y = 9400,
     label = "Observed Rate \n = 150 (kg/ha)",
     family = "Times",
     size = 3
@@ -714,11 +702,11 @@ field_cell_high_sf <-
 
 field_m_error_high <-
   ggplot(field_cell_high_sf) +
-    geom_sf(aes(fill = yield_error), size = 0) +
-    scale_fill_viridis_c() +
-    labs(fill = expression(paste( ~ epsilon, " (kg/ha)"))) +
-    ggtitle("(2) High error") +
-    theme_figure
+  geom_sf(aes(fill = yield_error), size = 0) +
+  scale_fill_viridis_c() +
+  labs(fill = expression(paste(~epsilon, " (kg/ha)"))) +
+  ggtitle("(2) High error") +
+  theme_figure
 ```
 
 # Results
@@ -886,7 +874,7 @@ rmse <- sample_simRes_test_y %>%
   ), by = .(Method, Model)]
 
 
-vis_y_pred <- 
+vis_y_pred <-
   ggplot(sample_simRes_test_y) +
   geom_point(aes(x = det_yield, y = pred_yield), size = 0.5) +
   geom_abline(aes(intercept = 0, slope = 1), color = "red", show.legend = TRUE) +
@@ -914,7 +902,7 @@ vis_y_pred <-
 # === Preparation === #
 prepare_count_tab <-
   res_y_test %>%
-    dcast(sim + Model ~ Method, value.var = c("pi_loss", "rmse_y")) %>%
+  dcast(sim + Model ~ Method, value.var = c("pi_loss", "rmse_y")) %>%
   .[, which_ML_y := case_when(
     rmse_y_BRF < rmse_y_RF & rmse_y_BRF < rmse_y_CNN ~ "BRF",
     rmse_y_RF < rmse_y_BRF & rmse_y_RF < rmse_y_CNN ~ "RF",
@@ -982,7 +970,7 @@ report_summary_res_CNN_RF_BRF <-
   autofit() %>%
   width(j = c(3:4, 6:7, 9:10), width = 0.6) %>%
   width(j = 12, width = 0.82) %>%
-  width(j = 1, width = 0.5) %>%
+  width(j = 1, width = 0.8) %>%
   width(j = c(2, 5, 8, 11), width = 0.1)
 ```
 
@@ -1233,21 +1221,21 @@ opfit <- prune(tree, opcp)
 
 ## EONR Estimation
 
-```{r}
+```{r, cache = F}
 # === Load the data === #
-Simres_low <- 
+Simres_low <-
   here("Shared/Results/for_writing/allML_summary_bySim_low.rds") %>%
   readRDS()
 
-Simres_high <- 
+Simres_high <-
   here("Shared/Results/for_writing/allML_summary_bySim_high.rds") %>%
   readRDS()
 
-Simres_low_high<-
- bind_rows(Simres_low, Simres_high, .id = "Degree") %>%
- .[, Degree := ifelse(Degree==1, "Low", "High")] %>%
- .[, Degree := factor(Degree, levels =c("Low", "High"))] %>%
- .[type == "test",]
+Simres_low_high <-
+  bind_rows(Simres_low, Simres_high, .id = "Degree") %>%
+  .[, Degree := ifelse(Degree == 1, "Low", "High")] %>%
+  .[, Degree := factor(Degree, levels = c("Low", "High"))] %>%
+  .[type == "test", ]
 
 
 # === Preparation === #
@@ -1265,7 +1253,7 @@ table_optN_prep_low_high <-
 
 
 # === Summary Table (Testing Data sets) === #
-table_optN_low_high <- 
+table_optN_low_high <-
   table_optN_prep_low_high %>%
   mutate(
     across(
@@ -1302,7 +1290,7 @@ table_optN_low_high <-
   hline_top(part = "header") %>%
   align(align = "center", part = "all") %>%
   align(j = 1, align = "left", part = "all") %>%
-  width(j = c(2,5,8,11, 14), width=0.3) %>%
+  width(j = c(2, 5, 8, 11, 14), width = 0.3) %>%
   footnote(
     # i = 1, j = c(4, 7, 10, 13), part = "header",
     value = as_paragraph("NOTE: \U1D70B\U0302", as_sub(as_i("def")), " indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), "."),
@@ -1310,11 +1298,11 @@ table_optN_low_high <-
   ) %>%
   fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
   autofit() %>%
-  width(j = c(4, 5, 7, 8, 10, 11, 13, 14), width = 0.6) %>%
-  width(j = 1, width = 0.82) %>%
-  width(j = 2, width = 0.5) %>%
+  width(j = c(4, 7, 10, 13), width = 0.6) %>%
+  width(j = c(5, 8, 11, 14), width = 0.5) %>%
+  width(j = 2, width = 0.7) %>%
   align(j = 2, align = "left", part = "body") %>%
-  width(j = c(3, 6, 9, 12), width = 0.1)
+  width(j = c(3, 6, 9, 12), width = 0.05)
 ```
 
 
@@ -1324,7 +1312,7 @@ table_optN_low_high <-
 ```{r}
 # /*--------------------------------*/
 #' ## Yield prediction
-#/*--------------------------------*/ 
+# /*--------------------------------*/
 report_table_y_low_high <-
   Simres_low_high %>%
   .[, .(rmse_y = mean(rmse_y)), by = .(Degree, Method, Model)] %>%
@@ -1354,7 +1342,7 @@ report_table_y_low_high <-
   hline_top(part = "header") %>%
   autofit() %>%
   width(j = 1, width = 0.82) %>%
-  align(j = 2, align = "left", part = "body") 
+  align(j = 2, align = "left", part = "body")
 ```
 
 
@@ -1429,11 +1417,9 @@ count_tbl_low_high <-
   ) %>%
   fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
   autofit() %>%
-  width(j = c(4:5, 7:8, 10:11), width = 0.6) %>%
-  width(j = 1, width = 0.82) %>%
+  width(j = c(4:5, 7:8, 10:11), width = 0.5) %>%
   width(j = 13, width = 0.82) %>%
-  width(j = 2, width = 0.5) %>%
+  width(j = 2, width = 0.7) %>%
   align(j = 2, align = "left", part = "body") %>%
-  width(j = c(3, 6, 9, 12), width = 0.1)
-
+  width(j = c(3, 6, 9, 12), width = 0.05)
 ```
