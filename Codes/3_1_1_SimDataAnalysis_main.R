@@ -84,7 +84,7 @@ forest_simRes_all <-
 #' # RMSE of EONRs and Profit-deficits calculation
 # /*=================================================*/
 forest_optN_piLoss <- 
-    source_dt[, !c("rate", "yield", "opt_N")] %>%
+    source_dt[, !c("yield", "opt_N")] %>%
     forest_simRes_all[, on=c("sim", "type", "unique_subplot_id")] %>%
     .[,`:=`(
         max_pi = pCorn*gen_yield_MB(ymax, alpha, beta, opt_N) - pN*opt_N,
@@ -247,7 +247,8 @@ cnn_optN_piLoss <-
     .[,`:=`(
         max_pi = pCorn*gen_yield_MB(ymax, alpha, beta, opt_N) - pN*opt_N,
         pi =  pCorn*gen_yield_MB(ymax, alpha, beta, opt_N_hat) - pN*opt_N_hat)] %>%
-    .[, pi_loss := max_pi - pi]
+    .[, pi_loss := max_pi - pi] %>%
+    .[, Method := "CNN"]
 
 
 # === Summarize by Simulation Round === #
@@ -257,20 +258,19 @@ cnn_summry_bySim <-
         rmse_optN = rmse_general(opt_N_hat, opt_N),
         pi_loss = mean(pi_loss),
         rmse_y = rmse_general(pred_yield, yield)
-    ), by= .(sim, type, Model)] %>%
-    .[, Method := "CNN"] %>%
+    ), by= .(sim, type, Method, Model)] %>%
     .[,.(sim, type, Method, Model, rmse_optN, pi_loss, rmse_y)]
 
 saveRDS(cnn_summry_bySim, here("Shared/Results/for_writing/cnn_summry_bySim.rds"))
 
 # === Check Summary of the CNN Results === #
-cnn_summry_bySim %>%
-    .[, .(
-        mean_rmse_optN = mean(rmse_optN),
-        mean_pi_loss = mean(pi_loss),
-        mean_rmse_y = mean(rmse_y)
-        ), by=.(type, Model)] %>%
-    .[order(type)]
+# cnn_summry_bySim %>%
+#     .[, .(
+#         mean_rmse_optN = mean(rmse_optN),
+#         mean_pi_loss = mean(pi_loss),
+#         mean_rmse_y = mean(rmse_y)
+#         ), by=.(type, Model)] %>%
+#     .[order(type)]
 
 
 
@@ -278,6 +278,14 @@ cnn_summry_bySim %>%
 # Merge Forest results and CNN results
 # ==========================================================================
 # === Merge === #
+
+allML_summary_raw <- 
+    rbind(forest_optN_piLoss, cnn_optN_piLoss[, names(forest_optN_piLoss), with = FALSE])
+
+saveRDS(allML_summary_raw, here("Shared/Results/for_writing/allML_summary_raw.rds"))
+
+
+
 allML_summary_bySim <-
   rbind(forest_summary_bySim, cnn_summry_bySim) %>%
   .[, Method := factor(Method, levels = c("RF", "BRF", "CNN", "CF_base"))] %>%
