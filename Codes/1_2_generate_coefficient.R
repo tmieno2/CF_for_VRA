@@ -1,6 +1,6 @@
-#/*----------------------------------*/
+# /*----------------------------------*/
 #' ## Preparation
-#/*----------------------------------*/
+# /*----------------------------------*/
 library(here)
 library(tmap)
 library(sp)
@@ -32,30 +32,30 @@ xy <- dplyr::select(field, unique_cell_id) %>%
 # --- Range (m) --- #
 Range <- 400
 
-#/*--------------------------------------------------------*/
+# /*--------------------------------------------------------*/
 #' ## (1) Generate raw coefficients (Medium m_error: psill = 0.015)
-#/*--------------------------------------------------------*/
+# /*--------------------------------------------------------*/
 
 # --- Number of iterations --- #
 b <- 1000
 
 # --- start simulation --- #
-coef_data <- 
+coef_data <-
   gen_coefs_par(
-    B = b, 
+    B = b,
     geo_xy = xy,
     sp_range = Range,
     psill_merror = 0.015
-    )
+  )
 
-saveRDS(coef_data, here("Shared/Data/for_Simulations", paste0('coefficients_sprange_',Range,'.rds')))
-
-
+saveRDS(coef_data, here("Shared/Data/for_Simulations", paste0("coefficients_sprange_", Range, ".rds")))
 
 
-#/*--------------------------------------------------------*/
+
+
+# /*--------------------------------------------------------*/
 #' ## (2) Generate raw coefficients (Small m_error: psill = 0.0075)
-#/*--------------------------------------------------------*/
+# /*--------------------------------------------------------*/
 # --- set seed --- #
 set.seed(39476)
 
@@ -63,24 +63,24 @@ set.seed(39476)
 b <- 100
 
 # --- start simulation --- #
-coef_data_low <- 
+coef_data_low <-
   gen_coefs_par(
-    B = b, 
+    B = b,
     geo_xy = xy,
     sp_range = Range,
     psill_merror = 0.0075
-    )
+  )
 
 
-saveRDS(coef_data_low, here("Shared/Data/for_Simulations", paste0('coefficients_sprange_',Range,'_low_error.rds')))
+saveRDS(coef_data_low, here("Shared/Data/for_Simulations", paste0("coefficients_sprange_", Range, "_low_error.rds")))
 
 
 
 
 
-#/*--------------------------------------------------------*/
+# /*--------------------------------------------------------*/
 #' ## (3) Generate raw coefficients (Large m_error: psill = 0.0225)
-#/*--------------------------------------------------------*/
+# /*--------------------------------------------------------*/
 # --- set seed --- #
 set.seed(57864)
 
@@ -88,14 +88,18 @@ set.seed(57864)
 b <- 100
 
 # --- start simulation --- #
-coef_data_high <- 
+coef_data_high <-
   gen_coefs_par(
-    B = b, 
+    B = b,
     geo_xy = xy,
     sp_range = Range,
     psill_merror = 0.0225
-    )
+  )
 
-saveRDS(coef_data_high, here("Shared/Data/for_Simulations", paste0('coefficients_sprange_',Range,'_high_error.rds')))
-
-
+saveRDS(
+  coef_data_high,
+  here(
+    "Shared/Data/for_Simulations",
+    paste0("coefficients_sprange_", Range, "_high_error.rds")
+  )
+)

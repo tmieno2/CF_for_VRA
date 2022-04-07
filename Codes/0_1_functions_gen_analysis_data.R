@@ -334,17 +334,17 @@ gen_cluster <- function(data, num_levels, dim) {
 }
 
 # /*=================================================*/
-#' # Make grids within a subplot for base_field 
+#' # Make grids within a subplot for base_field
 # /*=================================================*/
-make_grid_within_subplot <- function(field_base, cell){
+make_grid_within_subplot <- function(field_base, cell) {
   # cell="2_1"
-  temp_cell <- field_base%>%filter(unique_cell_id==cell)
-  res <- st_make_grid(st_boundary(temp_cell),  n = c(6, 1))%>%
-    st_as_sf()%>%
-    mutate(unique_cell_id=cell, cell_in_cell.id=seq(from=1,to=6))
+  temp_cell <- field_base %>% filter(unique_cell_id == cell)
+  res <- st_make_grid(st_boundary(temp_cell), n = c(6, 1)) %>%
+    st_as_sf() %>%
+    mutate(unique_cell_id = cell, cell_in_cell.id = seq(from = 1, to = 6))
 
   return(res)
-} 
+}
 
 
 # /*=================================================*/
@@ -490,13 +490,11 @@ assign_rates <- function(data_sf, rates_ls, pattern = "fixed-latin-square", merg
   }
 }
 
-
-#/*----------------------------------*/
-#' ## Unconditional Gaussian geostatistical Simulation  
-#/*----------------------------------*/
+# /*----------------------------------*/
+#' ## Unconditional Gaussian geostatistical Simulation
+# /*----------------------------------*/
 
 gen_coefs <- function(mean, psill, range, coef_name, nsim, xy) {
-  
   g_N <- gstat(
     formula = z ~ 1,
     locations = ~ X + Y,
@@ -507,13 +505,12 @@ gen_coefs <- function(mean, psill, range, coef_name, nsim, xy) {
       range = range,
       nugget = 0,
       model = "Sph" # changed from "Exp", "Sph"
-
     ),
     nmax = 50 # number of nearest observations
   )
 
   b_sim <- predict(g_N, newdata = xy, nsim = nsim) %>%
-    data.table()%>%
+    data.table() %>%
     melt(id.vars = c("X", "Y")) %>%
     # data.table() %>%
     setnames(c("variable", "value"), c("sim", coef_name)) %>%
@@ -526,11 +523,11 @@ gen_coefs <- function(mean, psill, range, coef_name, nsim, xy) {
 
 
 
-gen_coefs_par <- function(B, geo_xy, sp_range, psill_merror){
+gen_coefs_par <- function(B, geo_xy, sp_range, psill_merror) {
   # geo_xy=xy; sp_range=400
-  #/*--------------------------------------------------------*/
+  # /*--------------------------------------------------------*/
   #' ## Generate raw coefficients
-  #/*--------------------------------------------------------*/
+  # /*--------------------------------------------------------*/
   # === ymax === #
   ymax <- gen_coefs(
     mean = 12000,
@@ -560,10 +557,10 @@ gen_coefs_par <- function(B, geo_xy, sp_range, psill_merror){
     nsim = B,
     xy = geo_xy
   ) %>%
-  .[, sd_beta := sd(beta_raw), by = sim] %>%
-  .[, mean_beta := mean(beta_raw), by = sim] %>%
-  .[, beta := pnorm(beta_raw, mean = mean_beta, sd = sd_beta)] %>%
-  .[, beta := (beta * 1.8 - 2.8) * 0.01]
+    .[, sd_beta := sd(beta_raw), by = sim] %>%
+    .[, mean_beta := mean(beta_raw), by = sim] %>%
+    .[, beta := pnorm(beta_raw, mean = mean_beta, sd = sd_beta)] %>%
+    .[, beta := (beta * 1.8 - 2.8) * 0.01]
 
   # === m_error === #
   # --- error psill --- #
@@ -581,11 +578,11 @@ gen_coefs_par <- function(B, geo_xy, sp_range, psill_merror){
     xy = geo_xy
   )
 
-  m_error_agg <- 
+  m_error_agg <-
     m_error %>%
-    .[, y_error := 12000*m_error_uncorrelated] %>%
-    .[,.(mean_y_error = sd(y_error), by = sim)] %>%
-    .[,.(mean_yield = mean(mean_y_error))]
+    .[, y_error := 12000 * m_error_uncorrelated] %>%
+    .[, .(mean_y_error = sd(y_error), by = sim)] %>%
+    .[, .(mean_yield = mean(mean_y_error))]
 
   # === split_ratio === #
   split_ratio <- gen_coefs(
@@ -631,43 +628,43 @@ gen_coefs_par <- function(B, geo_xy, sp_range, psill_merror){
   coef_data <- ymax[alpha, on = c("sim", "unique_cell_id")] %>%
     beta[., on = c("sim", "unique_cell_id")] %>%
     m_error[., on = c("sim", "unique_cell_id")] %>%
-    split_ratio[., on =c("sim", "unique_cell_id")]%>%
-    mu_1[., on =c("sim", "unique_cell_id")]%>%
-    mu_2[., on =c("sim", "unique_cell_id")]%>%
-    mu_3[., on =c("sim", "unique_cell_id")]%>%
-    .[,`:=`(
-      alpha1 = alpha*split_ratio,
-      alpha2 = alpha*(1-split_ratio),
-      beta1  = beta*split_ratio,
-      beta2  = beta*(1-split_ratio),
-      ymax1  = ymax*split_ratio,
-      ymax2  = ymax*(1-split_ratio),
+    split_ratio[., on = c("sim", "unique_cell_id")] %>%
+    mu_1[., on = c("sim", "unique_cell_id")] %>%
+    mu_2[., on = c("sim", "unique_cell_id")] %>%
+    mu_3[., on = c("sim", "unique_cell_id")] %>%
+    .[, `:=`(
+      alpha1 = alpha * split_ratio,
+      alpha2 = alpha * (1 - split_ratio),
+      beta1 = beta * split_ratio,
+      beta2 = beta * (1 - split_ratio),
+      ymax1 = ymax * split_ratio,
+      ymax2 = ymax * (1 - split_ratio),
       beta_raw = NULL,
       sd_beta = NULL,
       mean_beta = NULL
     )]
 
-  #/*------------------------------------------------------*/
-  #' ## Generate errors (make m_error correlated with beta) 
-  #/*------------------------------------------------------*/
+  # /*------------------------------------------------------*/
+  #' ## Generate errors (make m_error correlated with beta)
+  # /*------------------------------------------------------*/
 
-  coef_data[, beta_norm := (beta - mean(beta))/sd(beta)] %>% 
-    .[, mu1_norm := (mu_1 - mean(mu_1))/sd(mu_1)]%>%
-    .[, mu2_norm := (mu_2 - mean(mu_2))/sd(mu_2)]%>%
-    .[, mu3_norm := (mu_3 - mean(mu_3))/sd(mu_3)]%>%
-    .[, m_error_raw := 0.6 * beta_norm + sqrt(1 - 0.6 ^ 2) * mu1_norm] %>% 
-    .[, m_error := m_error_raw * sd(m_error_uncorrelated)] %>% 
-    ##== create irrelevant coefficints but are correlated with beta==##
-    .[, theta_1 := 0.6 * beta_norm + sqrt(1 - 0.6 ^ 2) * mu2_norm] %>% 
-    .[, theta_2 := 0.8 * beta_norm + sqrt(1 - 0.6 ^ 2) * mu3_norm] %>%
+  coef_data[, beta_norm := (beta - mean(beta)) / sd(beta)] %>%
+    .[, mu1_norm := (mu_1 - mean(mu_1)) / sd(mu_1)] %>%
+    .[, mu2_norm := (mu_2 - mean(mu_2)) / sd(mu_2)] %>%
+    .[, mu3_norm := (mu_3 - mean(mu_3)) / sd(mu_3)] %>%
+    .[, m_error_raw := 0.6 * beta_norm + sqrt(1 - 0.6^2) * mu1_norm] %>%
+    .[, m_error := m_error_raw * sd(m_error_uncorrelated)] %>%
+    ## == create irrelevant coefficints but are correlated with beta==##
+    .[, theta_1 := 0.6 * beta_norm + sqrt(1 - 0.6^2) * mu2_norm] %>%
+    .[, theta_2 := 0.8 * beta_norm + sqrt(1 - 0.6^2) * mu3_norm] %>%
     .[, `:=`(
       beta_norm = NULL,
       m_error_raw = NULL,
       mu_1 = NULL,
       mu_2 = NULL,
       mu_3 = NULL,
-      mu1_norm = NULL, 
-      mu2_norm = NULL, 
+      mu1_norm = NULL,
+      mu2_norm = NULL,
       mu3_norm = NULL,
       split_ratio = NULL
       # m_error_uncorrelated = NULL
@@ -693,24 +690,24 @@ gen_yield_MB <- function(ymax, alpha, beta, N) {
 # /*----------------------------------*/
 #' ## generate application error (+-20)
 # /*----------------------------------*/
-app_error_fn <- function(data){
- # data = data
+app_error_fn <- function(data) {
+  # data = data
 
-  x <- rnorm(nrow(data), sd=5)
+  x <- rnorm(nrow(data), sd = 5)
   x <- x[x > -20 & x < 20]
 
-  if (length(x)!=nrow(data)){
+  if (length(x) != nrow(data)) {
     repeat {
       lack_no <- nrow(data) - length(x)
-      y <- rnorm(lack_no, sd=5)
+      y <- rnorm(lack_no, sd = 5)
       y <- y[y > -20 & y < 20]
-      if (length(y) == lack_no){
-      break
+      if (length(y) == lack_no) {
+        break
       }
     }
-  z <- c(x,y)
+    z <- c(x, y)
   } else {
-  z <- x
+    z <- x
   }
   return(z)
 }
@@ -733,7 +730,7 @@ price_table <- data.table(
 #' # Generate Cell-Level Field Data
 # /*=================================================*/
 
-prepare_raw_data <- function(i, field, coef_data_m, coef_data_t, app_error="no") {
+prepare_raw_data <- function(i, field, coef_data_m, coef_data_t, app_error = "no") {
   print(paste0("working on ", i, " th iteration."))
   # i=1; x=1
   # field=field; coef_data_m=coef_data[sim == x, ]; coef_data_t=coef_data[sim == ifelse(x + 1 >= max(sim), 1, x + 1), ]
@@ -745,7 +742,7 @@ prepare_raw_data <- function(i, field, coef_data_m, coef_data_t, app_error="no")
   # === merge field data with the coefs data ===#
   data <- coef_data_m[data.table(field), on = "unique_cell_id"] %>%
     .[, opt_N := (log(pN) - log(-pCorn * ymax * beta) - alpha) / beta]
-    
+
 
   test_data <- coef_data_t[data.table(field), on = "unique_cell_id"] %>%
     .[, opt_N := (log(pN) - log(-pCorn * ymax * beta) - alpha) / beta]
@@ -757,7 +754,7 @@ prepare_raw_data <- function(i, field, coef_data_m, coef_data_t, app_error="no")
   #     tm_fill(col = "opt_N")
 
   # /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-  #' treatment N rates 
+  #' treatment N rates
   # /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
   # === define experimental N rate ===#
   all_opt_N <- data[, opt_N]
@@ -767,32 +764,31 @@ prepare_raw_data <- function(i, field, coef_data_m, coef_data_t, app_error="no")
   N_levels <- seq(
     quantile(all_opt_N, prob = 0.05) - 20,
     quantile(all_opt_N, prob = 0.95) + 20,
-    length = 5 
+    length = 5
   ) %>%
     round()
 
-  data <- assign_rates(st_as_sf(data), N_levels) %>% 
-    data.table()%>%
-    .[!(subplot_id %in% c(1:3, 54:56)),]
+  data <- assign_rates(st_as_sf(data), N_levels) %>%
+    data.table() %>%
+    .[!(subplot_id %in% c(1:3, 54:56)), ]
 
-  test_data <- assign_rates(st_as_sf(test_data), N_levels) %>% 
-    data.table()%>%
-    .[!(subplot_id %in% c(1:3, 54:56)),]
+  test_data <- assign_rates(st_as_sf(test_data), N_levels) %>%
+    data.table() %>%
+    .[!(subplot_id %in% c(1:3, 54:56)), ]
 
 
-  if(app_error=="no"){
-  # /*~~~~~~~~~~~~~~~~~~~~~~*/
-  #' No application error
-  # /*~~~~~~~~~~~~~~~~~~~~~~*/
-    data[,aa_n := rate]
-    test_data[,aa_n := rate]
-
+  if (app_error == "no") {
+    # /*~~~~~~~~~~~~~~~~~~~~~~*/
+    #' No application error
+    # /*~~~~~~~~~~~~~~~~~~~~~~*/
+    data[, aa_n := rate]
+    test_data[, aa_n := rate]
   } else {
-  # /*~~~~~~~~~~~~~~~~~~~~~~*/
-  #' Include application error
-  # /*~~~~~~~~~~~~~~~~~~~~~~*/
-    data <- data %>% .[,aa_n := rate + app_error_fn(.)]
-    test_data <- test_data %>% .[,aa_n := rate + app_error_fn(.)]
+    # /*~~~~~~~~~~~~~~~~~~~~~~*/
+    #' Include application error
+    # /*~~~~~~~~~~~~~~~~~~~~~~*/
+    data <- data %>% .[, aa_n := rate + app_error_fn(.)]
+    test_data <- test_data %>% .[, aa_n := rate + app_error_fn(.)]
   }
 
   # ggplot(data)+
@@ -803,25 +799,25 @@ prepare_raw_data <- function(i, field, coef_data_m, coef_data_t, app_error="no")
   # /*~~~~~~~~~~~~~~~~~~~~~~*/
 
   data %<>% .[, det_yield := gen_yield_MB(ymax, alpha, beta, aa_n)] %>%
-      # === error ===#
+    # === error ===#
     .[, yield := det_yield * (1 + m_error)] %>%
-    .[, yield_error := det_yield*m_error] %>%
-      # === keep the relevant vars ===#
+    .[, yield_error := det_yield * m_error] %>%
+    # === keep the relevant vars ===#
     .[, .(
       yield, opt_N, rate, aa_n, alpha, beta, ymax, m_error, yield_error, alpha1, alpha2, beta1, beta2, ymax1, ymax2,
       theta_1, theta_2, subplot_id, strip_id, padding, X, Y, unique_cell_id
-    )]%>%
-    .[,sim := i]
+    )] %>%
+    .[, sim := i]
 
   test_data %<>% .[, det_yield := gen_yield_MB(ymax, alpha, beta, aa_n)] %>%
-      # === error ===#
+    # === error ===#
     .[, yield := det_yield * (1 + m_error)] %>%
-      # === keep the relevant vars ===#
+    # === keep the relevant vars ===#
     .[, .(
       yield, opt_N, rate, aa_n, alpha, beta, m_error, ymax, alpha1, alpha2, beta1, beta2, ymax1, ymax2,
       theta_1, theta_2, subplot_id, strip_id, padding, X, Y, unique_cell_id
-    )]%>%
-    .[,sim := i]
+    )] %>%
+    .[, sim := i]
 
 
   return(
@@ -836,7 +832,7 @@ prepare_raw_data <- function(i, field, coef_data_m, coef_data_t, app_error="no")
 # /*=================================================*/
 #' # Aggregate Cell-Level Field Data to Subplot-Level
 # /*=================================================*/
-prepare_data_for_sim <- function(reg_raw_data, test_raw_data){
+prepare_data_for_sim <- function(reg_raw_data, test_raw_data) {
 
   # /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
   #' ### Aggregate data by analysis unit (by subplot)
@@ -848,7 +844,7 @@ prepare_data_for_sim <- function(reg_raw_data, test_raw_data){
     yield = mean(yield),
     opt_N = mean(opt_N),
     rate = mean(rate),
-    aa_n = mean(aa_n), 
+    aa_n = mean(aa_n),
     alpha = mean(alpha),
     beta = mean(beta),
     ymax = mean(ymax),
@@ -863,19 +859,19 @@ prepare_data_for_sim <- function(reg_raw_data, test_raw_data){
     padding = mean(padding),
     X = mean(X),
     Y = mean(Y)
-  ), by = .(subplot_id, strip_id)]%>%
-  .[,unique_subplot_id:=paste0(strip_id,"_",subplot_id)]%>%
-  .[, `:=`(
-    strip_id = NULL,
-    subplot_id = NULL
-  )]  
+  ), by = .(subplot_id, strip_id)] %>%
+    .[, unique_subplot_id := paste0(strip_id, "_", subplot_id)] %>%
+    .[, `:=`(
+      strip_id = NULL,
+      subplot_id = NULL
+    )]
 
   test_agg_data <- test_raw_data[, .(
     sim = mean(sim),
     yield = mean(yield),
     opt_N = mean(opt_N),
     rate = mean(rate),
-    aa_n = mean(aa_n), 
+    aa_n = mean(aa_n),
     alpha = mean(alpha),
     beta = mean(beta),
     ymax = mean(ymax),
@@ -890,12 +886,12 @@ prepare_data_for_sim <- function(reg_raw_data, test_raw_data){
     padding = mean(padding),
     X = mean(X),
     Y = mean(Y)
-  ), by = .(subplot_id, strip_id)]%>%
-  .[,unique_subplot_id:=paste0(strip_id,"_",subplot_id)]%>%
-  .[, `:=`(
-    strip_id = NULL,
-    subplot_id = NULL
-  )]
+  ), by = .(subplot_id, strip_id)] %>%
+    .[, unique_subplot_id := paste0(strip_id, "_", subplot_id)] %>%
+    .[, `:=`(
+      strip_id = NULL,
+      subplot_id = NULL
+    )]
 
   return(
     list(
