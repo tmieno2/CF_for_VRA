@@ -1,6 +1,6 @@
-#/*----------------------------------*/
+# /*----------------------------------*/
 #' ## Preparation
-#/*----------------------------------*/
+# /*----------------------------------*/
 library(here)
 library(tmap)
 library(sp)
@@ -45,14 +45,14 @@ set.seed(39476)
 
 coef_data_low <- 
   gen_coefs_par(
-    B = b, 
+    B = b,
     geo_xy = xy,
     sp_range = Range,
     psill_merror = Error_small
     )
 
 
-saveRDS(coef_data_low, here("Shared/Data/for_Simulations", paste0('coefficients_sprange_',Range,'_low_error.rds')))
+saveRDS(coef_data_low, here("Shared/Data/for_Simulations", paste0("coefficients_sprange_", Range, "_low_error.rds")))
 
 
 #/*-------------------------------------*/
@@ -66,7 +66,7 @@ set.seed(57864)
 
 coef_data_high <- 
   gen_coefs_par(
-    B = b, 
+    B = b,
     geo_xy = xy,
     sp_range = Range,
     psill_merror = Error_large

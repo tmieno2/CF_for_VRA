@@ -1,8 +1,8 @@
 # /*===== Run on R GUI =====*/
 
-#/*----------------------------------*/
+# /*----------------------------------*/
 #' ## Preparation
-#/*----------------------------------*/
+# /*----------------------------------*/
 library(grf)
 library(data.table)
 library(tidyverse)
@@ -25,11 +25,12 @@ pN <- price_table[2, pN]
 # /*=================================================*/
 
 # === set up for parallel computations === #
-plan(multicore, workers = availableCores()-2)
-options(future.globals.maxSize= 850*1024^2)
+plan(multicore, workers = availableCores() - 2)
+options(future.globals.maxSize = 850 * 1024^2)
 
 # --- modeling scenario --- #
-var_ls_variations <- list(
+var_ls_variations <-
+  list(
     c("alpha", "beta", "ymax"),
     c("alpha", "beta", "ymax", "theta_1", "theta_2"),
     c("alpha1", "alpha2", "beta1", "beta2", "ymax1", "ymax2"),
