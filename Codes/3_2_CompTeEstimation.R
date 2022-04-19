@@ -48,7 +48,7 @@ true_te_dt <-
 
 
 # /*================================================================*/
-#' # (1) Treatment Effect Calculation by CF-base, RF, BRF
+#' # (1) Treatment Effect Estimation by CF-base, RF, BRF
 # /*================================================================*/
 # === all the cases to be considered === #
 te_var_ls_variations <- list(
@@ -61,18 +61,12 @@ te_case_data <- expand.grid(
   ) %>%
   tibble()
 
-
-# === set up for parallel computations === #
-plan(multicore, workers = availableCores()-2)
-options(future.globals.maxSize= 850*1024^2)
-set.seed(1378)
-
-
-# === treatment effect calculation === #
+# === treatment effect estimation === #
+set.seed(1378)   	
 forest_te_dt <- 
 	te_case_data %>%
 	mutate(
-		te_data = future_lapply(
+		te_data = lapply(
 			seq_len(nrow(.)),
 			function(x) {
 				get_te_dt(
@@ -82,7 +76,7 @@ forest_te_dt <-
             	rates_ls = N_levels,
             	Method = .$Method[[x]]
             	)
-			}, future.seed = TRUE
+			}
     	)
   	)%>%
   	unnest(., cols= "te_data")%>%
@@ -93,7 +87,7 @@ forest_te_dt <-
 
 
 # /*================================================================*/
-#' # (2) Treatment Effect Calculation by CNN
+#' # (2) Treatment Effect Estimation by CNN
 # /*================================================================*/
 
 # === load CNN results (case: aabbyytt) === #

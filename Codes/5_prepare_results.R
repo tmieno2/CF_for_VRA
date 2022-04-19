@@ -83,32 +83,31 @@ field_subplot_sf <-
 
 saveRDS(field_subplot_sf, here("Shared/Results/for_writing/sample_field_subplot_sf.rds"))
 
-
 field_subplot_test_dt <- 
   sample_test_cell_dt %>%
   .[padding==1,] %>%
-  group_by(subplot_id, strip_id) %>%
-  summarise(
+  .[,.(
     sim = mean(sim),
-      yield = mean(yield),
-      opt_N = mean(opt_N),
-      rate = mean(rate),
-      aa_n = mean(aa_n), 
-      alpha = mean(alpha),
-      beta = mean(beta),
-      ymax = mean(ymax),
-      m_error = mean(m_error),
-      alpha1 = mean(alpha1),
-      alpha2 = mean(alpha2),
-      beta1 = mean(beta1),
-      beta2 = mean(beta2),
-      ymax1 = mean(ymax1),
-      ymax2 = mean(ymax2),
-      theta_1 = mean(theta_1),
-      theta_2 = mean(theta_2)
-  ) %>%
-  mutate(unique_subplot_id = paste0(strip_id,"_",subplot_id))%>%
-  dplyr::select(!c(strip_id, subplot_id))
+    yield = mean(yield),
+    opt_N = mean(opt_N),
+    rate = mean(rate),
+    aa_n = mean(aa_n), 
+    alpha = mean(alpha),
+    beta = mean(beta),
+    ymax = mean(ymax),
+    m_error = mean(m_error),
+    alpha1 = mean(alpha1),
+    alpha2 = mean(alpha2),
+    beta1 = mean(beta1),
+    beta2 = mean(beta2),
+    ymax1 = mean(ymax1),
+    ymax2 = mean(ymax2),
+    theta_1 = mean(theta_1),
+    theta_2 = mean(theta_2)
+    ), by = .(subplot_id, strip_id)
+  ] %>%
+  .[,unique_subplot_id := paste0(strip_id,"_",subplot_id)] %>%
+  .[, `:=` (strip_id=NULL, subplot_id=NULL)]
 
 saveRDS(field_subplot_test_dt, here("Shared/Results/for_writing/field_subplot_test_dt.rds"))
 

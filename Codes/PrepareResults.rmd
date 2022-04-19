@@ -2,6 +2,7 @@
 
 ```{r packages, cache = FALSE, include = FALSE}
 # === packages ===#
+library(here)
 # --- data wrangling--- #
 library(sf)
 library(data.table)
@@ -58,7 +59,8 @@ set_flextable_defaults(
 )
 ```
 
-# Read the data
+
+# Read Field Data
 
 ```{r setup, warning=FALSE, message=FALSE, cache= FALSE}
 # === plot-level field data set  === #
@@ -78,15 +80,7 @@ field_cell_sf <-
 ```
 
 
-# Illustrative yield response curve
-
-+ show to *which degree N affects yield* (yield response to N) 
-+ show how the relation between yield estimation error and the effect of N on yield increase is ()
-
-
-## MB yield response to N
-+ for comment 8
-+ The figure illustrates how yield responds to N
+# Illustrative Examples of MB Yield Response Curves (Figure 2)
 
 ```{r}
 # /*--------------------------------*/
@@ -156,8 +150,6 @@ vis_MB_curve <-
   geom_line(
     aes(x = N, y = value, group = factor(group))
   ) +
-  # geom_point(data = sub_dt, aes(x = opt_N, y = value, alpha = "Yield at EONR"), color = "red", size = 1.5) +
-  # geom_segment(data = sub_dt, aes(x = N, xend=N, y = value, yend=-Inf), linetype = "dashed") +
   scale_alpha_manual(
     name = NULL,
     values = 1,
@@ -174,16 +166,10 @@ vis_MB_curve <-
 ```
 
 
-## MB yield response and estimated yield response by BRF
-+ As a response to comment 6
-+ The figure shows the true yield response function and predicted yields at five N experiment by BRF
+# Illustrative Examples of Yield Response Curves Estimated by RF and BRF (Figure 7)
 
 
 ```{r prepare-data-vis, cache = TRUE}
-# /*===========================================*/
-#' =  Prepare illustrative yield response curve estimated by RF =
-# /*===========================================*/
-
 # /*--------------------------------*/
 #' ## Preparation
 # /*--------------------------------*/
@@ -195,17 +181,6 @@ source(here("GitControlled/Codes/0_2_functions_main_sim.R"))
 test_subplot_dt <- 
   here("Shared/Results/for_writing/test_subplot_dt.rds") %>%
   readRDS()
-
-# subplots_infiled <- test_subplot_dt[,unique_subplot_id] %>% unique()
-
-# cnn_pred <- 
-#   here("Shared/Results/CNN_rawRes_onEval/alldata_model4.csv") %>%
-#   fread() %>%
-#   .[, c("subplot_id", "strip_id") := tstrsplit(id, "_", fixed=TRUE)] %>%
-#   .[,unique_subplot_id := paste0(strip_id,"_",subplot_id)] %>%
-#   .[sim==x & unique_subplot_id %in% subplots_infiled,] %>%
-#   .[,.(sim, unique_subplot_id, rate, pred)] %>%
-#   setnames(names(.), c("sim", "unique_subplot_id", "N", "CNN"))
 
 # /*===== Train ML =====*/
 temp_var_ls <-
@@ -267,11 +242,6 @@ res_pred <-
 
 
 # /*===== Preparation for plots =====*/
-# new one
-# c("8_43", "2_20")
-# old one
-# c("2_18", "6_47")
-
 vis_res_true <-
   res_true[unique_subplot_id %in% c("2_18", "6_47")]
 
@@ -323,13 +293,6 @@ vis_MB_BRF_y <-
     linetype = 2,
     size = 0.3
   ) +
-  # annotate(
-  #   "text",
-  #   x = 137,  y = 9700,
-  #   label = "Observed Rate \n = 117 (kg/ha)",
-  #   family = "Times",
-  #   size = 2
-  # ) +
   annotate(
     "text",
     x = 180, y = 9400,
@@ -356,56 +319,9 @@ vis_MB_BRF_y <-
 ```
 
 
-
-# Variogram Prameter Table
-
-```{r}
-variogram_tb <-
-  data.frame(
-    Parameters = c("alpha_ij", "beta_ij", "ymax_ij", "varepsilon_ij"),
-    Range = c(400, 400, 400, 400),
-    Mean = c(-0.5, format(0), 12000, format(0)),
-    Nugget = format(c(0, 0, 0, 0)),
-    Sill = c(0.02, format(1, nsmall = 1), 2000000, 0.015)
-  ) %>%
-  flextable() %>%
-  compose(i = 1, j = 1, part = "body", value = as_paragraph(as_i("\U03B1"), as_sub(as_i("i,j")))) %>%
-  compose(i = 2, j = 1, part = "body", value = as_paragraph(as_i("\U03B2"), as_sub(as_i("i,j")))) %>%
-  compose(i = 3, j = 1, part = "body", value = as_paragraph(as_i("ymax"), as_sub(as_i("i,j")))) %>%
-  # compose(i = 4, j = 1, part = "body", value = as_paragraph(as_i("\U03B5"), as_sub(as_i("i,j")))) %>%
-  compose(i = 4, j = 1, part = "body", value = as_paragraph("r", as_sup(as_i(" \U03B5")), as_sub(as_i("i,j")))) %>%
-  compose(i = 1, j = 5, part = "body", value = as_paragraph("2.0", "\U2A2F", "10", as_sup("-2"))) %>%
-  compose(i = 3, j = 3, part = "body", value = as_paragraph("1.2", "\U2A2F", "10", as_sup("4"))) %>%
-  compose(i = 3, j = 5, part = "body", value = as_paragraph("2.0", "\U2A2F", "10", as_sup("6"))) %>%
-  compose(i = 4, j = 5, part = "body", value = as_paragraph("1.5", "\U2A2F", "10", as_sup("-2"))) %>%
-  align(align = "center", part = "all") %>%
-  align(j = 1, align = "left", part = "all") %>%
-  # --- change headers labels--- #
-  set_header_labels(values = list(
-    Parameters = "Parameters",
-    Range = "Range (m)",
-    Mean = "Mean",
-    Nugget = "Nugget",
-    Sill = "Sill"
-  )) %>%
-  #- change the borders just for consistency with other tables -#
-  hline_bottom(part = "all") %>%
-  hline_top(part = "header") %>%
-  footnote(
-    value = as_paragraph("NOTE: Only in ", as_i("ymax"), " are consistent units of measurement used for Mean, Nugget, and Sill ", "(", as_i("kg"), ")."),
-    ref_symbols = NA
-  ) %>%
-  # set_caption(
-  #   caption = "Table C.1: The parameters for the Variogram models",
-  #   style = "Table Caption"
-  # ) %>%
-  autofit()
-```
-
-
 # Field Maps
 
-## Division of field: plots, subplots and cells (Visualization)
+## Division of Field: plots, subplots and cells (Figure 1)
 
 ```{r field-map-visualization, dependson = "setup"}
 
@@ -507,10 +423,7 @@ field_structure <-
   theme_void()
 ```
 
-
-# Distribution Map of Field Characteristics
-
-## Experimental N design
+## Experimental N Design (Figure 3 Left)
 
 ```{r, dependson = "setup"}
 field_Ndesign <-
@@ -527,7 +440,7 @@ field_Ndesign <-
 ```
 
 
-## Yield map
+## Yield Map (Figure 3 Right)
 
 ```{r, dependson = "setup"}
 # === subplot-level === #
@@ -540,13 +453,8 @@ vis_yield_subplot <-
   theme_figure
 ```
 
-## opt_N map
 
-```{r, dependson = "setup"}
-
-```
-
-## Field Characteristics Map
+## Field Characteristics Map (Appendix: Figure C.1)
 
 ```{r, dependson = "setup"}
 # === alpha map === #
@@ -595,6 +503,8 @@ field_optN <-
   theme_figure
 ```
 
+## Low and High Yield Error Maps (Appendix: Figure G.1)
+
 ```{r}
 # === Low error field map === #
 field_cell_low_sf <-
@@ -623,9 +533,10 @@ field_m_error_high <-
   theme_figure
 ```
 
-# Results
 
-## Source Results
+# Simulation Results
+
+## Load the Results
 
 ```{r source-results, message=FALSE, warning=FALSE, cache= FALSE}
 # === Load Results === #
@@ -642,13 +553,14 @@ res_y_test <-
 ```
 
 
-# Yield prediction results
+# Yield Prediction Results from the Main Simulations
 
-## Report RMSE of of Yield Prediction (RF, BRF, CNN)
+## Summary Table for RMSE of of Yield Prediction
+
+### on Training Datasets (Appendix: Table F.2)
 
 ```{r, dependson = "source-results"}
-# ==== Summary Table ====#
-# --- on training data sets--- #
+# /*===== On training datasets =====*/
 report_table_y_train <-
   res_y_train %>%
   .[, .(rmse_y = mean(rmse_y)), by = .(Method, Model)] %>%
@@ -675,8 +587,11 @@ report_table_y_train <-
   hline_bottom(part = "all") %>%
   hline_top(part = "header") %>%
   autofit()
+```
 
+### on Testing Datasets (Table 2)
 
+```{r, dependson = "source-results"}
 # --- on testing data sets--- #
 report_table_y <-
   res_y_test %>%
@@ -707,34 +622,9 @@ report_table_y <-
 ```
 
 
-## Figure (RMSE of EONR vs RMSE of yield for RF and BRF)
+## The Relationship between yield and EONR Prediction Performances under the aabbyytt scenario (Figure 8)
 
 ```{r}
-# fig_y_optN <-
-# res_y_test %>%
-# .[Method %in% c("RF", "BRF", "CNN")] %>%
-# ggplot(aes(x = rmse_y, y = rmse_optN)) +
-# geom_point(size = 0.5) +
-# facet_grid(Model ~ Method) +
-# geom_smooth(method = "lm", se = FALSE, color = "red", size = 0.7) +
-# stat_regline_equation(
-#   label.x = 2050, label.y = 90,
-#   aes(label = ..rr.label..),
-#   size = 3
-# ) +
-# guides(
-#   fill = guide_legend(keywidth = 1, keyheight = 1),
-#   linetype = guide_legend(keywidth = 3, keyheight = 1),
-#   colour = guide_legend(keywidth = 3, keyheight = 1)
-# ) +
-# ylim(NA, 95) +
-# labs(y = " RMSE of EONR Estimation (kg/ha)") +
-# labs(x = " RMSE of Yield Prediction (kg/ha)") +
-# theme_dist
-```
-
-```{r}
-# sim_no <- c(300, 600, 900)
 sim_no <- c(10, 20, 30)
 
 vis_RMSE_y_eonr <-
@@ -749,20 +639,14 @@ vis_RMSE_y_eonr <-
   theme_dist +
   labs(fill = "Simulation Round", shape = "Method") +
   guides(fill = guide_legend(override.aes = list(shape = 21))) +
-  # guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
-  # guides(shape=guide_legend(nrow=2, byrow=TRUE)) +
   theme(legend.position = "bottom", legend.box = "vertical", legend.margin = margin()) +
   labs(fill = "Simulation Round", shape = "Method")
 ```
 
 
 
+## True Yields without Error vs Predicted Yields (Appendix: Figure E.1)
 
-
-
-## True Yields vs Predicted Yields by models
-+ for comment 7
-+ a figure plots true yields (without error, epsilon) against predicted yields by model (without CF of course) for a single simulation round with RMSE printed for each model.
 
 ```{r}
 sample_simRes_test_y <- readRDS(here("Shared/Results/for_writing/sample_simRes_test_y.rds"))
@@ -810,7 +694,7 @@ vis_y_pred <-
 
 
 
-## Yield Prediction vs EONR estimation : Count Table in terms of profit loss
+## Yield Prediction vs EONR estimation : Count Table in terms of profit loss (Table 3)
 
 ```{r, dependson = "source-results"}
 # === Preparation === #
@@ -879,7 +763,6 @@ report_summary_res_CNN_RF_BRF <-
     value = as_paragraph("NOTE: #Y indicates the number of simulation rounds in which the model provided the lowest RMSE for yield prediction. #YP indicates the number of simulation rounds in which the model provided the lower RMSE of yield prediction and the highest profit at the same time."),
     ref_symbols = NA
   ) %>%
-  # set_table_properties(width = .7, layout = "autofit") %>%
   fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
   autofit() %>%
   width(j = c(3:4, 6:7, 9:10), width = 0.6) %>%
@@ -889,7 +772,9 @@ report_summary_res_CNN_RF_BRF <-
 ```
 
 
-# EONR Estimation
+# EONR Estimation from the Main Simulations
+
+## Distributions of RMSE of EONR estimation over simulations (Figure 4)
 
 ```{r, dependson = "source-results"}
 # /*----------------------------------*/
@@ -915,7 +800,13 @@ plot_dis_optN <-
   labs(x = "RMSE (kg/ha)") +
   theme_dist
 
+```
 
+## Summary Table for RMSE of EONR estimation
+
+### on Training Datasets (Appendix: Table F.1)
+
+```{r, dependson = "source-results"}
 # /*----------------------------------*/
 #' ## Summary Table
 # /*----------------------------------*/
@@ -983,7 +874,11 @@ report_table_optN_train <-
   width(j = c(3, 4, 6, 7, 9, 10, 12, 13), width = 0.6) %>%
   width(j = c(2, 5, 8, 11), width = 0.1)
 
+```
 
+### on Testing Datasets (Table 1)
+
+```{r, dependson = "source-results"}
 # === Summary Table (Testing Data sets) === #
 report_table_optN <-
   table_optN_prep %>%
@@ -1035,9 +930,9 @@ report_table_optN <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 ```
 
-# Profit Loss
 
-## Profit loss summary and distributions
+## Distributions of profit deficit over simulations (Figure 5)
+
 ```{r}
 piLoss_density <-
   allML_summary_bySim %>%
@@ -1059,7 +954,7 @@ piLoss_density <-
   theme_dist
 ```
 
-# Treatment effect comparison
+## Treatment effect comparison (Figure 6)
 
 ```{r}
 figure_te <-
@@ -1080,7 +975,56 @@ figure_te <-
   theme_dist
 ```
 
-# An Example of a Causal Tree
+# Appendix
+
+## Variogram Prameter Table (Appendix: Table C.1)
+
+```{r}
+variogram_tb <-
+  data.frame(
+    Parameters = c("alpha_ij", "beta_ij", "ymax_ij", "varepsilon_ij"),
+    Range = c(400, 400, 400, 400),
+    Mean = c(-0.5, format(0), 12000, format(0)),
+    Nugget = format(c(0, 0, 0, 0)),
+    Sill = c(0.02, format(1, nsmall = 1), 2000000, 0.015)
+  ) %>%
+  flextable() %>%
+  compose(i = 1, j = 1, part = "body", value = as_paragraph(as_i("\U03B1"), as_sub(as_i("i,j")))) %>%
+  compose(i = 2, j = 1, part = "body", value = as_paragraph(as_i("\U03B2"), as_sub(as_i("i,j")))) %>%
+  compose(i = 3, j = 1, part = "body", value = as_paragraph(as_i("ymax"), as_sub(as_i("i,j")))) %>%
+  # compose(i = 4, j = 1, part = "body", value = as_paragraph(as_i("\U03B5"), as_sub(as_i("i,j")))) %>%
+  compose(i = 4, j = 1, part = "body", value = as_paragraph("r", as_sup(as_i(" \U03B5")), as_sub(as_i("i,j")))) %>%
+  compose(i = 1, j = 5, part = "body", value = as_paragraph("2.0", "\U2A2F", "10", as_sup("-2"))) %>%
+  compose(i = 3, j = 3, part = "body", value = as_paragraph("1.2", "\U2A2F", "10", as_sup("4"))) %>%
+  compose(i = 3, j = 5, part = "body", value = as_paragraph("2.0", "\U2A2F", "10", as_sup("6"))) %>%
+  compose(i = 4, j = 5, part = "body", value = as_paragraph("1.5", "\U2A2F", "10", as_sup("-2"))) %>%
+  align(align = "center", part = "all") %>%
+  align(j = 1, align = "left", part = "all") %>%
+  # --- change headers labels--- #
+  set_header_labels(values = list(
+    Parameters = "Parameters",
+    Range = "Range (m)",
+    Mean = "Mean",
+    Nugget = "Nugget",
+    Sill = "Sill"
+  )) %>%
+  #- change the borders just for consistency with other tables -#
+  hline_bottom(part = "all") %>%
+  hline_top(part = "header") %>%
+  footnote(
+    value = as_paragraph("NOTE: Only in ", as_i("ymax"), " are consistent units of measurement used for Mean, Nugget, and Sill ", "(", as_i("kg"), ")."),
+    ref_symbols = NA
+  ) %>%
+  # set_caption(
+  #   caption = "Table C.1: The parameters for the Variogram models",
+  #   style = "Table Caption"
+  # ) %>%
+  autofit()
+```
+
+
+
+## An Example of a Causal Tree (Appendix: Figure A.1)
 
 ```{r, cache = TRUE}
 # /*=================================================*/
@@ -1131,9 +1075,7 @@ opfit <- prune(tree, opcp)
 # fancyRpartPlot(opfit, sub="", shadow.col = "")
 ```
 
-# Various Error Size (Appendix)
-
-## EONR Estimation
+## Various Error Size - EONR Estimation (Appendix: Table G.1)
 
 ```{r, cache = F}
 # === Load the data === #
@@ -1220,8 +1162,7 @@ table_optN_low_high <-
 ```
 
 
-
-## Yield Prediction
+## Various Error Size - Yield Prediction (Appendix: Table G.2)
 
 ```{r}
 # /*--------------------------------*/

@@ -277,15 +277,6 @@ saveRDS(cnn_summry_bySim, here("Shared/Results/for_writing/cnn_summry_bySim.rds"
 # ==========================================================================
 # Merge Forest results and CNN results
 # ==========================================================================
-# === Merge === #
-
-allML_summary_raw <- 
-    rbind(forest_optN_piLoss, cnn_optN_piLoss[, names(forest_optN_piLoss), with = FALSE])
-
-saveRDS(allML_summary_raw, here("Shared/Results/for_writing/allML_summary_raw.rds"))
-
-
-
 allML_summary_bySim <-
   rbind(forest_summary_bySim, cnn_summry_bySim) %>%
   .[, Method := factor(Method, levels = c("RF", "BRF", "CNN", "CF_base"))] %>%
@@ -295,15 +286,6 @@ saveRDS(allML_summary_bySim, here("Shared/Results/for_writing/allML_summary_bySi
 
 
 
-allML_summary_bySim <- readRDS(here("Shared/Results/for_writing/allML_summary_bySim.rds"))
-
-
-allML_summary_bySim %>% 
-    .[type=="test" & Model == "aabbyytt"] %>%
-    .[sim %in% agg_slope_model4$sim]
-
-allML_summary_bySim %>% 
-    .[type=="test" & Model == "aabbyytt" & sim==1]
 
 
 
