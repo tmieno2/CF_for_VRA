@@ -1,16 +1,6 @@
-## ----set-up, cache = F------------------------------------------------------------------------
-library(knitr)
-library(here)
-
-here::i_am("GitControlled/Writing/manuscript_cea.rmd")
-
-knitr::opts_chunk$set(
-  # cache = TRUE
-  cache = FALSE
-)
-
-## ----packages, cache = FALSE, include = FALSE-------------------------------------------------
+## ----packages, cache = FALSE, include = FALSE---------------------------------
 # === packages ===#
+library(here)
 # --- data wrangling--- #
 library(sf)
 library(data.table)
@@ -36,7 +26,7 @@ library(officedown)
 library(modelsummary)
 
 
-## ---------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 theme_figure <-
   theme(
     plot.title = element_text(hjust = 0.5),
@@ -65,7 +55,7 @@ set_flextable_defaults(
 )
 
 
-## ----setup, warning=FALSE, message=FALSE, cache= FALSE----------------------------------------
+## ----setup, warning=FALSE, message=FALSE, cache= FALSE------------------------
 # === plot-level field data set  === #
 field_plot_sf <-
   here("Shared/Results/for_writing/sample_field_plot_sf.rds") %>%
@@ -82,7 +72,7 @@ field_cell_sf <-
   readRDS()
 
 
-## ---------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # /*--------------------------------*/
 #' ## Preparation
 # /*--------------------------------*/
@@ -150,8 +140,6 @@ vis_MB_curve <-
   geom_line(
     aes(x = N, y = value, group = factor(group))
   ) +
-  # geom_point(data = sub_dt, aes(x = opt_N, y = value, alpha = "Yield at EONR"), color = "red", size = 1.5) +
-  # geom_segment(data = sub_dt, aes(x = N, xend=N, y = value, yend=-Inf), linetype = "dashed") +
   scale_alpha_manual(
     name = NULL,
     values = 1,
@@ -167,11 +155,7 @@ vis_MB_curve <-
   theme_dist
 
 
-## ----prepare-data-vis, cache = TRUE-----------------------------------------------------------
-# /*===========================================*/
-#' =  Prepare illustrative yield response curve estimated by RF =
-# /*===========================================*/
-
+## ----prepare-data-vis, cache = TRUE-------------------------------------------
 # /*--------------------------------*/
 #' ## Preparation
 # /*--------------------------------*/
@@ -183,17 +167,6 @@ source(here("GitControlled/Codes/0_2_functions_main_sim.R"))
 test_subplot_dt <- 
   here("Shared/Results/for_writing/test_subplot_dt.rds") %>%
   readRDS()
-
-# subplots_infiled <- test_subplot_dt[,unique_subplot_id] %>% unique()
-
-# cnn_pred <- 
-#   here("Shared/Results/CNN_rawRes_onEval/alldata_model4.csv") %>%
-#   fread() %>%
-#   .[, c("subplot_id", "strip_id") := tstrsplit(id, "_", fixed=TRUE)] %>%
-#   .[,unique_subplot_id := paste0(strip_id,"_",subplot_id)] %>%
-#   .[sim==x & unique_subplot_id %in% subplots_infiled,] %>%
-#   .[,.(sim, unique_subplot_id, rate, pred)] %>%
-#   setnames(names(.), c("sim", "unique_subplot_id", "N", "CNN"))
 
 # /*===== Train ML =====*/
 temp_var_ls <-
@@ -281,8 +254,7 @@ vis_true_points <-
 vis_all_points <- rbind(vis_res_pred, vis_true_points)
 
 
-
-## ----make-plot-MB-BRF-y-----------------------------------------------------------------------
+## ----make-plot-MB-BRF-y-------------------------------------------------------
 vis_MB_BRF_y <-
   ggplot() +
   # --- true yield response curve --- #
@@ -307,13 +279,6 @@ vis_MB_BRF_y <-
     linetype = 2,
     size = 0.3
   ) +
-  # annotate(
-  #   "text",
-  #   x = 137,  y = 9700,
-  #   label = "Observed Rate \n = 117 (kg/ha)",
-  #   family = "Times",
-  #   size = 2
-  # ) +
   annotate(
     "text",
     x = 180, y = 9400,
@@ -339,50 +304,7 @@ vis_MB_BRF_y <-
   theme_dist
 
 
-## ---------------------------------------------------------------------------------------------
-variogram_tb <-
-  data.frame(
-    Parameters = c("alpha_ij", "beta_ij", "ymax_ij", "varepsilon_ij"),
-    Range = c(400, 400, 400, 400),
-    Mean = c(-0.5, format(0), 12000, format(0)),
-    Nugget = format(c(0, 0, 0, 0)),
-    Sill = c(0.02, format(1, nsmall = 1), 2000000, 0.015)
-  ) %>%
-  flextable() %>%
-  compose(i = 1, j = 1, part = "body", value = as_paragraph(as_i("\U03B1"), as_sub(as_i("i,j")))) %>%
-  compose(i = 2, j = 1, part = "body", value = as_paragraph(as_i("\U03B2"), as_sub(as_i("i,j")))) %>%
-  compose(i = 3, j = 1, part = "body", value = as_paragraph(as_i("ymax"), as_sub(as_i("i,j")))) %>%
-  # compose(i = 4, j = 1, part = "body", value = as_paragraph(as_i("\U03B5"), as_sub(as_i("i,j")))) %>%
-  compose(i = 4, j = 1, part = "body", value = as_paragraph("r", as_sup(as_i(" \U03B5")), as_sub(as_i("i,j")))) %>%
-  compose(i = 1, j = 5, part = "body", value = as_paragraph("2.0", "\U2A2F", "10", as_sup("-2"))) %>%
-  compose(i = 3, j = 3, part = "body", value = as_paragraph("1.2", "\U2A2F", "10", as_sup("4"))) %>%
-  compose(i = 3, j = 5, part = "body", value = as_paragraph("2.0", "\U2A2F", "10", as_sup("6"))) %>%
-  compose(i = 4, j = 5, part = "body", value = as_paragraph("1.5", "\U2A2F", "10", as_sup("-2"))) %>%
-  align(align = "center", part = "all") %>%
-  align(j = 1, align = "left", part = "all") %>%
-  # --- change headers labels--- #
-  set_header_labels(values = list(
-    Parameters = "Parameters",
-    Range = "Range (m)",
-    Mean = "Mean",
-    Nugget = "Nugget",
-    Sill = "Sill"
-  )) %>%
-  #- change the borders just for consistency with other tables -#
-  hline_bottom(part = "all") %>%
-  hline_top(part = "header") %>%
-  footnote(
-    value = as_paragraph("NOTE: Only in ", as_i("ymax"), " are consistent units of measurement used for Mean, Nugget, and Sill ", "(", as_i("kg"), ")."),
-    ref_symbols = NA
-  ) %>%
-  # set_caption(
-  #   caption = "Table C.1: The parameters for the Variogram models",
-  #   style = "Table Caption"
-  # ) %>%
-  autofit()
-
-
-## ----field-map-visualization, dependson = "setup"---------------------------------------------
+## ----field-map-visualization, dependson = "setup"-----------------------------
 
 # === Preparation === #
 ex_plot <- field_plot_sf[224, ]
@@ -395,6 +317,8 @@ ex_cells <- field_cell_sf[ex_one_subplot, , op = st_within]
 one_subplot <- ex_subplots[3, ]
 
 #-- (1) plot-level field map  --#
+
+
 plot <-
   ggplot() +
   geom_sf(data = field_plot_sf) +
@@ -480,7 +404,7 @@ field_structure <-
   theme_void()
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"-----------------------------------------------------
 field_Ndesign <-
   ggplot() +
   geom_sf(
@@ -494,7 +418,7 @@ field_Ndesign <-
   theme_figure
 
 
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"-----------------------------------------------------
 # === subplot-level === #
 vis_yield_subplot <-
   ggplot(field_subplot_sf) +
@@ -504,12 +428,16 @@ vis_yield_subplot <-
   ggtitle("(2) Simulated yield level") +
   theme_figure
 
+vis_yield_cell <-
+  ggplot(field_cell_sf) +
+  geom_sf(aes(fill = yield), size = 0) +
+  scale_fill_viridis_c() +
+  labs(fill = "Yield level\n  (kg/ha)") +
+  ggtitle("(2) Simulated yield level") +
+  theme_figure
 
-## ---- dependson = "setup"---------------------------------------------------------------------
 
-
-
-## ---- dependson = "setup"---------------------------------------------------------------------
+## ---- dependson = "setup"-----------------------------------------------------
 # === alpha map === #
 field_alpha <-
   ggplot(field_cell_sf) +
@@ -556,7 +484,11 @@ field_optN <-
   theme_figure
 
 
-## ---------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
+
+
+
+## -----------------------------------------------------------------------------
 # === Low error field map === #
 field_cell_low_sf <-
   here("Shared/Results/for_writing/sample_field_cell_low_sf.rds") %>%
@@ -584,7 +516,7 @@ field_m_error_high <-
   theme_figure
 
 
-## ----source-results, message=FALSE, warning=FALSE, cache= FALSE-------------------------------
+## ----source-results, message=FALSE, warning=FALSE, cache= FALSE---------------
 # === Load Results === #
 allML_summary_bySim <- readRDS(here("Shared/Results/for_writing/allML_summary_bySim.rds"))
 
@@ -598,9 +530,8 @@ res_y_test <-
   .[type == "test" & Method %in% c("RF", "BRF", "CNN")]
 
 
-## ---- dependson = "source-results"------------------------------------------------------------
-# ==== Summary Table ====#
-# --- on training data sets--- #
+## ---- dependson = "source-results"--------------------------------------------
+# /*===== On training datasets =====*/
 report_table_y_train <-
   res_y_train %>%
   .[, .(rmse_y = mean(rmse_y)), by = .(Method, Model)] %>%
@@ -629,6 +560,7 @@ report_table_y_train <-
   autofit()
 
 
+## ---- dependson = "source-results"--------------------------------------------
 # --- on testing data sets--- #
 report_table_y <-
   res_y_test %>%
@@ -658,32 +590,7 @@ report_table_y <-
   autofit()
 
 
-## ---------------------------------------------------------------------------------------------
-# fig_y_optN <-
-# res_y_test %>%
-# .[Method %in% c("RF", "BRF", "CNN")] %>%
-# ggplot(aes(x = rmse_y, y = rmse_optN)) +
-# geom_point(size = 0.5) +
-# facet_grid(Model ~ Method) +
-# geom_smooth(method = "lm", se = FALSE, color = "red", size = 0.7) +
-# stat_regline_equation(
-#   label.x = 2050, label.y = 90,
-#   aes(label = ..rr.label..),
-#   size = 3
-# ) +
-# guides(
-#   fill = guide_legend(keywidth = 1, keyheight = 1),
-#   linetype = guide_legend(keywidth = 3, keyheight = 1),
-#   colour = guide_legend(keywidth = 3, keyheight = 1)
-# ) +
-# ylim(NA, 95) +
-# labs(y = " RMSE of EONR Estimation (kg/ha)") +
-# labs(x = " RMSE of Yield Prediction (kg/ha)") +
-# theme_dist
-
-
-## ---------------------------------------------------------------------------------------------
-# sim_no <- c(300, 600, 900)
+## -----------------------------------------------------------------------------
 sim_no <- c(10, 20, 30)
 
 vis_RMSE_y_eonr <-
@@ -698,13 +605,11 @@ vis_RMSE_y_eonr <-
   theme_dist +
   labs(fill = "Simulation Round", shape = "Method") +
   guides(fill = guide_legend(override.aes = list(shape = 21))) +
-  # guides(fill=guide_legend(nrow=2, byrow=TRUE)) +
-  # guides(shape=guide_legend(nrow=2, byrow=TRUE)) +
   theme(legend.position = "bottom", legend.box = "vertical", legend.margin = margin()) +
   labs(fill = "Simulation Round", shape = "Method")
 
 
-## ---------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 sample_simRes_test_y <- readRDS(here("Shared/Results/for_writing/sample_simRes_test_y.rds"))
 
 # === Function for RMSE Calculation === #
@@ -747,7 +652,7 @@ vis_y_pred <-
   theme_dist
 
 
-## ---- dependson = "source-results"------------------------------------------------------------
+## ---- dependson = "source-results"--------------------------------------------
 # === Preparation === #
 prepare_count_tab <-
   res_y_test %>%
@@ -814,16 +719,15 @@ report_summary_res_CNN_RF_BRF <-
     value = as_paragraph("NOTE: #Y indicates the number of simulation rounds in which the model provided the lowest RMSE for yield prediction. #YP indicates the number of simulation rounds in which the model provided the lower RMSE of yield prediction and the highest profit at the same time."),
     ref_symbols = NA
   ) %>%
-  # set_table_properties(width = .7, layout = "autofit") %>%
   fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
   autofit() %>%
   width(j = c(3:4, 6:7, 9:10), width = 0.6) %>%
   width(j = 12, width = 0.82) %>%
-  width(j = 1, width = 0.5) %>%
+  width(j = 1, width = 0.8) %>%
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---- dependson = "source-results"------------------------------------------------------------
+## ---- dependson = "source-results"--------------------------------------------
 # /*----------------------------------*/
 #' ## Distribution of RMSE of EONR estimates
 # /*----------------------------------*/
@@ -848,6 +752,8 @@ plot_dis_optN <-
   theme_dist
 
 
+
+## ---- dependson = "source-results"--------------------------------------------
 # /*----------------------------------*/
 #' ## Summary Table
 # /*----------------------------------*/
@@ -916,6 +822,8 @@ report_table_optN_train <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
+
+## ---- dependson = "source-results"--------------------------------------------
 # === Summary Table (Testing Data sets) === #
 report_table_optN <-
   table_optN_prep %>%
@@ -967,7 +875,7 @@ report_table_optN <-
   width(j = c(2, 5, 8, 11), width = 0.1)
 
 
-## ---------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 piLoss_density <-
   allML_summary_bySim %>%
   .[type == "test", ] %>%
@@ -988,7 +896,7 @@ piLoss_density <-
   theme_dist
 
 
-## ---------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 figure_te <-
   here("Shared/Results/for_writing/dt_TEcomparison.rds") %>%
   readRDS() %>%
@@ -1007,7 +915,50 @@ figure_te <-
   theme_dist
 
 
-## ---- cache = TRUE----------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
+variogram_tb <-
+  data.frame(
+    Parameters = c("alpha_ij", "beta_ij", "ymax_ij", "varepsilon_ij"),
+    Range = c(400, 400, 400, 400),
+    Mean = c(-0.5, format(0), 12000, format(0)),
+    Nugget = format(c(0, 0, 0, 0)),
+    Sill = c(0.02, format(1, nsmall = 1), 2000000, 0.015)
+  ) %>%
+  flextable() %>%
+  compose(i = 1, j = 1, part = "body", value = as_paragraph(as_i("\U03B1"), as_sub(as_i("i,j")))) %>%
+  compose(i = 2, j = 1, part = "body", value = as_paragraph(as_i("\U03B2"), as_sub(as_i("i,j")))) %>%
+  compose(i = 3, j = 1, part = "body", value = as_paragraph(as_i("ymax"), as_sub(as_i("i,j")))) %>%
+  # compose(i = 4, j = 1, part = "body", value = as_paragraph(as_i("\U03B5"), as_sub(as_i("i,j")))) %>%
+  compose(i = 4, j = 1, part = "body", value = as_paragraph("r", as_sup(as_i(" \U03B5")), as_sub(as_i("i,j")))) %>%
+  compose(i = 1, j = 5, part = "body", value = as_paragraph("2.0", "\U2A2F", "10", as_sup("-2"))) %>%
+  compose(i = 3, j = 3, part = "body", value = as_paragraph("1.2", "\U2A2F", "10", as_sup("4"))) %>%
+  compose(i = 3, j = 5, part = "body", value = as_paragraph("2.0", "\U2A2F", "10", as_sup("6"))) %>%
+  compose(i = 4, j = 5, part = "body", value = as_paragraph("1.5", "\U2A2F", "10", as_sup("-2"))) %>%
+  align(align = "center", part = "all") %>%
+  align(j = 1, align = "left", part = "all") %>%
+  # --- change headers labels--- #
+  set_header_labels(values = list(
+    Parameters = "Parameters",
+    Range = "Range (m)",
+    Mean = "Mean",
+    Nugget = "Nugget",
+    Sill = "Sill"
+  )) %>%
+  #- change the borders just for consistency with other tables -#
+  hline_bottom(part = "all") %>%
+  hline_top(part = "header") %>%
+  footnote(
+    value = as_paragraph("NOTE: Only in ", as_i("ymax"), " are consistent units of measurement used for Mean, Nugget, and Sill ", "(", as_i("kg"), ")."),
+    ref_symbols = NA
+  ) %>%
+  # set_caption(
+  #   caption = "Table C.1: The parameters for the Variogram models",
+  #   style = "Table Caption"
+  # ) %>%
+  autofit()
+
+
+## ---- cache = TRUE------------------------------------------------------------
 # /*=================================================*/
 #' # Sample CT figure
 # /*=================================================*/
@@ -1056,21 +1007,21 @@ opfit <- prune(tree, opcp)
 # fancyRpartPlot(opfit, sub="", shadow.col = "")
 
 
-## ---------------------------------------------------------------------------------------------
+## ---- cache = F---------------------------------------------------------------
 # === Load the data === #
-Simres_low <- 
+Simres_low <-
   here("Shared/Results/for_writing/allML_summary_bySim_low.rds") %>%
   readRDS()
 
-Simres_high <- 
+Simres_high <-
   here("Shared/Results/for_writing/allML_summary_bySim_high.rds") %>%
   readRDS()
 
-Simres_low_high<-
- bind_rows(Simres_low, Simres_high, .id = "Degree") %>%
- .[, Degree := ifelse(Degree==1, "Low", "High")] %>%
- .[, Degree := factor(Degree, levels =c("Low", "High"))] %>%
- .[type == "test",]
+Simres_low_high <-
+  bind_rows(Simres_low, Simres_high, .id = "Degree") %>%
+  .[, Degree := ifelse(Degree == 1, "Low", "High")] %>%
+  .[, Degree := factor(Degree, levels = c("Low", "High"))] %>%
+  .[type == "test", ]
 
 
 # === Preparation === #
@@ -1088,7 +1039,7 @@ table_optN_prep_low_high <-
 
 
 # === Summary Table (Testing Data sets) === #
-table_optN_low_high <- 
+table_optN_low_high <-
   table_optN_prep_low_high %>%
   mutate(
     across(
@@ -1125,7 +1076,7 @@ table_optN_low_high <-
   hline_top(part = "header") %>%
   align(align = "center", part = "all") %>%
   align(j = 1, align = "left", part = "all") %>%
-  width(j = c(2,5,8,11, 14), width=0.3) %>%
+  width(j = c(2, 5, 8, 11, 14), width = 0.3) %>%
   footnote(
     # i = 1, j = c(4, 7, 10, 13), part = "header",
     value = as_paragraph("NOTE: \U1D70B\U0302", as_sub(as_i("def")), " indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), "."),
@@ -1133,14 +1084,14 @@ table_optN_low_high <-
   ) %>%
   fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
   autofit() %>%
-  width(j = c(4, 5, 7, 8, 10, 11, 13, 14), width = 0.6) %>%
-  width(j = 1, width = 0.82) %>%
-  width(j = 2, width = 0.5) %>%
+  width(j = c(4, 7, 10, 13), width = 0.6) %>%
+  width(j = c(5, 8, 11, 14), width = 0.5) %>%
+  width(j = 2, width = 0.7) %>%
   align(j = 2, align = "left", part = "body") %>%
-  width(j = c(3, 6, 9, 12), width = 0.1)
+  width(j = c(3, 6, 9, 12), width = 0.05)
 
 
-## ---------------------------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 # /*--------------------------------*/
 #' ## Yield prediction
 # /*--------------------------------*/
@@ -1173,10 +1124,10 @@ report_table_y_low_high <-
   hline_top(part = "header") %>%
   autofit() %>%
   width(j = 1, width = 0.82) %>%
-  align(j = 2, align = "left", part = "body") 
+  align(j = 2, align = "left", part = "body")
 
 
-## ---- dependson = "source-results"------------------------------------------------------------
+## ---- dependson = "source-results"--------------------------------------------
 # === Preparation === #
 prepare_count_tbl_low_high <-
   Simres_low_high %>%
@@ -1245,11 +1196,9 @@ count_tbl_low_high <-
   ) %>%
   fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
   autofit() %>%
-  width(j = c(4:5, 7:8, 10:11), width = 0.6) %>%
-  width(j = 1, width = 0.82) %>%
+  width(j = c(4:5, 7:8, 10:11), width = 0.5) %>%
   width(j = 13, width = 0.82) %>%
-  width(j = 2, width = 0.5) %>%
+  width(j = 2, width = 0.7) %>%
   align(j = 2, align = "left", part = "body") %>%
-  width(j = c(3, 6, 9, 12), width = 0.1)
-
+  width(j = c(3, 6, 9, 12), width = 0.05)
 

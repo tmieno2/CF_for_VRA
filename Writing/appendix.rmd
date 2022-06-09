@@ -1,7 +1,7 @@
 <!-- NOTE: Erase the extra Figure, Table and section numbers manually-->
 
 ## Appendix A: Causal Tree Example {-}
-Figure A.1 shows an example of a CT where the treatment is an increase in seed rate from $27,000$ seeds/ha (control) to $31,000$ seeds/ha (treated) with apparent electrical conductivity ($\textit{ecs}$) ($dS/m$) and topographical $\textit{slope}$ ($degree$) as variables to explain the heterogeneity of the impact of the treatment impact.  
+Figure A.1 shows an example of a CT where the treatment is an increase in seed rate from $27,000$ seeds/ha (control) to $31,000$ seeds/ha (treated) with electrical conductivity ($\textit{ecs}$) ($dS/m$) and topographical $\textit{slope}$ ($degree$) as variables to explain the heterogeneity of the impact of the treatment.  
 
 ```{r ct-ex, fig.width=5, fig.height=5, fig.align="center", fig.cap = "Figure A.1: An illustrative example of a causal tree"}
 par(family = "Times")

@@ -6,9 +6,7 @@ output:
     fig_caption: yes
     number_sections: no
     global_numbering: true
-    reference_docx: word_template.docx
-    # reference_docx: word_template_format.docx
-    # pandoc_args: ["-Fpandoc-crossref"]
+    reference_docx: ../word_template.docx
 ---
 
 Date: 

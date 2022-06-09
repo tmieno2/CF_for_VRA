@@ -6,13 +6,7 @@ output:
     fig_caption: yes
     number_sections: no
     global_numbering: true
-    reference_docx: word_template.docx
-    # reference_docx: word_template_format.docx
-    # pandoc_args: ["-Fpandoc-crossref"]
-bibliography: ML_VRA.bib
-csl: computers-and-electronics-in-agriculture.csl
-eqnPrefix: 
-      - "Eq"
+    reference_docx: ../word_template.docx
 ---
 
 # Highlights:

@@ -56,6 +56,7 @@ theme_dist <-
 
 set_flextable_defaults(
   font.family = "Times New Roman"
+  # font.family = "Cambria Math"
 )
 ```
 
@@ -451,6 +452,14 @@ vis_yield_subplot <-
   labs(fill = "Yield level\n  (kg/ha)") +
   ggtitle("(2) Simulated yield level") +
   theme_figure
+
+vis_yield_cell <-
+  ggplot(field_cell_sf) +
+  geom_sf(aes(fill = yield), size = 0) +
+  scale_fill_viridis_c() +
+  labs(fill = "Yield level\n  (kg/ha)") +
+  ggtitle("(2) Simulated yield level") +
+  theme_figure
 ```
 
 
@@ -501,6 +510,10 @@ field_optN <-
   ggtitle("(5) EONR (kg/ha)") +
   theme(legend.title = element_blank()) +
   theme_figure
+```
+
+```{r}
+
 ```
 
 ## Low and High Yield Error Maps (Appendix: Figure G.1)
@@ -825,6 +838,9 @@ table_optN_prep <-
 
 
 # === Summary Table (Training Data sets) === #
+pi_symb <- as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))
+pi_symb[[1]]$font.family <- "Cambria Math"
+
 report_table_optN_train <-
   table_optN_prep %>%
   .[type == "train", !"type"] %>%
@@ -856,19 +872,27 @@ report_table_optN_train <-
     blank4 = "", rmse_optN_CF_base = "RMSE", pi_loss_CF_base = "pi_loss",
     top = FALSE
   ) %>%
-  compose(i = 2, j = c(4, 7, 10, 13), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))) %>%
+  # compose(i = 2, j = c(4, 7, 10, 13), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))) %>%
+  # font(i = 2, j = c(4, 7, 10, 13), fontname = "Cambria Math", part = "header") %>%
+  compose(i = 2, j = c(4, 7, 10, 13), part = "header", value = pi_symb) %>%
   hline_bottom(part = "all") %>%
   hline_top(part = "header") %>%
   align(align = "center", part = "all") %>%
   align(j = 1, align = "left", part = "all") %>%
-  # autofit() %>%
   # width(j = c(2,5,8,11), width=0.3) %>%
-  # fix_border_issues()
-  footnote(
-    # i = 1, j = c(4, 7, 10, 13), part = "header",
-    value = as_paragraph("NOTE: \U1D70B\U0302", as_sub(as_i("def")), " indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), "."),
-    ref_symbols = NA
+  # --- footer --- #
+  add_footer_lines(values = "") %>%
+  compose(value = as_paragraph("Note: "), part = "footer") %>%
+  footnote(part = "body", ref_symbols = NA, inline = T, sep = "",
+    value = pi_symb
   ) %>%
+  footnote(part = "body", ref_symbols = NA, sep = "", inline = T,
+    value = as_paragraph(" indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), ".")
+  ) %>%
+  # footnote(
+  #   value = as_paragraph("NOTE: \U1D70B\U0302", as_sub(as_i("def")), " indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), "."),
+  #   ref_symbols = NA
+  # ) %>%
   fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
   autofit() %>%
   width(j = c(3, 4, 6, 7, 9, 10, 12, 13), width = 0.6) %>%
@@ -880,6 +904,9 @@ report_table_optN_train <-
 
 ```{r, dependson = "source-results"}
 # === Summary Table (Testing Data sets) === #
+pi_symb <- as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))
+pi_symb[[1]]$font.family <- "Cambria Math"
+
 report_table_optN <-
   table_optN_prep %>%
   .[type == "test", !"type"] %>%
@@ -911,19 +938,27 @@ report_table_optN <-
     blank4 = "", rmse_optN_CF_base = "RMSE", pi_loss_CF_base = "pi_loss",
     top = FALSE
   ) %>%
-  compose(i = 2, j = c(4, 7, 10, 13), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))) %>%
+  # compose(i = 2, j = c(4, 7, 10, 13), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))) %>%
+  # font(i = 2, j = c(4, 7, 10, 13), fontname = "Cambria Math", part = "header") %>%
+  compose(i = 2, j = c(4, 7, 10, 13), part = "header", value = pi_symb) %>%
   hline_bottom(part = "all") %>%
   hline_top(part = "header") %>%
   align(align = "center", part = "all") %>%
   align(j = 1, align = "left", part = "all") %>%
-  # autofit() %>%
-  # width(j = c(2,5,8,11), width=0.3) %>%
-  # fix_border_issues()
-  footnote(
-    # i = 1, j = c(4, 7, 10, 13), part = "header",
-    value = as_paragraph("NOTE: \U1D70B\U0302", as_sub(as_i("def")), " indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), "."),
-    ref_symbols = NA
+  # --- footer --- #
+  add_footer_lines(values = "") %>%
+  compose(value = as_paragraph("Note: "), part = "footer") %>%
+  footnote(part = "body", ref_symbols = NA, inline = T, sep = "",
+    value = pi_symb
   ) %>%
+  footnote(part = "body", ref_symbols = NA, sep = "", inline = T,
+    value = as_paragraph(" indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), ".")
+  ) %>%
+  # footnote(
+  #   # i = 1, j = c(4, 7, 10, 13), part = "header",
+  #   value = as_paragraph("NOTE: \U1D70B\U0302", as_sub(as_i("def")), " indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), "."),
+  #   ref_symbols = NA
+  # ) %>%
   fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
   autofit() %>%
   width(j = c(3, 4, 6, 7, 9, 10, 12, 13), width = 0.6) %>%
@@ -1109,6 +1144,9 @@ table_optN_prep_low_high <-
 
 
 # === Summary Table (Testing Data sets) === #
+pi_symb <- as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))
+pi_symb[[1]]$font.family <- "Cambria Math"
+
 table_optN_low_high <-
   table_optN_prep_low_high %>%
   mutate(
@@ -1141,17 +1179,28 @@ table_optN_low_high <-
     blank3 = "", rmse_optN_CF_base = "RMSE", pi_loss_CF_base = "pi_loss",
     top = FALSE
   ) %>%
-  compose(i = 2, j = c(5, 8, 11, 14), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))) %>%
+  # compose(i = 2, j = c(5, 8, 11, 14), part = "header", value = as_paragraph("\U1D70B\U0302", as_sub(as_i("def")))) %>%
+  # font(i = 2, j = c(5, 8, 11, 14), fontname = "Cambria Math", part = "header") %>%
+  compose(i = 2, j = c(5, 8, 11, 14), part = "header", value = pi_symb) %>%
   hline_bottom(part = "all") %>%
   hline_top(part = "header") %>%
   align(align = "center", part = "all") %>%
   align(j = 1, align = "left", part = "all") %>%
   width(j = c(2, 5, 8, 11, 14), width = 0.3) %>%
-  footnote(
-    # i = 1, j = c(4, 7, 10, 13), part = "header",
-    value = as_paragraph("NOTE: \U1D70B\U0302", as_sub(as_i("def")), " indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), "."),
-    ref_symbols = NA
+  # --- footer --- #
+  add_footer_lines(values = "") %>%
+  compose(value = as_paragraph("Note: "), part = "footer") %>%
+  footnote(part = "body", ref_symbols = NA, inline = T, sep = "",
+    value = pi_symb
   ) %>%
+  footnote(part = "body", ref_symbols = NA, sep = "", inline = T,
+    value = as_paragraph(" indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), ".")
+  ) %>%
+  # footnote(
+  #   # i = 1, j = c(4, 7, 10, 13), part = "header",
+  #   value = as_paragraph("NOTE: \U1D70B\U0302", as_sub(as_i("def")), " indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), "."),
+  #   ref_symbols = NA
+  # ) %>%
   fontsize(i = NULL, j = NULL, size = 9, part = "footer") %>%
   autofit() %>%
   width(j = c(4, 7, 10, 13), width = 0.6) %>%
@@ -1159,6 +1208,18 @@ table_optN_low_high <-
   width(j = 2, width = 0.7) %>%
   align(j = 2, align = "left", part = "body") %>%
   width(j = c(3, 6, 9, 12), width = 0.05)
+
+
+# flextable(head(iris)) %>%
+#   autofit() %>%
+#   add_footer_lines(values = "") %>%
+#   compose(value = as_paragraph("Note: "), part = "footer") %>%
+#   footnote(part = "body", ref_symbols = NA, inline = T, sep = "",
+#     value = pi_symb
+#     ) %>%
+#   footnote(part = "body", ref_symbols = NA, sep = "", inline = T,
+#     value = as_paragraph(" indicates profit-deficit ($/ha) relative to the true maximum profit at the subplot level. The maximized profit is the profit under the true yield response functions evaluated at ", as_i("\U004E\U2071"), as_sub(as_i("opt")), ".")
+#     )
 ```
 
 

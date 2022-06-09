@@ -1,0 +1,111 @@
+---
+title: "Response to Reviewers"
+output:
+  bookdown::word_document2:
+    number_sections: no
+    reference_docx: ../word_template_format.docx
+bibliography: ../ML_VRA.bib
+---
+
+```{r echo = F, include = FALSE, cache = F}
+library(knitr)
+library(here)
+here::i_am("GitControlled/Writing/CEA_final_submission/Response to Reviewers.rmd")
+# opts_knit$set(root.dir = here())
+
+options(htmltools.dir.version = FALSE)
+options(knitr.duplicate.label = "allow")
+
+opts_chunk$set(
+  fig.align = "center",
+  fig.retina = 5,
+  warning = F,
+  message = F,
+  cache = T,
+  echo = F
+)
+
+library(data.table)
+library(ggplot2)
+```
+
+For the final submission, we corrected some typos and explanations in the manuscript. Here, we report those minor changes. You will find the original sentences or equations in black and the corrected ones in blue. 
+
+<br>
+
+**1. P5, L87: "the necessary condition for maximization is, that $\partial f(I, \mathbf{c})/\partial I - w =0$"** 
+
+<span style="color:blue"> 
+An element $p$ was lacked from the equation in the sentence. The derivative of Equation (1) with respect to $I$ is $p (\partial f(I, \mathbf{c})/\partial I) - w =0$. We corrected the equation in that part. 
+</span>
+
+<br>
+
+<!-- **2. P13, L220: "$\{(y_{i}, N^{opt}_{i}, N_{i}) = \frac{1}{36}\sum_{j=1}^{36} (y_{i,j}, N^{opt}_{i,j}, N_{i,j}): i \in \{1,2,\dots,1536\}\}.  \quad (4)$"** 
+
+<span style="color:blue"> 
+$\mathbf{c}_{i,j}$ was missed in Eq. (4). The cell-level field characteristic data was also aggregated up to the subplot level. Therefore, we added $\mathbf{c}_{i,j}$ to Eq. (4). The corrected equation is: 
+
+$$
+\{(y_{i}, N^{opt}_{i}, N_{i}, \mathbf{c}_{i}) = \frac{1}{36}\sum_{j=1}^{36} (y_{i,j}, N^{opt}_{i,j}, N_{i,j}, \mathbf{c}_{i,j}): i \in \{1,2,\dots,1536\}\}. \quad (4)
+$$
+
+</span>
+
+<br> -->
+
+
+**2. P32, L394: "This fact, along with the poor performance of RF in predicting EONR presented in 1, ..."**
+
+<span style="color:blue"> 
+We added a word "Table" in front of the table number as the following: "This fact, along with the poor performance of RF in predicting EONR presented in Table 1, ...".
+</span>
+
+<br>
+
+**3. P33, L506: "Puntel et al., 2018, 2016"** 
+
+<span style="color:blue"> 
+We corrected the order of the references as: "Puntel et al., 2016, 2018".
+</span>
+
+<br>
+
+
+**4. P34, L525: "We also showed that the best model in prediction yields is ..."**
+
+<span style="color:blue"> 
+The correct sentence is: "We also showed that the best model in predicting yields is ...".
+</span>
+
+<br>
+
+**5. P41, L660; "apparent electrical conductivity"**
+
+<span style="color:blue"> 
+Electrical conductivity is correct, not apparent electrical conductivity. 
+</span>
+
+<br>
+
+**6. P41, L662: "... as variables to explain the heterogeneity of the impact of the treatment impact."**
+
+<span style="color:blue"> 
+The word "impact" in the end of the sentence was redundant. We corrected that part as: "... as variables to explain the heterogeneity of the impact of the treatment"
+</span>
+
+<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
