@@ -93,7 +93,7 @@ Let $p$ be the price that a producer receives for a unit of a crop, $w$ be the p
 \max_{I} \quad pf(I, \mathbf{c}) - wI -OC. (\#eq:eqn1)
 \end{equation}
 
-Elementary calculus shows that the necessary condition for maximization is, that $\partial f(I, \mathbf{c})/\partial I - w =0$, which implicitly defines the economically optimal input application rate as a function of prices and soil/field characteristics, and may be arranged as \@ref(eq:eqn2):
+Elementary calculus shows that the necessary condition for maximization is, that $p (\partial f(I, \mathbf{c})/\partial I) - w =0$, which implicitly defines the economically optimal input application rate as a function of prices and soil/field characteristics, and may be arranged as \@ref(eq:eqn2):
 
 \begin{equation}
 \frac{\partial f(I^{*}(p,w,\mathbf{c}), \mathbf{c})}{\partial I} \equiv \frac{w}{p}. (\#eq:eqn2)
@@ -262,7 +262,7 @@ figure_te
 
 ## The Relationship between Yield and EONR Prediction Performances.
 
-Table \@ref(tab:table-y) shows the mean RMSE of yield prediction over the one thousand simulations. (See Figure E.1 in Appendix E for examples of visualizations of predicted and true yields along with RMSE values, by model.) Since CF-base does not predict yield, the table only reports the results from RF, BRF and CNN. Compared to the result of EONR estimation, RF performed as well as BRF in the simple modeling scenarios of "aby" and "abytt." This fact, along with the poor performance of RF in predicting EONR presented in \@ref(tab:table-optN), shows that strong predictive power of yield levels does not imply accurate prediction of EONR. Further, RF shows vulnerability to the inclusion of many correlated variables, as is displayed for EONR prediction as well. While CNN performed worse than RF and BRF in "aby" and "abytt," it performed better than RF in more complicated modeling scenarios, showing robustness, at least in yield prediction, to inclusion of many correlated variables. Of course, while on average in the "aabbyy" and "aabbyytt" scenarios CNN predicted yields better than RF did, CNN's EONR predictions were worse than RF's, which further backs our claim that a good yield prediction capability does not imply good EONR prediction capability.
+Table \@ref(tab:table-y) shows the mean RMSE of yield prediction over the one thousand simulations. (See Figure E.1 in Appendix E for examples of visualizations of predicted and true yields along with RMSE values, by model.) Since CF-base does not predict yield, the table only reports the results from RF, BRF and CNN. Compared to the result of EONR estimation, RF performed as well as BRF in the simple modeling scenarios of "aby" and "abytt." This fact, along with the poor performance of RF in predicting EONR presented in Table \@ref(tab:table-optN), shows that strong predictive power of yield levels does not imply accurate prediction of EONR. Further, RF shows vulnerability to the inclusion of many correlated variables, as is displayed for EONR prediction as well. While CNN performed worse than RF and BRF in "aby" and "abytt," it performed better than RF in more complicated modeling scenarios, showing robustness, at least in yield prediction, to inclusion of many correlated variables. Of course, while on average in the "aabbyy" and "aabbyytt" scenarios CNN predicted yields better than RF did, CNN's EONR predictions were worse than RF's, which further backs our claim that a good yield prediction capability does not imply good EONR prediction capability.
 
 <br>
 
@@ -282,7 +282,7 @@ Since you need to be able to estimate yield curves (yield response function) wel
 
 All previous research has followed a two-step procedure to estimate site-specific EONRs. The first step was to select the model that predicts yield levels most accurately at the observed N rates, and the second was to use the selected model to predict EONR. As discussed earlier, this practice can be economically harmful. Figure \@ref(fig:vis-RMSE-y-eonr) further illustrates the underlying problem. It plots RMSE of yield (x-axis) and EONR (y-axis) predictions by model and simulation round for several simulation rounds. Clearly, the model with the lowest yield RMSE is not necessarily the model with the lower EONR RMSE for a given simulation round (simulation round 20 and 30).
 
-```{r, vis-RMSE-y-eonr, fig.width=5, fig.height=5, fig.cap = "The Relationship between yield and EONR Prediction Performances under the aabbyytt scenario"}
+```{r, vis-RMSE-y-eonr, fig.width=5, fig.height=5, fig.cap = "The relationship between yield and EONR prediction performances under the aabbyytt scenario"}
 vis_RMSE_y_eonr
 ```
 
@@ -314,7 +314,7 @@ ML methods are appealing tools that can potentially improve site-specific input 
 
 We examined the use of CF in the generation of site-specific input management recommendations. Using Monte Carlo simulations under various modeling scenarios, we compared the CF estimations of site-specific EONRs to those of the prediction-oriented ML methods RF, BRF, and CNN. CF consistently outperformed the other methods across all modeling scenarios in terms of EONR prediction and profit generation. Also, it is notable that RF's performance in EONR prediction was considerably worse than BRF's. However, it is important to keep in mind that we are not claiming that CF always performs better economically than RF, BRF, and CNN. Examining the relative performance of CF to the other ML methods in different contexts will be an interesting and fruitful future research. In particular, CNN is extremely flexible in its architecture, and it is possible that other architectures than the one tried in this study may perform much better. 
 
-We also showed that the best model in prediction yields is not necessarily the best model in predicting EONRs and profit generation, implying that yield prediction accuracy should not be used as a model selection criterion if the goal of the experiment is to create a site-specific EOIR map. Many studies seek to predict yield level accurately using deep learning methods. Our results question the usefulness of such models in the making of management decisions. Further examinations into these issues are warranted. 
+We also showed that the best model in predicting yields is not necessarily the best model in predicting EONRs and profit generation, implying that yield prediction accuracy should not be used as a model selection criterion if the goal of the experiment is to create a site-specific EOIR map. Many studies seek to predict yield level accurately using deep learning methods. Our results question the usefulness of such models in the making of management decisions. Further examinations into these issues are warranted. 
 
 
 # Acknowledgements

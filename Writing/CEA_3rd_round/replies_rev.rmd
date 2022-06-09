@@ -1,5 +1,5 @@
 ---
-title: "Reply to Editor"
+title: "Response to Editor"
 output:
   bookdown::word_document2:
     number_sections: no
